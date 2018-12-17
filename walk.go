@@ -7,6 +7,7 @@ package syrinx
 import (
 	"fmt"
 	. "go/ast"
+	"reflect"
 )
 
 // A Walker's BeginWalk method is invoked for each node encountered by Visit.
@@ -29,38 +30,38 @@ type Walker interface {
 	EndWalkFuncLit(lit *FuncLit)
 	WalkCompositeLit(lit *CompositeLit)
 	EndWalkCompositeLit(lit *CompositeLit)
-	WalkParen(expr *ParenExpr)
-	EndWalkParen(expr *ParenExpr)
-	WalkSelector(expr *SelectorExpr)
-	EndWalkSelector(expr *SelectorExpr)
-	WalkIndex(expr *IndexExpr)
-	EndWalkIndex(expr *IndexExpr)
-	WalkSlice(expr *SliceExpr)
-	EndWalkSlice(expr *SliceExpr)
-	WalkTypeAssert(expr *TypeAssertExpr)
-	EndWalkTypeAssert(expr *TypeAssertExpr)
-	WalkCall(expr *CallExpr)
-	EndWalkCall(expr *CallExpr)
-	WalkStar(expr *StarExpr)
-	EndWalkStar(expr *StarExpr)
-	WalkUnary(expr *UnaryExpr)
-	EndWalkUnary(expr *UnaryExpr)
-	WalkBinary(expr *BinaryExpr)
-	EndWalkBinary(expr *BinaryExpr)
-	WalkKeyValue(expr *KeyValueExpr)
-	EndWalkKeyValue(expr *KeyValueExpr)
+	WalkParenExpr(expr *ParenExpr)
+	EndWalkParenExpr(expr *ParenExpr)
+	WalkSelectorExpr(expr *SelectorExpr)
+	EndWalkSelectorExpr(expr *SelectorExpr)
+	WalkIndexExpr(expr *IndexExpr)
+	EndWalkIndexExpr(expr *IndexExpr)
+	WalkSliceExpr(expr *SliceExpr)
+	EndWalkSliceExpr(expr *SliceExpr)
+	WalkTypeAssertExpr(expr *TypeAssertExpr)
+	EndWalkTypeAssertExpr(expr *TypeAssertExpr)
+	WalkCallExpr(expr *CallExpr)
+	EndWalkCallExpr(expr *CallExpr)
+	WalkStarExpr(expr *StarExpr)
+	EndWalkStarExpr(expr *StarExpr)
+	WalkUnaryExpr(expr *UnaryExpr)
+	EndWalkUnaryExpr(expr *UnaryExpr)
+	WalkBinaryExpr(expr *BinaryExpr)
+	EndWalkBinaryExpr(expr *BinaryExpr)
+	WalkKeyValueExpr(expr *KeyValueExpr)
+	EndWalkKeyValueExpr(expr *KeyValueExpr)
 	WalkArrayType(arrayType *ArrayType)
 	EndWalkArrayType(arrayType *ArrayType)
-	WalkStruct(structType *StructType)
-	EndWalkStruct(structType *StructType)
-	WalkFunc(funcType *FuncType)
-	EndWalkFunc(funcType *FuncType)
-	WalkInterface(interfaceType *InterfaceType)
-	EndWalkInterface(interfaceType *InterfaceType)
-	WalkMap(mapType *MapType)
-	EndWalkMap(mapType *MapType)
-	WalkChan(chanType *ChanType)
-	EndWalkChan(chanType *ChanType)
+	WalkStructType(structType *StructType)
+	EndWalkStructType(structType *StructType)
+	WalkFuncType(funcType *FuncType)
+	EndWalkFuncType(funcType *FuncType)
+	WalkInterfaceType(interfaceType *InterfaceType)
+	EndWalkInterfaceType(interfaceType *InterfaceType)
+	WalkMapType(mapType *MapType)
+	EndWalkMapType(mapType *MapType)
+	WalkChanType(chanType *ChanType)
+	EndWalkChanType(chanType *ChanType)
 	WalkDeclStmt(stmt *DeclStmt)
 	EndWalkDeclStmt(stmt *DeclStmt)
 	WalkLabeledStmt(stmt *LabeledStmt)
@@ -154,6 +155,7 @@ func Visit(v Walker, node Node) {
 	if v = v.BeginWalk(node); v == nil {
 		return
 	}
+	walkNode(v, node)
 
 	// walk children
 	// (the order of the cases matches the order
@@ -161,14 +163,19 @@ func Visit(v Walker, node Node) {
 	switch n := node.(type) {
 	// Comments and fields
 	case *Comment:
+		v.WalkComment(n)
+		v.EndWalkComment(n)
 		// nothing to do
 
 	case *CommentGroup:
+		v.WalkCommentGroup(n)
 		for _, c := range n.List {
 			Visit(v, c)
 		}
+		v.EndWalkCommentGroup(n)
 
 	case *Field:
+		v.WalkField(n)
 		if n.Doc != nil {
 			Visit(v, n.Doc)
 		}
@@ -180,11 +187,14 @@ func Visit(v Walker, node Node) {
 		if n.Comment != nil {
 			Visit(v, n.Comment)
 		}
+		v.EndWalkField(n)
 
 	case *FieldList:
+		v.WalkFieldList(n)
 		for _, f := range n.List {
 			Visit(v, f)
 		}
+		v.EndWalkFieldList(n)
 
 	// Expressions
 	case *BadExpr, *Ident, *BasicLit:
@@ -466,5 +476,42 @@ func Visit(v Walker, node Node) {
 		panic(fmt.Sprintf("ast.Visit: unexpected node type %T", n))
 	}
 
+	endWalkNode(v, node)
+
 	v.BeginWalk(nil)
+}
+
+func walkNode(v Walker, node Node) {
+	callMethod(node, v, getWalkNodeMethodName(node))
+}
+
+func endWalkNode(v Walker, node Node) {
+	callMethod(node, v, getEndWalkNodeMethodName(node))
+}
+
+func getWalkNodeMethodName(node Node) string {
+	nodeName := getNodeName(node)
+	return fmt.Sprintf("Walk%s", nodeName)
+}
+
+func getEndWalkNodeMethodName(node Node) string {
+	nodeName := getNodeName(node)
+	return fmt.Sprintf("EndWalk%s", nodeName)
+}
+
+func callMethod(node Node, v Walker, walkMethodName string) {
+	walkMethod := getMethod(v, walkMethodName)
+	walkMethod.Call([]reflect.Value{reflect.ValueOf(node)})
+}
+
+func getMethod(v Walker, walkMethodName string) reflect.Value {
+	value := reflect.ValueOf(v)
+	walkMethod := value.MethodByName(walkMethodName)
+	return walkMethod
+}
+
+func getNodeName(node Node) string {
+	nodeType := reflect.TypeOf(node).Elem()
+	nodeTypeName := nodeType.Name()
+	return nodeTypeName
 }

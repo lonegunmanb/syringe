@@ -75,14 +75,14 @@ func (mr *MockWalkerMockRecorder) EndWalkAssignStmt(arg0 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkAssignStmt", reflect.TypeOf((*MockWalker)(nil).EndWalkAssignStmt), arg0)
 }
 
-// EndWalkBinary mocks base method
-func (m *MockWalker) EndWalkBinary(arg0 *ast.BinaryExpr) {
-	m.ctrl.Call(m, "EndWalkBinary", arg0)
+// EndWalkBinaryExpr mocks base method
+func (m *MockWalker) EndWalkBinaryExpr(arg0 *ast.BinaryExpr) {
+	m.ctrl.Call(m, "EndWalkBinaryExpr", arg0)
 }
 
-// EndWalkBinary indicates an expected call of EndWalkBinary
-func (mr *MockWalkerMockRecorder) EndWalkBinary(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkBinary", reflect.TypeOf((*MockWalker)(nil).EndWalkBinary), arg0)
+// EndWalkBinaryExpr indicates an expected call of EndWalkBinaryExpr
+func (mr *MockWalkerMockRecorder) EndWalkBinaryExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkBinaryExpr", reflect.TypeOf((*MockWalker)(nil).EndWalkBinaryExpr), arg0)
 }
 
 // EndWalkBlockStmt mocks base method
@@ -105,14 +105,14 @@ func (mr *MockWalkerMockRecorder) EndWalkBranchStmt(arg0 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkBranchStmt", reflect.TypeOf((*MockWalker)(nil).EndWalkBranchStmt), arg0)
 }
 
-// EndWalkCall mocks base method
-func (m *MockWalker) EndWalkCall(arg0 *ast.CallExpr) {
-	m.ctrl.Call(m, "EndWalkCall", arg0)
+// EndWalkCallExpr mocks base method
+func (m *MockWalker) EndWalkCallExpr(arg0 *ast.CallExpr) {
+	m.ctrl.Call(m, "EndWalkCallExpr", arg0)
 }
 
-// EndWalkCall indicates an expected call of EndWalkCall
-func (mr *MockWalkerMockRecorder) EndWalkCall(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkCall", reflect.TypeOf((*MockWalker)(nil).EndWalkCall), arg0)
+// EndWalkCallExpr indicates an expected call of EndWalkCallExpr
+func (mr *MockWalkerMockRecorder) EndWalkCallExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkCallExpr", reflect.TypeOf((*MockWalker)(nil).EndWalkCallExpr), arg0)
 }
 
 // EndWalkCaseClause mocks base method
@@ -125,14 +125,14 @@ func (mr *MockWalkerMockRecorder) EndWalkCaseClause(arg0 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkCaseClause", reflect.TypeOf((*MockWalker)(nil).EndWalkCaseClause), arg0)
 }
 
-// EndWalkChan mocks base method
-func (m *MockWalker) EndWalkChan(arg0 *ast.ChanType) {
-	m.ctrl.Call(m, "EndWalkChan", arg0)
+// EndWalkChanType mocks base method
+func (m *MockWalker) EndWalkChanType(arg0 *ast.ChanType) {
+	m.ctrl.Call(m, "EndWalkChanType", arg0)
 }
 
-// EndWalkChan indicates an expected call of EndWalkChan
-func (mr *MockWalkerMockRecorder) EndWalkChan(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkChan", reflect.TypeOf((*MockWalker)(nil).EndWalkChan), arg0)
+// EndWalkChanType indicates an expected call of EndWalkChanType
+func (mr *MockWalkerMockRecorder) EndWalkChanType(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkChanType", reflect.TypeOf((*MockWalker)(nil).EndWalkChanType), arg0)
 }
 
 // EndWalkCommClause mocks base method
@@ -255,16 +255,6 @@ func (mr *MockWalkerMockRecorder) EndWalkForStmt(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkForStmt", reflect.TypeOf((*MockWalker)(nil).EndWalkForStmt), arg0)
 }
 
-// EndWalkFunc mocks base method
-func (m *MockWalker) EndWalkFunc(arg0 *ast.FuncType) {
-	m.ctrl.Call(m, "EndWalkFunc", arg0)
-}
-
-// EndWalkFunc indicates an expected call of EndWalkFunc
-func (mr *MockWalkerMockRecorder) EndWalkFunc(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkFunc", reflect.TypeOf((*MockWalker)(nil).EndWalkFunc), arg0)
-}
-
 // EndWalkFuncDecl mocks base method
 func (m *MockWalker) EndWalkFuncDecl(arg0 *ast.FuncDecl) {
 	m.ctrl.Call(m, "EndWalkFuncDecl", arg0)
@@ -283,6 +273,16 @@ func (m *MockWalker) EndWalkFuncLit(arg0 *ast.FuncLit) {
 // EndWalkFuncLit indicates an expected call of EndWalkFuncLit
 func (mr *MockWalkerMockRecorder) EndWalkFuncLit(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkFuncLit", reflect.TypeOf((*MockWalker)(nil).EndWalkFuncLit), arg0)
+}
+
+// EndWalkFuncType mocks base method
+func (m *MockWalker) EndWalkFuncType(arg0 *ast.FuncType) {
+	m.ctrl.Call(m, "EndWalkFuncType", arg0)
+}
+
+// EndWalkFuncType indicates an expected call of EndWalkFuncType
+func (mr *MockWalkerMockRecorder) EndWalkFuncType(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkFuncType", reflect.TypeOf((*MockWalker)(nil).EndWalkFuncType), arg0)
 }
 
 // EndWalkGenDecl mocks base method
@@ -335,34 +335,34 @@ func (mr *MockWalkerMockRecorder) EndWalkIncDecStmt(arg0 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkIncDecStmt", reflect.TypeOf((*MockWalker)(nil).EndWalkIncDecStmt), arg0)
 }
 
-// EndWalkIndex mocks base method
-func (m *MockWalker) EndWalkIndex(arg0 *ast.IndexExpr) {
-	m.ctrl.Call(m, "EndWalkIndex", arg0)
+// EndWalkIndexExpr mocks base method
+func (m *MockWalker) EndWalkIndexExpr(arg0 *ast.IndexExpr) {
+	m.ctrl.Call(m, "EndWalkIndexExpr", arg0)
 }
 
-// EndWalkIndex indicates an expected call of EndWalkIndex
-func (mr *MockWalkerMockRecorder) EndWalkIndex(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkIndex", reflect.TypeOf((*MockWalker)(nil).EndWalkIndex), arg0)
+// EndWalkIndexExpr indicates an expected call of EndWalkIndexExpr
+func (mr *MockWalkerMockRecorder) EndWalkIndexExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkIndexExpr", reflect.TypeOf((*MockWalker)(nil).EndWalkIndexExpr), arg0)
 }
 
-// EndWalkInterface mocks base method
-func (m *MockWalker) EndWalkInterface(arg0 *ast.InterfaceType) {
-	m.ctrl.Call(m, "EndWalkInterface", arg0)
+// EndWalkInterfaceType mocks base method
+func (m *MockWalker) EndWalkInterfaceType(arg0 *ast.InterfaceType) {
+	m.ctrl.Call(m, "EndWalkInterfaceType", arg0)
 }
 
-// EndWalkInterface indicates an expected call of EndWalkInterface
-func (mr *MockWalkerMockRecorder) EndWalkInterface(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkInterface", reflect.TypeOf((*MockWalker)(nil).EndWalkInterface), arg0)
+// EndWalkInterfaceType indicates an expected call of EndWalkInterfaceType
+func (mr *MockWalkerMockRecorder) EndWalkInterfaceType(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkInterfaceType", reflect.TypeOf((*MockWalker)(nil).EndWalkInterfaceType), arg0)
 }
 
-// EndWalkKeyValue mocks base method
-func (m *MockWalker) EndWalkKeyValue(arg0 *ast.KeyValueExpr) {
-	m.ctrl.Call(m, "EndWalkKeyValue", arg0)
+// EndWalkKeyValueExpr mocks base method
+func (m *MockWalker) EndWalkKeyValueExpr(arg0 *ast.KeyValueExpr) {
+	m.ctrl.Call(m, "EndWalkKeyValueExpr", arg0)
 }
 
-// EndWalkKeyValue indicates an expected call of EndWalkKeyValue
-func (mr *MockWalkerMockRecorder) EndWalkKeyValue(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkKeyValue", reflect.TypeOf((*MockWalker)(nil).EndWalkKeyValue), arg0)
+// EndWalkKeyValueExpr indicates an expected call of EndWalkKeyValueExpr
+func (mr *MockWalkerMockRecorder) EndWalkKeyValueExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkKeyValueExpr", reflect.TypeOf((*MockWalker)(nil).EndWalkKeyValueExpr), arg0)
 }
 
 // EndWalkLabeledStmt mocks base method
@@ -375,14 +375,14 @@ func (mr *MockWalkerMockRecorder) EndWalkLabeledStmt(arg0 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkLabeledStmt", reflect.TypeOf((*MockWalker)(nil).EndWalkLabeledStmt), arg0)
 }
 
-// EndWalkMap mocks base method
-func (m *MockWalker) EndWalkMap(arg0 *ast.MapType) {
-	m.ctrl.Call(m, "EndWalkMap", arg0)
+// EndWalkMapType mocks base method
+func (m *MockWalker) EndWalkMapType(arg0 *ast.MapType) {
+	m.ctrl.Call(m, "EndWalkMapType", arg0)
 }
 
-// EndWalkMap indicates an expected call of EndWalkMap
-func (mr *MockWalkerMockRecorder) EndWalkMap(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkMap", reflect.TypeOf((*MockWalker)(nil).EndWalkMap), arg0)
+// EndWalkMapType indicates an expected call of EndWalkMapType
+func (mr *MockWalkerMockRecorder) EndWalkMapType(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkMapType", reflect.TypeOf((*MockWalker)(nil).EndWalkMapType), arg0)
 }
 
 // EndWalkPackage mocks base method
@@ -395,14 +395,14 @@ func (mr *MockWalkerMockRecorder) EndWalkPackage(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkPackage", reflect.TypeOf((*MockWalker)(nil).EndWalkPackage), arg0)
 }
 
-// EndWalkParen mocks base method
-func (m *MockWalker) EndWalkParen(arg0 *ast.ParenExpr) {
-	m.ctrl.Call(m, "EndWalkParen", arg0)
+// EndWalkParenExpr mocks base method
+func (m *MockWalker) EndWalkParenExpr(arg0 *ast.ParenExpr) {
+	m.ctrl.Call(m, "EndWalkParenExpr", arg0)
 }
 
-// EndWalkParen indicates an expected call of EndWalkParen
-func (mr *MockWalkerMockRecorder) EndWalkParen(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkParen", reflect.TypeOf((*MockWalker)(nil).EndWalkParen), arg0)
+// EndWalkParenExpr indicates an expected call of EndWalkParenExpr
+func (mr *MockWalkerMockRecorder) EndWalkParenExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkParenExpr", reflect.TypeOf((*MockWalker)(nil).EndWalkParenExpr), arg0)
 }
 
 // EndWalkRangeStmt mocks base method
@@ -435,14 +435,14 @@ func (mr *MockWalkerMockRecorder) EndWalkSelectStmt(arg0 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkSelectStmt", reflect.TypeOf((*MockWalker)(nil).EndWalkSelectStmt), arg0)
 }
 
-// EndWalkSelector mocks base method
-func (m *MockWalker) EndWalkSelector(arg0 *ast.SelectorExpr) {
-	m.ctrl.Call(m, "EndWalkSelector", arg0)
+// EndWalkSelectorExpr mocks base method
+func (m *MockWalker) EndWalkSelectorExpr(arg0 *ast.SelectorExpr) {
+	m.ctrl.Call(m, "EndWalkSelectorExpr", arg0)
 }
 
-// EndWalkSelector indicates an expected call of EndWalkSelector
-func (mr *MockWalkerMockRecorder) EndWalkSelector(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkSelector", reflect.TypeOf((*MockWalker)(nil).EndWalkSelector), arg0)
+// EndWalkSelectorExpr indicates an expected call of EndWalkSelectorExpr
+func (mr *MockWalkerMockRecorder) EndWalkSelectorExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkSelectorExpr", reflect.TypeOf((*MockWalker)(nil).EndWalkSelectorExpr), arg0)
 }
 
 // EndWalkSendStmt mocks base method
@@ -455,34 +455,34 @@ func (mr *MockWalkerMockRecorder) EndWalkSendStmt(arg0 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkSendStmt", reflect.TypeOf((*MockWalker)(nil).EndWalkSendStmt), arg0)
 }
 
-// EndWalkSlice mocks base method
-func (m *MockWalker) EndWalkSlice(arg0 *ast.SliceExpr) {
-	m.ctrl.Call(m, "EndWalkSlice", arg0)
+// EndWalkSliceExpr mocks base method
+func (m *MockWalker) EndWalkSliceExpr(arg0 *ast.SliceExpr) {
+	m.ctrl.Call(m, "EndWalkSliceExpr", arg0)
 }
 
-// EndWalkSlice indicates an expected call of EndWalkSlice
-func (mr *MockWalkerMockRecorder) EndWalkSlice(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkSlice", reflect.TypeOf((*MockWalker)(nil).EndWalkSlice), arg0)
+// EndWalkSliceExpr indicates an expected call of EndWalkSliceExpr
+func (mr *MockWalkerMockRecorder) EndWalkSliceExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkSliceExpr", reflect.TypeOf((*MockWalker)(nil).EndWalkSliceExpr), arg0)
 }
 
-// EndWalkStar mocks base method
-func (m *MockWalker) EndWalkStar(arg0 *ast.StarExpr) {
-	m.ctrl.Call(m, "EndWalkStar", arg0)
+// EndWalkStarExpr mocks base method
+func (m *MockWalker) EndWalkStarExpr(arg0 *ast.StarExpr) {
+	m.ctrl.Call(m, "EndWalkStarExpr", arg0)
 }
 
-// EndWalkStar indicates an expected call of EndWalkStar
-func (mr *MockWalkerMockRecorder) EndWalkStar(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkStar", reflect.TypeOf((*MockWalker)(nil).EndWalkStar), arg0)
+// EndWalkStarExpr indicates an expected call of EndWalkStarExpr
+func (mr *MockWalkerMockRecorder) EndWalkStarExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkStarExpr", reflect.TypeOf((*MockWalker)(nil).EndWalkStarExpr), arg0)
 }
 
-// EndWalkStruct mocks base method
-func (m *MockWalker) EndWalkStruct(arg0 *ast.StructType) {
-	m.ctrl.Call(m, "EndWalkStruct", arg0)
+// EndWalkStructType mocks base method
+func (m *MockWalker) EndWalkStructType(arg0 *ast.StructType) {
+	m.ctrl.Call(m, "EndWalkStructType", arg0)
 }
 
-// EndWalkStruct indicates an expected call of EndWalkStruct
-func (mr *MockWalkerMockRecorder) EndWalkStruct(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkStruct", reflect.TypeOf((*MockWalker)(nil).EndWalkStruct), arg0)
+// EndWalkStructType indicates an expected call of EndWalkStructType
+func (mr *MockWalkerMockRecorder) EndWalkStructType(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkStructType", reflect.TypeOf((*MockWalker)(nil).EndWalkStructType), arg0)
 }
 
 // EndWalkSwitchStmt mocks base method
@@ -495,14 +495,14 @@ func (mr *MockWalkerMockRecorder) EndWalkSwitchStmt(arg0 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkSwitchStmt", reflect.TypeOf((*MockWalker)(nil).EndWalkSwitchStmt), arg0)
 }
 
-// EndWalkTypeAssert mocks base method
-func (m *MockWalker) EndWalkTypeAssert(arg0 *ast.TypeAssertExpr) {
-	m.ctrl.Call(m, "EndWalkTypeAssert", arg0)
+// EndWalkTypeAssertExpr mocks base method
+func (m *MockWalker) EndWalkTypeAssertExpr(arg0 *ast.TypeAssertExpr) {
+	m.ctrl.Call(m, "EndWalkTypeAssertExpr", arg0)
 }
 
-// EndWalkTypeAssert indicates an expected call of EndWalkTypeAssert
-func (mr *MockWalkerMockRecorder) EndWalkTypeAssert(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkTypeAssert", reflect.TypeOf((*MockWalker)(nil).EndWalkTypeAssert), arg0)
+// EndWalkTypeAssertExpr indicates an expected call of EndWalkTypeAssertExpr
+func (mr *MockWalkerMockRecorder) EndWalkTypeAssertExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkTypeAssertExpr", reflect.TypeOf((*MockWalker)(nil).EndWalkTypeAssertExpr), arg0)
 }
 
 // EndWalkTypeSpec mocks base method
@@ -525,14 +525,14 @@ func (mr *MockWalkerMockRecorder) EndWalkTypeSwitchStmt(arg0 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkTypeSwitchStmt", reflect.TypeOf((*MockWalker)(nil).EndWalkTypeSwitchStmt), arg0)
 }
 
-// EndWalkUnary mocks base method
-func (m *MockWalker) EndWalkUnary(arg0 *ast.UnaryExpr) {
-	m.ctrl.Call(m, "EndWalkUnary", arg0)
+// EndWalkUnaryExpr mocks base method
+func (m *MockWalker) EndWalkUnaryExpr(arg0 *ast.UnaryExpr) {
+	m.ctrl.Call(m, "EndWalkUnaryExpr", arg0)
 }
 
-// EndWalkUnary indicates an expected call of EndWalkUnary
-func (mr *MockWalkerMockRecorder) EndWalkUnary(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkUnary", reflect.TypeOf((*MockWalker)(nil).EndWalkUnary), arg0)
+// EndWalkUnaryExpr indicates an expected call of EndWalkUnaryExpr
+func (mr *MockWalkerMockRecorder) EndWalkUnaryExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndWalkUnaryExpr", reflect.TypeOf((*MockWalker)(nil).EndWalkUnaryExpr), arg0)
 }
 
 // EndWalkValueSpec mocks base method
@@ -565,14 +565,14 @@ func (mr *MockWalkerMockRecorder) WalkAssignStmt(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkAssignStmt", reflect.TypeOf((*MockWalker)(nil).WalkAssignStmt), arg0)
 }
 
-// WalkBinary mocks base method
-func (m *MockWalker) WalkBinary(arg0 *ast.BinaryExpr) {
-	m.ctrl.Call(m, "WalkBinary", arg0)
+// WalkBinaryExpr mocks base method
+func (m *MockWalker) WalkBinaryExpr(arg0 *ast.BinaryExpr) {
+	m.ctrl.Call(m, "WalkBinaryExpr", arg0)
 }
 
-// WalkBinary indicates an expected call of WalkBinary
-func (mr *MockWalkerMockRecorder) WalkBinary(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkBinary", reflect.TypeOf((*MockWalker)(nil).WalkBinary), arg0)
+// WalkBinaryExpr indicates an expected call of WalkBinaryExpr
+func (mr *MockWalkerMockRecorder) WalkBinaryExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkBinaryExpr", reflect.TypeOf((*MockWalker)(nil).WalkBinaryExpr), arg0)
 }
 
 // WalkBlockStmt mocks base method
@@ -595,14 +595,14 @@ func (mr *MockWalkerMockRecorder) WalkBranchStmt(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkBranchStmt", reflect.TypeOf((*MockWalker)(nil).WalkBranchStmt), arg0)
 }
 
-// WalkCall mocks base method
-func (m *MockWalker) WalkCall(arg0 *ast.CallExpr) {
-	m.ctrl.Call(m, "WalkCall", arg0)
+// WalkCallExpr mocks base method
+func (m *MockWalker) WalkCallExpr(arg0 *ast.CallExpr) {
+	m.ctrl.Call(m, "WalkCallExpr", arg0)
 }
 
-// WalkCall indicates an expected call of WalkCall
-func (mr *MockWalkerMockRecorder) WalkCall(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkCall", reflect.TypeOf((*MockWalker)(nil).WalkCall), arg0)
+// WalkCallExpr indicates an expected call of WalkCallExpr
+func (mr *MockWalkerMockRecorder) WalkCallExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkCallExpr", reflect.TypeOf((*MockWalker)(nil).WalkCallExpr), arg0)
 }
 
 // WalkCaseClause mocks base method
@@ -615,14 +615,14 @@ func (mr *MockWalkerMockRecorder) WalkCaseClause(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkCaseClause", reflect.TypeOf((*MockWalker)(nil).WalkCaseClause), arg0)
 }
 
-// WalkChan mocks base method
-func (m *MockWalker) WalkChan(arg0 *ast.ChanType) {
-	m.ctrl.Call(m, "WalkChan", arg0)
+// WalkChanType mocks base method
+func (m *MockWalker) WalkChanType(arg0 *ast.ChanType) {
+	m.ctrl.Call(m, "WalkChanType", arg0)
 }
 
-// WalkChan indicates an expected call of WalkChan
-func (mr *MockWalkerMockRecorder) WalkChan(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkChan", reflect.TypeOf((*MockWalker)(nil).WalkChan), arg0)
+// WalkChanType indicates an expected call of WalkChanType
+func (mr *MockWalkerMockRecorder) WalkChanType(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkChanType", reflect.TypeOf((*MockWalker)(nil).WalkChanType), arg0)
 }
 
 // WalkCommClause mocks base method
@@ -745,16 +745,6 @@ func (mr *MockWalkerMockRecorder) WalkForStmt(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkForStmt", reflect.TypeOf((*MockWalker)(nil).WalkForStmt), arg0)
 }
 
-// WalkFunc mocks base method
-func (m *MockWalker) WalkFunc(arg0 *ast.FuncType) {
-	m.ctrl.Call(m, "WalkFunc", arg0)
-}
-
-// WalkFunc indicates an expected call of WalkFunc
-func (mr *MockWalkerMockRecorder) WalkFunc(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkFunc", reflect.TypeOf((*MockWalker)(nil).WalkFunc), arg0)
-}
-
 // WalkFuncDecl mocks base method
 func (m *MockWalker) WalkFuncDecl(arg0 *ast.FuncDecl) {
 	m.ctrl.Call(m, "WalkFuncDecl", arg0)
@@ -773,6 +763,16 @@ func (m *MockWalker) WalkFuncLit(arg0 *ast.FuncLit) {
 // WalkFuncLit indicates an expected call of WalkFuncLit
 func (mr *MockWalkerMockRecorder) WalkFuncLit(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkFuncLit", reflect.TypeOf((*MockWalker)(nil).WalkFuncLit), arg0)
+}
+
+// WalkFuncType mocks base method
+func (m *MockWalker) WalkFuncType(arg0 *ast.FuncType) {
+	m.ctrl.Call(m, "WalkFuncType", arg0)
+}
+
+// WalkFuncType indicates an expected call of WalkFuncType
+func (mr *MockWalkerMockRecorder) WalkFuncType(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkFuncType", reflect.TypeOf((*MockWalker)(nil).WalkFuncType), arg0)
 }
 
 // WalkGenDecl mocks base method
@@ -825,34 +825,34 @@ func (mr *MockWalkerMockRecorder) WalkIncDecStmt(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkIncDecStmt", reflect.TypeOf((*MockWalker)(nil).WalkIncDecStmt), arg0)
 }
 
-// WalkIndex mocks base method
-func (m *MockWalker) WalkIndex(arg0 *ast.IndexExpr) {
-	m.ctrl.Call(m, "WalkIndex", arg0)
+// WalkIndexExpr mocks base method
+func (m *MockWalker) WalkIndexExpr(arg0 *ast.IndexExpr) {
+	m.ctrl.Call(m, "WalkIndexExpr", arg0)
 }
 
-// WalkIndex indicates an expected call of WalkIndex
-func (mr *MockWalkerMockRecorder) WalkIndex(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkIndex", reflect.TypeOf((*MockWalker)(nil).WalkIndex), arg0)
+// WalkIndexExpr indicates an expected call of WalkIndexExpr
+func (mr *MockWalkerMockRecorder) WalkIndexExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkIndexExpr", reflect.TypeOf((*MockWalker)(nil).WalkIndexExpr), arg0)
 }
 
-// WalkInterface mocks base method
-func (m *MockWalker) WalkInterface(arg0 *ast.InterfaceType) {
-	m.ctrl.Call(m, "WalkInterface", arg0)
+// WalkInterfaceType mocks base method
+func (m *MockWalker) WalkInterfaceType(arg0 *ast.InterfaceType) {
+	m.ctrl.Call(m, "WalkInterfaceType", arg0)
 }
 
-// WalkInterface indicates an expected call of WalkInterface
-func (mr *MockWalkerMockRecorder) WalkInterface(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkInterface", reflect.TypeOf((*MockWalker)(nil).WalkInterface), arg0)
+// WalkInterfaceType indicates an expected call of WalkInterfaceType
+func (mr *MockWalkerMockRecorder) WalkInterfaceType(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkInterfaceType", reflect.TypeOf((*MockWalker)(nil).WalkInterfaceType), arg0)
 }
 
-// WalkKeyValue mocks base method
-func (m *MockWalker) WalkKeyValue(arg0 *ast.KeyValueExpr) {
-	m.ctrl.Call(m, "WalkKeyValue", arg0)
+// WalkKeyValueExpr mocks base method
+func (m *MockWalker) WalkKeyValueExpr(arg0 *ast.KeyValueExpr) {
+	m.ctrl.Call(m, "WalkKeyValueExpr", arg0)
 }
 
-// WalkKeyValue indicates an expected call of WalkKeyValue
-func (mr *MockWalkerMockRecorder) WalkKeyValue(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkKeyValue", reflect.TypeOf((*MockWalker)(nil).WalkKeyValue), arg0)
+// WalkKeyValueExpr indicates an expected call of WalkKeyValueExpr
+func (mr *MockWalkerMockRecorder) WalkKeyValueExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkKeyValueExpr", reflect.TypeOf((*MockWalker)(nil).WalkKeyValueExpr), arg0)
 }
 
 // WalkLabeledStmt mocks base method
@@ -865,14 +865,14 @@ func (mr *MockWalkerMockRecorder) WalkLabeledStmt(arg0 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkLabeledStmt", reflect.TypeOf((*MockWalker)(nil).WalkLabeledStmt), arg0)
 }
 
-// WalkMap mocks base method
-func (m *MockWalker) WalkMap(arg0 *ast.MapType) {
-	m.ctrl.Call(m, "WalkMap", arg0)
+// WalkMapType mocks base method
+func (m *MockWalker) WalkMapType(arg0 *ast.MapType) {
+	m.ctrl.Call(m, "WalkMapType", arg0)
 }
 
-// WalkMap indicates an expected call of WalkMap
-func (mr *MockWalkerMockRecorder) WalkMap(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkMap", reflect.TypeOf((*MockWalker)(nil).WalkMap), arg0)
+// WalkMapType indicates an expected call of WalkMapType
+func (mr *MockWalkerMockRecorder) WalkMapType(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkMapType", reflect.TypeOf((*MockWalker)(nil).WalkMapType), arg0)
 }
 
 // WalkPackage mocks base method
@@ -885,14 +885,14 @@ func (mr *MockWalkerMockRecorder) WalkPackage(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkPackage", reflect.TypeOf((*MockWalker)(nil).WalkPackage), arg0)
 }
 
-// WalkParen mocks base method
-func (m *MockWalker) WalkParen(arg0 *ast.ParenExpr) {
-	m.ctrl.Call(m, "WalkParen", arg0)
+// WalkParenExpr mocks base method
+func (m *MockWalker) WalkParenExpr(arg0 *ast.ParenExpr) {
+	m.ctrl.Call(m, "WalkParenExpr", arg0)
 }
 
-// WalkParen indicates an expected call of WalkParen
-func (mr *MockWalkerMockRecorder) WalkParen(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkParen", reflect.TypeOf((*MockWalker)(nil).WalkParen), arg0)
+// WalkParenExpr indicates an expected call of WalkParenExpr
+func (mr *MockWalkerMockRecorder) WalkParenExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkParenExpr", reflect.TypeOf((*MockWalker)(nil).WalkParenExpr), arg0)
 }
 
 // WalkRangeStmt mocks base method
@@ -925,14 +925,14 @@ func (mr *MockWalkerMockRecorder) WalkSelectStmt(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkSelectStmt", reflect.TypeOf((*MockWalker)(nil).WalkSelectStmt), arg0)
 }
 
-// WalkSelector mocks base method
-func (m *MockWalker) WalkSelector(arg0 *ast.SelectorExpr) {
-	m.ctrl.Call(m, "WalkSelector", arg0)
+// WalkSelectorExpr mocks base method
+func (m *MockWalker) WalkSelectorExpr(arg0 *ast.SelectorExpr) {
+	m.ctrl.Call(m, "WalkSelectorExpr", arg0)
 }
 
-// WalkSelector indicates an expected call of WalkSelector
-func (mr *MockWalkerMockRecorder) WalkSelector(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkSelector", reflect.TypeOf((*MockWalker)(nil).WalkSelector), arg0)
+// WalkSelectorExpr indicates an expected call of WalkSelectorExpr
+func (mr *MockWalkerMockRecorder) WalkSelectorExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkSelectorExpr", reflect.TypeOf((*MockWalker)(nil).WalkSelectorExpr), arg0)
 }
 
 // WalkSendStmt mocks base method
@@ -945,34 +945,34 @@ func (mr *MockWalkerMockRecorder) WalkSendStmt(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkSendStmt", reflect.TypeOf((*MockWalker)(nil).WalkSendStmt), arg0)
 }
 
-// WalkSlice mocks base method
-func (m *MockWalker) WalkSlice(arg0 *ast.SliceExpr) {
-	m.ctrl.Call(m, "WalkSlice", arg0)
+// WalkSliceExpr mocks base method
+func (m *MockWalker) WalkSliceExpr(arg0 *ast.SliceExpr) {
+	m.ctrl.Call(m, "WalkSliceExpr", arg0)
 }
 
-// WalkSlice indicates an expected call of WalkSlice
-func (mr *MockWalkerMockRecorder) WalkSlice(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkSlice", reflect.TypeOf((*MockWalker)(nil).WalkSlice), arg0)
+// WalkSliceExpr indicates an expected call of WalkSliceExpr
+func (mr *MockWalkerMockRecorder) WalkSliceExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkSliceExpr", reflect.TypeOf((*MockWalker)(nil).WalkSliceExpr), arg0)
 }
 
-// WalkStar mocks base method
-func (m *MockWalker) WalkStar(arg0 *ast.StarExpr) {
-	m.ctrl.Call(m, "WalkStar", arg0)
+// WalkStarExpr mocks base method
+func (m *MockWalker) WalkStarExpr(arg0 *ast.StarExpr) {
+	m.ctrl.Call(m, "WalkStarExpr", arg0)
 }
 
-// WalkStar indicates an expected call of WalkStar
-func (mr *MockWalkerMockRecorder) WalkStar(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkStar", reflect.TypeOf((*MockWalker)(nil).WalkStar), arg0)
+// WalkStarExpr indicates an expected call of WalkStarExpr
+func (mr *MockWalkerMockRecorder) WalkStarExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkStarExpr", reflect.TypeOf((*MockWalker)(nil).WalkStarExpr), arg0)
 }
 
-// WalkStruct mocks base method
-func (m *MockWalker) WalkStruct(arg0 *ast.StructType) {
-	m.ctrl.Call(m, "WalkStruct", arg0)
+// WalkStructType mocks base method
+func (m *MockWalker) WalkStructType(arg0 *ast.StructType) {
+	m.ctrl.Call(m, "WalkStructType", arg0)
 }
 
-// WalkStruct indicates an expected call of WalkStruct
-func (mr *MockWalkerMockRecorder) WalkStruct(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkStruct", reflect.TypeOf((*MockWalker)(nil).WalkStruct), arg0)
+// WalkStructType indicates an expected call of WalkStructType
+func (mr *MockWalkerMockRecorder) WalkStructType(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkStructType", reflect.TypeOf((*MockWalker)(nil).WalkStructType), arg0)
 }
 
 // WalkSwitchStmt mocks base method
@@ -985,14 +985,14 @@ func (mr *MockWalkerMockRecorder) WalkSwitchStmt(arg0 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkSwitchStmt", reflect.TypeOf((*MockWalker)(nil).WalkSwitchStmt), arg0)
 }
 
-// WalkTypeAssert mocks base method
-func (m *MockWalker) WalkTypeAssert(arg0 *ast.TypeAssertExpr) {
-	m.ctrl.Call(m, "WalkTypeAssert", arg0)
+// WalkTypeAssertExpr mocks base method
+func (m *MockWalker) WalkTypeAssertExpr(arg0 *ast.TypeAssertExpr) {
+	m.ctrl.Call(m, "WalkTypeAssertExpr", arg0)
 }
 
-// WalkTypeAssert indicates an expected call of WalkTypeAssert
-func (mr *MockWalkerMockRecorder) WalkTypeAssert(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkTypeAssert", reflect.TypeOf((*MockWalker)(nil).WalkTypeAssert), arg0)
+// WalkTypeAssertExpr indicates an expected call of WalkTypeAssertExpr
+func (mr *MockWalkerMockRecorder) WalkTypeAssertExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkTypeAssertExpr", reflect.TypeOf((*MockWalker)(nil).WalkTypeAssertExpr), arg0)
 }
 
 // WalkTypeSpec mocks base method
@@ -1015,14 +1015,14 @@ func (mr *MockWalkerMockRecorder) WalkTypeSwitchStmt(arg0 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkTypeSwitchStmt", reflect.TypeOf((*MockWalker)(nil).WalkTypeSwitchStmt), arg0)
 }
 
-// WalkUnary mocks base method
-func (m *MockWalker) WalkUnary(arg0 *ast.UnaryExpr) {
-	m.ctrl.Call(m, "WalkUnary", arg0)
+// WalkUnaryExpr mocks base method
+func (m *MockWalker) WalkUnaryExpr(arg0 *ast.UnaryExpr) {
+	m.ctrl.Call(m, "WalkUnaryExpr", arg0)
 }
 
-// WalkUnary indicates an expected call of WalkUnary
-func (mr *MockWalkerMockRecorder) WalkUnary(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkUnary", reflect.TypeOf((*MockWalker)(nil).WalkUnary), arg0)
+// WalkUnaryExpr indicates an expected call of WalkUnaryExpr
+func (mr *MockWalkerMockRecorder) WalkUnaryExpr(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WalkUnaryExpr", reflect.TypeOf((*MockWalker)(nil).WalkUnaryExpr), arg0)
 }
 
 // WalkValueSpec mocks base method

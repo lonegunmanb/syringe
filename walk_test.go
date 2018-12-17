@@ -7,6 +7,14 @@ import (
 	"testing"
 )
 
+func TestWalkComment(t *testing.T) {
+	comment := &ast.Comment{}
+	testVisit(t, comment, func(walker *MockWalker) {
+		walker.EXPECT().WalkComment(comment).Times(1)
+		walker.EXPECT().EndWalkComment(comment).Times(1)
+	})
+}
+
 /*
 case *CommentGroup:
 		v.WalkCommentGroup(n)
@@ -19,8 +27,10 @@ func TestWalkCommentGroup(t *testing.T) {
 	commentGroup := &ast.CommentGroup{
 		List: []*ast.Comment{{}},
 	}
-	visit(t, commentGroup, func(walker *MockWalker) {
+	testVisit(t, commentGroup, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(commentGroup.List[0])
+		walker.EXPECT().WalkCommentGroup(commentGroup).Times(1)
+		walker.EXPECT().EndWalkCommentGroup(commentGroup).Times(1)
 	})
 }
 
@@ -46,12 +56,14 @@ func TestWalkField(t *testing.T) {
 		Tag:     &ast.BasicLit{},
 		Comment: dummyCommentGroup(),
 	}
-	visit(t, field, func(walker *MockWalker) {
+	testVisit(t, field, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(field.Doc)
 		walker.ExpectWalkOnce(field.Names[0])
 		walker.ExpectWalkOnce(field.Type)
 		walker.ExpectWalkOnce(field.Tag)
 		walker.ExpectWalkOnce(field.Comment)
+		walker.EXPECT().WalkField(field).Times(1)
+		walker.EXPECT().EndWalkField(field).Times(1)
 	})
 }
 
@@ -65,8 +77,10 @@ func TestWalkFieldList(t *testing.T) {
 	fieldList := &ast.FieldList{
 		List: []*ast.Field{{}},
 	}
-	visit(t, fieldList, func(walker *MockWalker) {
+	testVisit(t, fieldList, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(fieldList.List[0])
+		walker.EXPECT().WalkFieldList(fieldList).Times(1)
+		walker.EXPECT().EndWalkFieldList(fieldList).Times(1)
 	})
 }
 
@@ -99,7 +113,7 @@ func TestWalkEllipsis(t *testing.T) {
 	ellipsis := &ast.Ellipsis{
 		Elt: dummyExpr(),
 	}
-	visit(t, ellipsis, func(walker *MockWalker) {
+	testVisit(t, ellipsis, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(ellipsis.Elt)
 	})
 }
@@ -114,7 +128,7 @@ func TestFuncLit(t *testing.T) {
 		Type: &ast.FuncType{},
 		Body: &ast.BlockStmt{},
 	}
-	visit(t, funcLit, func(walker *MockWalker) {
+	testVisit(t, funcLit, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(funcLit.Type)
 		walker.ExpectWalkOnce(funcLit.Body)
 	})
@@ -132,7 +146,7 @@ func TestCompositeLit(t *testing.T) {
 		Type: dummyExpr(),
 		Elts: []ast.Expr{dummyExpr()},
 	}
-	visit(t, compositeLit, func(walker *MockWalker) {
+	testVisit(t, compositeLit, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(compositeLit.Type)
 		walker.ExpectWalkOnce(compositeLit.Elts[0])
 	})
@@ -146,7 +160,7 @@ func TestWalkParenExpr(t *testing.T) {
 	parenExpr := &ast.ParenExpr{
 		X: dummyExpr(),
 	}
-	visit(t, parenExpr, func(walker *MockWalker) {
+	testVisit(t, parenExpr, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(parenExpr.X)
 	})
 }
@@ -162,7 +176,7 @@ func TestWalkSelectorExpr(t *testing.T) {
 		X:   dummyExpr(),
 		Sel: &ast.Ident{},
 	}
-	visit(t, selectorExpr, func(walker *MockWalker) {
+	testVisit(t, selectorExpr, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(selectorExpr.X)
 		walker.ExpectWalkOnce(selectorExpr.Sel)
 	})
@@ -178,7 +192,7 @@ func TestWalkIndexExpr(t *testing.T) {
 		X:     dummyExpr(),
 		Index: dummyExpr(),
 	}
-	visit(t, indexExpr, func(walker *MockWalker) {
+	testVisit(t, indexExpr, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(indexExpr.X)
 		walker.ExpectWalkOnce(indexExpr.Index)
 	})
@@ -204,7 +218,7 @@ func TestWalkSliceExpr(t *testing.T) {
 		High: dummyExpr(),
 		Max:  dummyExpr(),
 	}
-	visit(t, sliceExpr, func(walker *MockWalker) {
+	testVisit(t, sliceExpr, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(sliceExpr.X)
 		walker.ExpectWalkOnce(sliceExpr.Low)
 		walker.ExpectWalkOnce(sliceExpr.High)
@@ -224,7 +238,7 @@ func TestWalkTypeAssertExpr(t *testing.T) {
 		X:    dummyExpr(),
 		Type: dummyExpr(),
 	}
-	visit(t, typeAssertExpr, func(walker *MockWalker) {
+	testVisit(t, typeAssertExpr, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(typeAssertExpr.X)
 		walker.ExpectWalkOnce(typeAssertExpr.Type)
 	})
@@ -240,7 +254,7 @@ func TestWalkCallExpr(t *testing.T) {
 		Fun:  dummyExpr(),
 		Args: []ast.Expr{dummyExpr()},
 	}
-	visit(t, callExpr, func(walker *MockWalker) {
+	testVisit(t, callExpr, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(callExpr.Fun)
 		walker.ExpectWalkOnce(callExpr.Args[0])
 	})
@@ -254,7 +268,7 @@ func TestWalkStarExpr(t *testing.T) {
 	starExpr := &ast.StarExpr{
 		X: dummyExpr(),
 	}
-	visit(t, starExpr, func(walker *MockWalker) {
+	testVisit(t, starExpr, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(starExpr.X)
 	})
 }
@@ -267,7 +281,7 @@ func TestWalkUnaryExpr(t *testing.T) {
 	unaryExpr := &ast.UnaryExpr{
 		X: dummyExpr(),
 	}
-	visit(t, unaryExpr, func(walker *MockWalker) {
+	testVisit(t, unaryExpr, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(unaryExpr.X)
 	})
 }
@@ -282,7 +296,7 @@ func TestWalkBinaryExpr(t *testing.T) {
 		X: dummyExpr(),
 		Y: dummyExpr(),
 	}
-	visit(t, binaryExpr, func(walker *MockWalker) {
+	testVisit(t, binaryExpr, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(binaryExpr.X)
 		walker.ExpectWalkOnce(binaryExpr.Y)
 	})
@@ -298,7 +312,7 @@ func TestWalkKeyValueExpr(t *testing.T) {
 		Key:   dummyExpr(),
 		Value: dummyExpr(),
 	}
-	visit(t, keyValueExpr, func(walker *MockWalker) {
+	testVisit(t, keyValueExpr, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(keyValueExpr.Key)
 		walker.ExpectWalkOnce(keyValueExpr.Value)
 	})
@@ -316,7 +330,7 @@ func TestWalkArrayType(t *testing.T) {
 		Len: dummyExpr(),
 		Elt: dummyExpr(),
 	}
-	visit(t, arrayType, func(walker *MockWalker) {
+	testVisit(t, arrayType, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(arrayType.Len)
 		walker.ExpectWalkOnce(arrayType.Elt)
 	})
@@ -330,7 +344,7 @@ func TestWalkStuctType(t *testing.T) {
 	structType := &ast.StructType{
 		Fields: &ast.FieldList{},
 	}
-	visit(t, structType, func(walker *MockWalker) {
+	testVisit(t, structType, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(structType.Fields)
 	})
 }
@@ -349,7 +363,7 @@ func TestWalkFuncType(t *testing.T) {
 		Params:  &ast.FieldList{Opening: 0},
 		Results: &ast.FieldList{Opening: 1},
 	}
-	visit(t, funcType, func(walker *MockWalker) {
+	testVisit(t, funcType, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(funcType.Params)
 		walker.ExpectWalkOnce(funcType.Results)
 	})
@@ -363,7 +377,7 @@ func TestWalkInterfaceType(t *testing.T) {
 	interfaceType := &ast.InterfaceType{
 		Methods: &ast.FieldList{},
 	}
-	visit(t, interfaceType, func(walker *MockWalker) {
+	testVisit(t, interfaceType, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(interfaceType.Methods)
 	})
 }
@@ -378,7 +392,7 @@ func TestWalkMapType(t *testing.T) {
 		Key:   dummyExpr(),
 		Value: dummyExpr(),
 	}
-	visit(t, mapType, func(walker *MockWalker) {
+	testVisit(t, mapType, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(mapType.Key)
 		walker.ExpectWalkOnce(mapType.Value)
 	})
@@ -392,7 +406,7 @@ func TestWalkChanType(t *testing.T) {
 	chanType := &ast.ChanType{
 		Value: dummyExpr(),
 	}
-	visit(t, chanType, func(walker *MockWalker) {
+	testVisit(t, chanType, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(chanType.Value)
 	})
 }
@@ -414,7 +428,7 @@ func TestWalkDeclStmt(t *testing.T) {
 	declStmt := &ast.DeclStmt{
 		Decl: dummyDecl(),
 	}
-	visit(t, declStmt, func(walker *MockWalker) {
+	testVisit(t, declStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(declStmt.Decl)
 	})
 }
@@ -438,7 +452,7 @@ func TestWalkLabeledStmt(t *testing.T) {
 		Label: &ast.Ident{},
 		Stmt:  dummyStmt(),
 	}
-	visit(t, labeledStmt, func(walker *MockWalker) {
+	testVisit(t, labeledStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(labeledStmt.Label)
 		walker.ExpectWalkOnce(labeledStmt.Stmt)
 	})
@@ -452,7 +466,7 @@ func TestWalkExprStmt(t *testing.T) {
 	exprStmt := &ast.ExprStmt{
 		X: dummyExpr(),
 	}
-	visit(t, exprStmt, func(walker *MockWalker) {
+	testVisit(t, exprStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(exprStmt.X)
 	})
 }
@@ -467,7 +481,7 @@ func TestWalkSendStmt(t *testing.T) {
 		Chan:  dummyExpr(),
 		Value: dummyExpr(),
 	}
-	visit(t, sendStmt, func(walker *MockWalker) {
+	testVisit(t, sendStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(sendStmt.Chan)
 		walker.ExpectWalkOnce(sendStmt.Value)
 	})
@@ -481,7 +495,7 @@ func TestWalkIncDecStmt(t *testing.T) {
 	incDecStmt := &ast.IncDecStmt{
 		X: dummyExpr(),
 	}
-	visit(t, incDecStmt, func(walker *MockWalker) {
+	testVisit(t, incDecStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(incDecStmt.X)
 	})
 }
@@ -496,7 +510,7 @@ func TestWalkAssignStmt(t *testing.T) {
 		Lhs: []ast.Expr{dummyExpr()},
 		Rhs: []ast.Expr{dummyExpr()},
 	}
-	visit(t, assignStmt, func(walker *MockWalker) {
+	testVisit(t, assignStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(assignStmt.Lhs[0])
 		walker.ExpectWalkOnce(assignStmt.Rhs[0])
 	})
@@ -510,7 +524,7 @@ func TestWalkGoStmt(t *testing.T) {
 	goStmt := &ast.GoStmt{
 		Call: &ast.CallExpr{},
 	}
-	visit(t, goStmt, func(walker *MockWalker) {
+	testVisit(t, goStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(goStmt.Call)
 	})
 }
@@ -523,7 +537,7 @@ func TestWalkDeferStmt(t *testing.T) {
 	deferStmt := &ast.DeferStmt{
 		Call: &ast.CallExpr{},
 	}
-	visit(t, deferStmt, func(walker *MockWalker) {
+	testVisit(t, deferStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(deferStmt.Call)
 	})
 }
@@ -536,7 +550,7 @@ func TestWalkReturnStmt(t *testing.T) {
 	returnStmt := &ast.ReturnStmt{
 		Results: []ast.Expr{dummyExpr()},
 	}
-	visit(t, returnStmt, func(walker *MockWalker) {
+	testVisit(t, returnStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(returnStmt.Results[0])
 	})
 }
@@ -551,7 +565,7 @@ func TestWalkBranchStmt(t *testing.T) {
 	branchStmt := &ast.BranchStmt{
 		Label: &ast.Ident{},
 	}
-	visit(t, branchStmt, func(walker *MockWalker) {
+	testVisit(t, branchStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(branchStmt.Label)
 	})
 }
@@ -564,7 +578,7 @@ func TestWalkBlockStmt(t *testing.T) {
 	blockStmt := &ast.BlockStmt{
 		List: []ast.Stmt{dummyStmt()},
 	}
-	visit(t, blockStmt, func(walker *MockWalker) {
+	testVisit(t, blockStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(blockStmt.List[0])
 	})
 }
@@ -587,7 +601,7 @@ func TestWalkIfStmt(t *testing.T) {
 		Body: &ast.BlockStmt{},
 		Else: dummyStmt(),
 	}
-	visit(t, ifStmt, func(walker *MockWalker) {
+	testVisit(t, ifStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(ifStmt.Init)
 		walker.ExpectWalkOnce(ifStmt.Cond)
 		walker.ExpectWalkOnce(ifStmt.Body)
@@ -605,7 +619,7 @@ func TestCaseClause(t *testing.T) {
 		List: []ast.Expr{dummyExpr()},
 		Body: []ast.Stmt{dummyStmt()},
 	}
-	visit(t, caseClause, func(walker *MockWalker) {
+	testVisit(t, caseClause, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(caseClause.List[0])
 		walker.ExpectWalkOnce(caseClause.Body[0])
 	})
@@ -627,7 +641,7 @@ func TestSwitchStmt(t *testing.T) {
 		Tag:  dummyExpr(),
 		Body: &ast.BlockStmt{},
 	}
-	visit(t, switchStmt, func(walker *MockWalker) {
+	testVisit(t, switchStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(switchStmt.Init)
 		walker.ExpectWalkOnce(switchStmt.Tag)
 		walker.ExpectWalkOnce(switchStmt.Body)
@@ -646,7 +660,7 @@ func TestWalkCommClause(t *testing.T) {
 		Comm: dummyStmt(),
 		Body: []ast.Stmt{dummyStmt()},
 	}
-	visit(t, commClause, func(walker *MockWalker) {
+	testVisit(t, commClause, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(commClause.Comm)
 		walker.ExpectWalkOnce(commClause.Body[0])
 	})
@@ -660,7 +674,7 @@ func TestWalkSelectStmt(t *testing.T) {
 	selectStmt := &ast.SelectStmt{
 		Body: &ast.BlockStmt{},
 	}
-	visit(t, selectStmt, func(walker *MockWalker) {
+	testVisit(t, selectStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(selectStmt.Body)
 	})
 }
@@ -685,7 +699,7 @@ func TestWalkForStmt(t *testing.T) {
 		Post: dummyStmt(),
 		Body: &ast.BlockStmt{},
 	}
-	visit(t, forStmt, func(walker *MockWalker) {
+	testVisit(t, forStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(forStmt.Init)
 		walker.ExpectWalkOnce(forStmt.Cond)
 		walker.ExpectWalkOnce(forStmt.Post)
@@ -711,7 +725,7 @@ func TestWalkRangeStmt(t *testing.T) {
 		X:     dummyExpr(),
 		Body:  &ast.BlockStmt{},
 	}
-	visit(t, rangeStmt, func(walker *MockWalker) {
+	testVisit(t, rangeStmt, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(rangeStmt.Key)
 		walker.ExpectWalkOnce(rangeStmt.Value)
 		walker.ExpectWalkOnce(rangeStmt.X)
@@ -740,7 +754,7 @@ func TestWalkImportSpec(t *testing.T) {
 		Path:    &ast.BasicLit{},
 		Comment: dummyCommentGroup(),
 	}
-	visit(t, importSpec, func(walker *MockWalker) {
+	testVisit(t, importSpec, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(importSpec.Doc)
 		walker.ExpectWalkOnce(importSpec.Name)
 		walker.ExpectWalkOnce(importSpec.Path)
@@ -770,7 +784,7 @@ func TestWalkValueSpec(t *testing.T) {
 		Values:  []ast.Expr{dummyExpr()},
 		Comment: dummyCommentGroup(),
 	}
-	visit(t, valueSpec, func(walker *MockWalker) {
+	testVisit(t, valueSpec, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(valueSpec.Doc)
 		walker.ExpectWalkOnce(valueSpec.Names[0])
 		walker.ExpectWalkOnce(valueSpec.Type)
@@ -797,7 +811,7 @@ func TestWalkTypeSpec(t *testing.T) {
 		Type:    dummyExpr(),
 		Comment: dummyCommentGroup(),
 	}
-	visit(t, typeSpec, func(walker *MockWalker) {
+	testVisit(t, typeSpec, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(typeSpec.Doc)
 		walker.ExpectWalkOnce(typeSpec.Name)
 		walker.ExpectWalkOnce(typeSpec.Type)
@@ -827,7 +841,7 @@ func TestWalkGenDecl(t *testing.T) {
 		Doc:   dummyCommentGroup(),
 		Specs: []ast.Spec{&ast.TypeSpec{}},
 	}
-	visit(t, genDecl, func(walker *MockWalker) {
+	testVisit(t, genDecl, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(genDecl.Doc)
 		walker.ExpectWalkOnce(genDecl.Specs[0])
 	})
@@ -855,7 +869,7 @@ func TestWalkFuncDecl(t *testing.T) {
 		Type: &ast.FuncType{},
 		Body: &ast.BlockStmt{},
 	}
-	visit(t, funcDecl, func(walker *MockWalker) {
+	testVisit(t, funcDecl, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(funcDecl.Doc)
 		walker.ExpectWalkOnce(funcDecl.Recv)
 		walker.ExpectWalkOnce(funcDecl.Name)
@@ -878,7 +892,7 @@ func TestWalkFile(t *testing.T) {
 		Name:  &ast.Ident{},
 		Decls: []ast.Decl{dummyDecl()},
 	}
-	visit(t, file, func(walker *MockWalker) {
+	testVisit(t, file, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(file.Doc)
 		walker.ExpectWalkOnce(file.Name)
 		walker.ExpectWalkOnce(file.Decls[0])
@@ -896,7 +910,7 @@ func TestWalkPackage(t *testing.T) {
 	packageDecl := &ast.Package{
 		Files: map[string]*ast.File{"": file},
 	}
-	visit(t, packageDecl, func(walker *MockWalker) {
+	testVisit(t, packageDecl, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(file)
 	})
 }
@@ -905,10 +919,14 @@ func (v *MockWalker) ExpectWalkOnce(i interface{}) {
 	v.EXPECT().BeginWalk(gomock.Eq(i)).Times(1).Return(nil)
 }
 
-func visit(t *testing.T, sut ast.Node, setup func(*MockWalker)) {
+func testVisit(t *testing.T, sut ast.Node, setup func(*MockWalker)) {
 	ctrl, walker := createMock(t, sut)
 	defer ctrl.Finish()
+	walkMethodName := getWalkNodeMethodName(sut)
+	endWalkMethodName := getEndWalkNodeMethodName(sut)
+	ctrl.RecordCall(walker.recorder.mock, walkMethodName, sut)
 	setup(walker)
+	ctrl.RecordCall(walker.recorder.mock, endWalkMethodName, sut)
 	Visit(walker, sut)
 }
 
