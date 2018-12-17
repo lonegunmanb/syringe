@@ -13,6 +13,7 @@ import (
 // A Walker's BeginWalk method is invoked for each node encountered by Visit.
 // If the result visitor w is not nil, Visit visits each of the children
 // of node with the visitor w, followed by a call of w.BeginWalk(nil).
+//go:generate mockgen -package=syrinx -destination=./mock_walker.go github.com/lonegunmanb/syrinx Walker
 type Walker interface {
 	BeginWalk(node Node) (w Walker)
 	EndWalk(node Node)
@@ -114,6 +115,18 @@ type Walker interface {
 	EndWalkFile(file *File)
 	WalkPackage(n *Package)
 	EndWalkPackage(n *Package)
+	WalkBadExpr(n *BadExpr)
+	EndWalkBadExpr(n *BadExpr)
+	WalkIdent(n *Ident)
+	EndWalkIdent(n *Ident)
+	WalkBasicLit(n *BasicLit)
+	EndWalkBasicLit(n *BasicLit)
+	WalkBadStmt(n *BadStmt)
+	EndWalkBadStmt(n *BadStmt)
+	WalkEmptyStmt(n *EmptyStmt)
+	EndWalkEmptyStmt(n *EmptyStmt)
+	WalkBadDecl(n *BadDecl)
+	EndWalkBadDecl(n *BadDecl)
 }
 
 // Helper functions for common node lists. They may be empty.

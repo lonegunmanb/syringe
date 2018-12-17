@@ -922,17 +922,22 @@ func (v *MockWalker) ExpectWalkOnce(i interface{}) {
 func testVisit(t *testing.T, sut ast.Node, setup func(*MockWalker)) {
 	ctrl, walker := createMock(t, sut)
 	defer ctrl.Finish()
+	setupWalkAndEndWalk(sut, ctrl, walker)
+	setup(walker)
+	Visit(walker, sut)
+}
+
+func setupWalkAndEndWalk(sut ast.Node, ctrl *gomock.Controller, walker *MockWalker) {
 	walkMethodName := getWalkNodeMethodName(sut)
 	endWalkMethodName := getEndWalkNodeMethodName(sut)
 	ctrl.RecordCall(walker.recorder.mock, walkMethodName, sut)
-	setup(walker)
 	ctrl.RecordCall(walker.recorder.mock, endWalkMethodName, sut)
-	Visit(walker, sut)
 }
 
 func testNothingToDoNode(t *testing.T, node ast.Node) {
 	ctrl, walker := createMock(t, node)
 	defer ctrl.Finish()
+	setupWalkAndEndWalk(node, ctrl, walker)
 	Visit(walker, node)
 }
 
