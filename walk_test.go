@@ -10,8 +10,6 @@ import (
 func TestWalkComment(t *testing.T) {
 	comment := &ast.Comment{}
 	testVisit(t, comment, func(walker *MockWalker) {
-		walker.EXPECT().WalkComment(comment).Times(1)
-		walker.EXPECT().EndWalkComment(comment).Times(1)
 	})
 }
 
@@ -29,8 +27,6 @@ func TestWalkCommentGroup(t *testing.T) {
 	}
 	testVisit(t, commentGroup, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(commentGroup.List[0])
-		walker.EXPECT().WalkCommentGroup(commentGroup).Times(1)
-		walker.EXPECT().EndWalkCommentGroup(commentGroup).Times(1)
 	})
 }
 
@@ -62,8 +58,6 @@ func TestWalkField(t *testing.T) {
 		walker.ExpectWalkOnce(field.Type)
 		walker.ExpectWalkOnce(field.Tag)
 		walker.ExpectWalkOnce(field.Comment)
-		walker.EXPECT().WalkField(field).Times(1)
-		walker.EXPECT().EndWalkField(field).Times(1)
 	})
 }
 
@@ -79,8 +73,6 @@ func TestWalkFieldList(t *testing.T) {
 	}
 	testVisit(t, fieldList, func(walker *MockWalker) {
 		walker.ExpectWalkOnce(fieldList.List[0])
-		walker.EXPECT().WalkFieldList(fieldList).Times(1)
-		walker.EXPECT().EndWalkFieldList(fieldList).Times(1)
 	})
 }
 
