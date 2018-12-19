@@ -3,13 +3,34 @@ package syrinx
 import (
 	"github.com/golang-collections/collections/stack"
 	"go/ast"
+	"go/importer"
 	"go/parser"
 	"go/token"
 	"go/types"
 )
 
-type StructInfo struct {
+type FieldInfo struct {
 	Name string
+	Type types.Type
+}
+
+func (structInfo *StructInfo) addFields(names []*ast.Ident, fieldType types.Type) {
+	for _, fieldName := range names {
+		structInfo.addField(fieldName.Name, fieldType)
+	}
+}
+
+func (structInfo *StructInfo) addField(fieldName string, fieldType types.Type) {
+	structInfo.Fields = append(structInfo.Fields, &FieldInfo{
+		Name: fieldName,
+		Type: fieldType,
+	})
+}
+
+type StructInfo struct {
+	Name   string
+	Fields []*FieldInfo
+	Type   types.Type
 }
 
 type structWalker struct {
@@ -36,7 +57,7 @@ func (walker *structWalker) Parse(sourceCode string) error {
 
 func (*structWalker) parseTypeInfo(fset *token.FileSet, astFile *ast.File) (types.Info, error) {
 	typeInfo := types.Info{Types: make(map[ast.Expr]types.TypeAndValue)}
-	_, err := (&types.Config{}).Check("mypkg", fset, []*ast.File{astFile}, &typeInfo)
+	_, err := (&types.Config{Importer: importer.Default()}).Check("mypkg", fset, []*ast.File{astFile}, &typeInfo)
 	return typeInfo, err
 }
 
@@ -77,14 +98,10 @@ func (*structWalker) EndWalkCommentGroup(group *ast.CommentGroup) {
 }
 
 func (walker *structWalker) WalkField(field *ast.Field) {
+	structInfo := walker.structInfoStack.Peek().(*StructInfo)
 	fieldType := walker.typeInfo.Types[field.Type].Type
-	switch fieldType.(type) {
-	case *types.Struct:
-		{
-			structName := fieldType.String()
-			walker.typeNameStack.Push(structName)
-		}
-	}
+	emitTypeNameIfFiledIsNestedStruct(walker, fieldType)
+	structInfo.addFields(field.Names, fieldType)
 }
 
 func (*structWalker) EndWalkField(field *ast.Field) {
@@ -180,11 +197,10 @@ func (*structWalker) WalkArrayType(arrayType *ast.ArrayType) {
 func (*structWalker) EndWalkArrayType(arrayType *ast.ArrayType) {
 }
 
-func (walker *structWalker) WalkStructType(structType *ast.StructType) {
+func (walker *structWalker) WalkStructType(structTypeExpr *ast.StructType) {
 	structName := walker.typeNameStack.Pop().(string)
-	walker.structInfoStack.Push(&StructInfo{
-		Name: structName,
-	})
+	structType := walker.typeInfo.Types[structTypeExpr].Type
+	walker.addStructInfo(structName, structType)
 }
 
 func (walker *structWalker) EndWalkStructType(structType *ast.StructType) {
@@ -409,4 +425,21 @@ func (*structWalker) EndWalkBadDecl(n *ast.BadDecl) {
 
 func NewStructWalker() *structWalker {
 	return &structWalker{}
+}
+
+func emitTypeNameIfFiledIsNestedStruct(walker *structWalker, fieldType types.Type) {
+	switch fieldType.(type) {
+	case *types.Struct:
+		{
+			structName := fieldType.String()
+			walker.typeNameStack.Push(structName)
+		}
+	}
+}
+
+func (walker *structWalker) addStructInfo(structName string, structType types.Type) {
+	walker.structInfoStack.Push(&StructInfo{
+		Name: structName,
+		Type: structType,
+	})
 }

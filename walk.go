@@ -178,19 +178,14 @@ func Visit(v Walker, node ast.Node) {
 	switch n := node.(type) {
 	// Comments and fields
 	case *ast.Comment:
-		v.WalkComment(n)
-		v.EndWalkComment(n)
 		// nothing to do
 
 	case *ast.CommentGroup:
-		v.WalkCommentGroup(n)
 		for _, c := range n.List {
 			Visit(v, c)
 		}
-		v.EndWalkCommentGroup(n)
 
 	case *ast.Field:
-		v.WalkField(n)
 		if n.Doc != nil {
 			Visit(v, n.Doc)
 		}
@@ -202,14 +197,11 @@ func Visit(v Walker, node ast.Node) {
 		if n.Comment != nil {
 			Visit(v, n.Comment)
 		}
-		v.EndWalkField(n)
 
 	case *ast.FieldList:
-		v.WalkFieldList(n)
 		for _, f := range n.List {
 			Visit(v, f)
 		}
-		v.EndWalkFieldList(n)
 
 	// Expressions
 	case *ast.BadExpr, *ast.Ident, *ast.BasicLit:
