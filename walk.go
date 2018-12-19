@@ -6,7 +6,7 @@ package syrinx
 
 import (
 	"fmt"
-	. "go/ast"
+	"go/ast"
 	"reflect"
 )
 
@@ -15,129 +15,129 @@ import (
 // of node with the visitor w, followed by a call of w.BeginWalk(nil).
 //go:generate mockgen -package=syrinx -destination=./mock_walker.go github.com/lonegunmanb/syrinx Walker
 type Walker interface {
-	BeginWalk(node Node) (w Walker)
-	EndWalk(node Node)
-	WalkComment(comment *Comment)
-	WalkCommentGroup(group *CommentGroup)
-	EndWalkComment(comment *Comment)
-	EndWalkCommentGroup(group *CommentGroup)
-	WalkField(field *Field)
-	EndWalkField(field *Field)
-	WalkFieldList(list *FieldList)
-	EndWalkFieldList(list *FieldList)
-	WalkEllipsis(ellipsis *Ellipsis)
-	EndWalkEllipsis(ellipsis *Ellipsis)
-	WalkFuncLit(lit *FuncLit)
-	EndWalkFuncLit(lit *FuncLit)
-	WalkCompositeLit(lit *CompositeLit)
-	EndWalkCompositeLit(lit *CompositeLit)
-	WalkParenExpr(expr *ParenExpr)
-	EndWalkParenExpr(expr *ParenExpr)
-	WalkSelectorExpr(expr *SelectorExpr)
-	EndWalkSelectorExpr(expr *SelectorExpr)
-	WalkIndexExpr(expr *IndexExpr)
-	EndWalkIndexExpr(expr *IndexExpr)
-	WalkSliceExpr(expr *SliceExpr)
-	EndWalkSliceExpr(expr *SliceExpr)
-	WalkTypeAssertExpr(expr *TypeAssertExpr)
-	EndWalkTypeAssertExpr(expr *TypeAssertExpr)
-	WalkCallExpr(expr *CallExpr)
-	EndWalkCallExpr(expr *CallExpr)
-	WalkStarExpr(expr *StarExpr)
-	EndWalkStarExpr(expr *StarExpr)
-	WalkUnaryExpr(expr *UnaryExpr)
-	EndWalkUnaryExpr(expr *UnaryExpr)
-	WalkBinaryExpr(expr *BinaryExpr)
-	EndWalkBinaryExpr(expr *BinaryExpr)
-	WalkKeyValueExpr(expr *KeyValueExpr)
-	EndWalkKeyValueExpr(expr *KeyValueExpr)
-	WalkArrayType(arrayType *ArrayType)
-	EndWalkArrayType(arrayType *ArrayType)
-	WalkStructType(structType *StructType)
-	EndWalkStructType(structType *StructType)
-	WalkFuncType(funcType *FuncType)
-	EndWalkFuncType(funcType *FuncType)
-	WalkInterfaceType(interfaceType *InterfaceType)
-	EndWalkInterfaceType(interfaceType *InterfaceType)
-	WalkMapType(mapType *MapType)
-	EndWalkMapType(mapType *MapType)
-	WalkChanType(chanType *ChanType)
-	EndWalkChanType(chanType *ChanType)
-	WalkDeclStmt(stmt *DeclStmt)
-	EndWalkDeclStmt(stmt *DeclStmt)
-	WalkLabeledStmt(stmt *LabeledStmt)
-	EndWalkLabeledStmt(stmt *LabeledStmt)
-	WalkExprStmt(stmt *ExprStmt)
-	EndWalkExprStmt(stmt *ExprStmt)
-	WalkSendStmt(stmt *SendStmt)
-	EndWalkSendStmt(stmt *SendStmt)
-	WalkIncDecStmt(stmt *IncDecStmt)
-	EndWalkIncDecStmt(stmt *IncDecStmt)
-	WalkAssignStmt(stmt *AssignStmt)
-	EndWalkAssignStmt(stmt *AssignStmt)
-	WalkGoStmt(stmt *GoStmt)
-	EndWalkGoStmt(stmt *GoStmt)
-	WalkDeferStmt(stmt *DeferStmt)
-	EndWalkDeferStmt(stmt *DeferStmt)
-	WalkReturnStmt(stmt *ReturnStmt)
-	EndWalkReturnStmt(stmt *ReturnStmt)
-	WalkBranchStmt(stmt *BranchStmt)
-	EndWalkBranchStmt(stmt *BranchStmt)
-	WalkBlockStmt(stmt *BlockStmt)
-	EndWalkBlockStmt(stmt *BlockStmt)
-	WalkIfStmt(stmt *IfStmt)
-	EndWalkIfStmt(stmt *IfStmt)
-	WalkCaseClause(clause *CaseClause)
-	EndWalkCaseClause(clause *CaseClause)
-	WalkSwitchStmt(stmt *SwitchStmt)
-	EndWalkSwitchStmt(stmt *SwitchStmt)
-	WalkTypeSwitchStmt(stmt *TypeSwitchStmt)
-	EndWalkTypeSwitchStmt(stmt *TypeSwitchStmt)
-	WalkCommClause(clause *CommClause)
-	EndWalkCommClause(clause *CommClause)
-	WalkSelectStmt(stmt *SelectStmt)
-	EndWalkSelectStmt(stmt *SelectStmt)
-	WalkForStmt(stmt *ForStmt)
-	EndWalkForStmt(stmt *ForStmt)
-	WalkRangeStmt(stmt *RangeStmt)
-	EndWalkRangeStmt(stmt *RangeStmt)
-	WalkImportSpec(spec *ImportSpec)
-	EndWalkImportSpec(spec *ImportSpec)
-	WalkValueSpec(spec *ValueSpec)
-	EndWalkValueSpec(spec *ValueSpec)
-	WalkTypeSpec(spec *TypeSpec)
-	EndWalkTypeSpec(spec *TypeSpec)
-	WalkGenDecl(decl *GenDecl)
-	EndWalkGenDecl(decl *GenDecl)
-	WalkFuncDecl(decl *FuncDecl)
-	EndWalkFuncDecl(decl *FuncDecl)
-	WalkFile(file *File)
-	EndWalkFile(file *File)
-	WalkPackage(n *Package)
-	EndWalkPackage(n *Package)
-	WalkBadExpr(n *BadExpr)
-	EndWalkBadExpr(n *BadExpr)
-	WalkIdent(n *Ident)
-	EndWalkIdent(n *Ident)
-	WalkBasicLit(n *BasicLit)
-	EndWalkBasicLit(n *BasicLit)
-	WalkBadStmt(n *BadStmt)
-	EndWalkBadStmt(n *BadStmt)
-	WalkEmptyStmt(n *EmptyStmt)
-	EndWalkEmptyStmt(n *EmptyStmt)
-	WalkBadDecl(n *BadDecl)
-	EndWalkBadDecl(n *BadDecl)
+	BeginWalk(node ast.Node) (w Walker)
+	EndWalk(node ast.Node)
+	WalkComment(comment *ast.Comment)
+	WalkCommentGroup(group *ast.CommentGroup)
+	EndWalkComment(comment *ast.Comment)
+	EndWalkCommentGroup(group *ast.CommentGroup)
+	WalkField(field *ast.Field)
+	EndWalkField(field *ast.Field)
+	WalkFieldList(list *ast.FieldList)
+	EndWalkFieldList(list *ast.FieldList)
+	WalkEllipsis(ellipsis *ast.Ellipsis)
+	EndWalkEllipsis(ellipsis *ast.Ellipsis)
+	WalkFuncLit(lit *ast.FuncLit)
+	EndWalkFuncLit(lit *ast.FuncLit)
+	WalkCompositeLit(lit *ast.CompositeLit)
+	EndWalkCompositeLit(lit *ast.CompositeLit)
+	WalkParenExpr(expr *ast.ParenExpr)
+	EndWalkParenExpr(expr *ast.ParenExpr)
+	WalkSelectorExpr(expr *ast.SelectorExpr)
+	EndWalkSelectorExpr(expr *ast.SelectorExpr)
+	WalkIndexExpr(expr *ast.IndexExpr)
+	EndWalkIndexExpr(expr *ast.IndexExpr)
+	WalkSliceExpr(expr *ast.SliceExpr)
+	EndWalkSliceExpr(expr *ast.SliceExpr)
+	WalkTypeAssertExpr(expr *ast.TypeAssertExpr)
+	EndWalkTypeAssertExpr(expr *ast.TypeAssertExpr)
+	WalkCallExpr(expr *ast.CallExpr)
+	EndWalkCallExpr(expr *ast.CallExpr)
+	WalkStarExpr(expr *ast.StarExpr)
+	EndWalkStarExpr(expr *ast.StarExpr)
+	WalkUnaryExpr(expr *ast.UnaryExpr)
+	EndWalkUnaryExpr(expr *ast.UnaryExpr)
+	WalkBinaryExpr(expr *ast.BinaryExpr)
+	EndWalkBinaryExpr(expr *ast.BinaryExpr)
+	WalkKeyValueExpr(expr *ast.KeyValueExpr)
+	EndWalkKeyValueExpr(expr *ast.KeyValueExpr)
+	WalkArrayType(arrayType *ast.ArrayType)
+	EndWalkArrayType(arrayType *ast.ArrayType)
+	WalkStructType(structType *ast.StructType)
+	EndWalkStructType(structType *ast.StructType)
+	WalkFuncType(funcType *ast.FuncType)
+	EndWalkFuncType(funcType *ast.FuncType)
+	WalkInterfaceType(interfaceType *ast.InterfaceType)
+	EndWalkInterfaceType(interfaceType *ast.InterfaceType)
+	WalkMapType(mapType *ast.MapType)
+	EndWalkMapType(mapType *ast.MapType)
+	WalkChanType(chanType *ast.ChanType)
+	EndWalkChanType(chanType *ast.ChanType)
+	WalkDeclStmt(stmt *ast.DeclStmt)
+	EndWalkDeclStmt(stmt *ast.DeclStmt)
+	WalkLabeledStmt(stmt *ast.LabeledStmt)
+	EndWalkLabeledStmt(stmt *ast.LabeledStmt)
+	WalkExprStmt(stmt *ast.ExprStmt)
+	EndWalkExprStmt(stmt *ast.ExprStmt)
+	WalkSendStmt(stmt *ast.SendStmt)
+	EndWalkSendStmt(stmt *ast.SendStmt)
+	WalkIncDecStmt(stmt *ast.IncDecStmt)
+	EndWalkIncDecStmt(stmt *ast.IncDecStmt)
+	WalkAssignStmt(stmt *ast.AssignStmt)
+	EndWalkAssignStmt(stmt *ast.AssignStmt)
+	WalkGoStmt(stmt *ast.GoStmt)
+	EndWalkGoStmt(stmt *ast.GoStmt)
+	WalkDeferStmt(stmt *ast.DeferStmt)
+	EndWalkDeferStmt(stmt *ast.DeferStmt)
+	WalkReturnStmt(stmt *ast.ReturnStmt)
+	EndWalkReturnStmt(stmt *ast.ReturnStmt)
+	WalkBranchStmt(stmt *ast.BranchStmt)
+	EndWalkBranchStmt(stmt *ast.BranchStmt)
+	WalkBlockStmt(stmt *ast.BlockStmt)
+	EndWalkBlockStmt(stmt *ast.BlockStmt)
+	WalkIfStmt(stmt *ast.IfStmt)
+	EndWalkIfStmt(stmt *ast.IfStmt)
+	WalkCaseClause(clause *ast.CaseClause)
+	EndWalkCaseClause(clause *ast.CaseClause)
+	WalkSwitchStmt(stmt *ast.SwitchStmt)
+	EndWalkSwitchStmt(stmt *ast.SwitchStmt)
+	WalkTypeSwitchStmt(stmt *ast.TypeSwitchStmt)
+	EndWalkTypeSwitchStmt(stmt *ast.TypeSwitchStmt)
+	WalkCommClause(clause *ast.CommClause)
+	EndWalkCommClause(clause *ast.CommClause)
+	WalkSelectStmt(stmt *ast.SelectStmt)
+	EndWalkSelectStmt(stmt *ast.SelectStmt)
+	WalkForStmt(stmt *ast.ForStmt)
+	EndWalkForStmt(stmt *ast.ForStmt)
+	WalkRangeStmt(stmt *ast.RangeStmt)
+	EndWalkRangeStmt(stmt *ast.RangeStmt)
+	WalkImportSpec(spec *ast.ImportSpec)
+	EndWalkImportSpec(spec *ast.ImportSpec)
+	WalkValueSpec(spec *ast.ValueSpec)
+	EndWalkValueSpec(spec *ast.ValueSpec)
+	WalkTypeSpec(spec *ast.TypeSpec)
+	EndWalkTypeSpec(spec *ast.TypeSpec)
+	WalkGenDecl(decl *ast.GenDecl)
+	EndWalkGenDecl(decl *ast.GenDecl)
+	WalkFuncDecl(decl *ast.FuncDecl)
+	EndWalkFuncDecl(decl *ast.FuncDecl)
+	WalkFile(file *ast.File)
+	EndWalkFile(file *ast.File)
+	WalkPackage(n *ast.Package)
+	EndWalkPackage(n *ast.Package)
+	WalkBadExpr(n *ast.BadExpr)
+	EndWalkBadExpr(n *ast.BadExpr)
+	WalkIdent(n *ast.Ident)
+	EndWalkIdent(n *ast.Ident)
+	WalkBasicLit(n *ast.BasicLit)
+	EndWalkBasicLit(n *ast.BasicLit)
+	WalkBadStmt(n *ast.BadStmt)
+	EndWalkBadStmt(n *ast.BadStmt)
+	WalkEmptyStmt(n *ast.EmptyStmt)
+	EndWalkEmptyStmt(n *ast.EmptyStmt)
+	WalkBadDecl(n *ast.BadDecl)
+	EndWalkBadDecl(n *ast.BadDecl)
 }
 
 // Helper functions for common node lists. They may be empty.
 
-func walkIdentList(v Walker, list []*Ident) {
+func walkIdentList(v Walker, list []*ast.Ident) {
 	for _, x := range list {
 		Visit(v, x)
 	}
 }
 
-func walkExprList(v Walker, list []Expr) {
+func walkExprList(v Walker, list []ast.Expr) {
 	i, _ := Err()
 	println(i)
 	for _, x := range list {
@@ -145,13 +145,13 @@ func walkExprList(v Walker, list []Expr) {
 	}
 }
 
-func walkStmtList(v Walker, list []Stmt) {
+func walkStmtList(v Walker, list []ast.Stmt) {
 	for _, x := range list {
 		Visit(v, x)
 	}
 }
 
-func walkDeclList(v Walker, list []Decl) {
+func walkDeclList(v Walker, list []ast.Decl) {
 	for _, x := range list {
 		Visit(v, x)
 	}
@@ -166,7 +166,7 @@ func walkDeclList(v Walker, list []Decl) {
 // w for each of the non-nil children of node, followed by a call of
 // w.BeginWalk(nil).
 //
-func Visit(v Walker, node Node) {
+func Visit(v Walker, node ast.Node) {
 	if v = v.BeginWalk(node); v == nil {
 		return
 	}
@@ -177,19 +177,19 @@ func Visit(v Walker, node Node) {
 	// of the corresponding node types in ast.go)
 	switch n := node.(type) {
 	// Comments and fields
-	case *Comment:
+	case *ast.Comment:
 		v.WalkComment(n)
 		v.EndWalkComment(n)
 		// nothing to do
 
-	case *CommentGroup:
+	case *ast.CommentGroup:
 		v.WalkCommentGroup(n)
 		for _, c := range n.List {
 			Visit(v, c)
 		}
 		v.EndWalkCommentGroup(n)
 
-	case *Field:
+	case *ast.Field:
 		v.WalkField(n)
 		if n.Doc != nil {
 			Visit(v, n.Doc)
@@ -204,7 +204,7 @@ func Visit(v Walker, node Node) {
 		}
 		v.EndWalkField(n)
 
-	case *FieldList:
+	case *ast.FieldList:
 		v.WalkFieldList(n)
 		for _, f := range n.List {
 			Visit(v, f)
@@ -212,36 +212,36 @@ func Visit(v Walker, node Node) {
 		v.EndWalkFieldList(n)
 
 	// Expressions
-	case *BadExpr, *Ident, *BasicLit:
+	case *ast.BadExpr, *ast.Ident, *ast.BasicLit:
 		// nothing to do
 
-	case *Ellipsis:
+	case *ast.Ellipsis:
 		if n.Elt != nil {
 			Visit(v, n.Elt)
 		}
 
-	case *FuncLit:
+	case *ast.FuncLit:
 		Visit(v, n.Type)
 		Visit(v, n.Body)
 
-	case *CompositeLit:
+	case *ast.CompositeLit:
 		if n.Type != nil {
 			Visit(v, n.Type)
 		}
 		walkExprList(v, n.Elts)
 
-	case *ParenExpr:
+	case *ast.ParenExpr:
 		Visit(v, n.X)
 
-	case *SelectorExpr:
+	case *ast.SelectorExpr:
 		Visit(v, n.X)
 		Visit(v, n.Sel)
 
-	case *IndexExpr:
+	case *ast.IndexExpr:
 		Visit(v, n.X)
 		Visit(v, n.Index)
 
-	case *SliceExpr:
+	case *ast.SliceExpr:
 		Visit(v, n.X)
 		if n.Low != nil {
 			Visit(v, n.Low)
@@ -253,41 +253,41 @@ func Visit(v Walker, node Node) {
 			Visit(v, n.Max)
 		}
 
-	case *TypeAssertExpr:
+	case *ast.TypeAssertExpr:
 		Visit(v, n.X)
 		if n.Type != nil {
 			Visit(v, n.Type)
 		}
 
-	case *CallExpr:
+	case *ast.CallExpr:
 		Visit(v, n.Fun)
 		walkExprList(v, n.Args)
 
-	case *StarExpr:
+	case *ast.StarExpr:
 		Visit(v, n.X)
 
-	case *UnaryExpr:
+	case *ast.UnaryExpr:
 		Visit(v, n.X)
 
-	case *BinaryExpr:
+	case *ast.BinaryExpr:
 		Visit(v, n.X)
 		Visit(v, n.Y)
 
-	case *KeyValueExpr:
+	case *ast.KeyValueExpr:
 		Visit(v, n.Key)
 		Visit(v, n.Value)
 
 	// Types
-	case *ArrayType:
+	case *ast.ArrayType:
 		if n.Len != nil {
 			Visit(v, n.Len)
 		}
 		Visit(v, n.Elt)
 
-	case *StructType:
+	case *ast.StructType:
 		Visit(v, n.Fields)
 
-	case *FuncType:
+	case *ast.FuncType:
 		if n.Params != nil {
 			Visit(v, n.Params)
 		}
@@ -295,62 +295,62 @@ func Visit(v Walker, node Node) {
 			Visit(v, n.Results)
 		}
 
-	case *InterfaceType:
+	case *ast.InterfaceType:
 		Visit(v, n.Methods)
 
-	case *MapType:
+	case *ast.MapType:
 		Visit(v, n.Key)
 		Visit(v, n.Value)
 
-	case *ChanType:
+	case *ast.ChanType:
 		Visit(v, n.Value)
 
 	// Statements
-	case *BadStmt:
+	case *ast.BadStmt:
 		// nothing to do
 
-	case *DeclStmt:
+	case *ast.DeclStmt:
 		Visit(v, n.Decl)
 
-	case *EmptyStmt:
+	case *ast.EmptyStmt:
 		// nothing to do
 
-	case *LabeledStmt:
+	case *ast.LabeledStmt:
 		Visit(v, n.Label)
 		Visit(v, n.Stmt)
 
-	case *ExprStmt:
+	case *ast.ExprStmt:
 		Visit(v, n.X)
 
-	case *SendStmt:
+	case *ast.SendStmt:
 		Visit(v, n.Chan)
 		Visit(v, n.Value)
 
-	case *IncDecStmt:
+	case *ast.IncDecStmt:
 		Visit(v, n.X)
 
-	case *AssignStmt:
+	case *ast.AssignStmt:
 		walkExprList(v, n.Lhs)
 		walkExprList(v, n.Rhs)
 
-	case *GoStmt:
+	case *ast.GoStmt:
 		Visit(v, n.Call)
 
-	case *DeferStmt:
+	case *ast.DeferStmt:
 		Visit(v, n.Call)
 
-	case *ReturnStmt:
+	case *ast.ReturnStmt:
 		walkExprList(v, n.Results)
 
-	case *BranchStmt:
+	case *ast.BranchStmt:
 		if n.Label != nil {
 			Visit(v, n.Label)
 		}
 
-	case *BlockStmt:
+	case *ast.BlockStmt:
 		walkStmtList(v, n.List)
 
-	case *IfStmt:
+	case *ast.IfStmt:
 		if n.Init != nil {
 			Visit(v, n.Init)
 		}
@@ -360,11 +360,11 @@ func Visit(v Walker, node Node) {
 			Visit(v, n.Else)
 		}
 
-	case *CaseClause:
+	case *ast.CaseClause:
 		walkExprList(v, n.List)
 		walkStmtList(v, n.Body)
 
-	case *SwitchStmt:
+	case *ast.SwitchStmt:
 		if n.Init != nil {
 			Visit(v, n.Init)
 		}
@@ -373,23 +373,23 @@ func Visit(v Walker, node Node) {
 		}
 		Visit(v, n.Body)
 
-	case *TypeSwitchStmt:
+	case *ast.TypeSwitchStmt:
 		if n.Init != nil {
 			Visit(v, n.Init)
 		}
 		Visit(v, n.Assign)
 		Visit(v, n.Body)
 
-	case *CommClause:
+	case *ast.CommClause:
 		if n.Comm != nil {
 			Visit(v, n.Comm)
 		}
 		walkStmtList(v, n.Body)
 
-	case *SelectStmt:
+	case *ast.SelectStmt:
 		Visit(v, n.Body)
 
-	case *ForStmt:
+	case *ast.ForStmt:
 		if n.Init != nil {
 			Visit(v, n.Init)
 		}
@@ -401,7 +401,7 @@ func Visit(v Walker, node Node) {
 		}
 		Visit(v, n.Body)
 
-	case *RangeStmt:
+	case *ast.RangeStmt:
 		if n.Key != nil {
 			Visit(v, n.Key)
 		}
@@ -412,7 +412,7 @@ func Visit(v Walker, node Node) {
 		Visit(v, n.Body)
 
 	// Declarations
-	case *ImportSpec:
+	case *ast.ImportSpec:
 		if n.Doc != nil {
 			Visit(v, n.Doc)
 		}
@@ -424,7 +424,7 @@ func Visit(v Walker, node Node) {
 			Visit(v, n.Comment)
 		}
 
-	case *ValueSpec:
+	case *ast.ValueSpec:
 		if n.Doc != nil {
 			Visit(v, n.Doc)
 		}
@@ -437,7 +437,7 @@ func Visit(v Walker, node Node) {
 			Visit(v, n.Comment)
 		}
 
-	case *TypeSpec:
+	case *ast.TypeSpec:
 		if n.Doc != nil {
 			Visit(v, n.Doc)
 		}
@@ -447,10 +447,10 @@ func Visit(v Walker, node Node) {
 			Visit(v, n.Comment)
 		}
 
-	case *BadDecl:
+	case *ast.BadDecl:
 		// nothing to do
 
-	case *GenDecl:
+	case *ast.GenDecl:
 		if n.Doc != nil {
 			Visit(v, n.Doc)
 		}
@@ -458,7 +458,7 @@ func Visit(v Walker, node Node) {
 			Visit(v, s)
 		}
 
-	case *FuncDecl:
+	case *ast.FuncDecl:
 		if n.Doc != nil {
 			Visit(v, n.Doc)
 		}
@@ -472,7 +472,7 @@ func Visit(v Walker, node Node) {
 		}
 
 	// Files and packages
-	case *File:
+	case *ast.File:
 		if n.Doc != nil {
 			Visit(v, n.Doc)
 		}
@@ -482,7 +482,7 @@ func Visit(v Walker, node Node) {
 		// visited already through the individual
 		// nodes
 
-	case *Package:
+	case *ast.Package:
 		for _, f := range n.Files {
 			Visit(v, f)
 		}
@@ -496,25 +496,25 @@ func Visit(v Walker, node Node) {
 	v.BeginWalk(nil)
 }
 
-func walkNode(v Walker, node Node) {
+func walkNode(v Walker, node ast.Node) {
 	callMethod(node, v, getWalkNodeMethodName(node))
 }
 
-func endWalkNode(v Walker, node Node) {
+func endWalkNode(v Walker, node ast.Node) {
 	callMethod(node, v, getEndWalkNodeMethodName(node))
 }
 
-func getWalkNodeMethodName(node Node) string {
+func getWalkNodeMethodName(node ast.Node) string {
 	nodeName := getNodeName(node)
 	return fmt.Sprintf("Walk%s", nodeName)
 }
 
-func getEndWalkNodeMethodName(node Node) string {
+func getEndWalkNodeMethodName(node ast.Node) string {
 	nodeName := getNodeName(node)
 	return fmt.Sprintf("EndWalk%s", nodeName)
 }
 
-func callMethod(node Node, v Walker, walkMethodName string) {
+func callMethod(node ast.Node, v Walker, walkMethodName string) {
 	walkMethod := getMethod(v, walkMethodName)
 	walkMethod.Call([]reflect.Value{reflect.ValueOf(node)})
 }
@@ -525,7 +525,7 @@ func getMethod(v Walker, walkMethodName string) reflect.Value {
 	return walkMethod
 }
 
-func getNodeName(node Node) string {
+func getNodeName(node ast.Node) string {
 	nodeType := reflect.TypeOf(node).Elem()
 	nodeTypeName := nodeType.Name()
 	return nodeTypeName
