@@ -964,7 +964,7 @@ type DummyStmt struct {
 	Index int
 }
 
-var dummyCounter int = 0
+var dummyCounter = 0
 
 func dummyExpr() *DummyExpr {
 	dummyCounter++

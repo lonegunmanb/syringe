@@ -138,6 +138,8 @@ func walkIdentList(v Walker, list []*Ident) {
 }
 
 func walkExprList(v Walker, list []Expr) {
+	i, _ := Err()
+	println(i)
 	for _, x := range list {
 		Visit(v, x)
 	}
