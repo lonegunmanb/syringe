@@ -7,8 +7,57 @@ import (
 	"testing"
 )
 
+func TestFieldTag(t *testing.T) {
+	souceCode := `
+package test
+type Struct struct {
+	Field2 int ` + "`" + "inject:\"Field2\"`" + `
+}
+`
+	structWalker := parseCode(t, souceCode)
+	struct1 := structWalker.Structs()[0]
+	field := struct1.Fields[0]
+	tag := field.Tag
+	assert.Equal(t, "`inject:\"Field2\"`", tag)
+}
+
+func TestNewTypeDefinition(t *testing.T) {
+	sourceCode := `
+package test
+type newint int
+type Struct struct {
+	Field newint
+	Field2 int
+}
+`
+	structWalker := parseCode(t, sourceCode)
+	struct1 := structWalker.Structs()[0]
+	field1 := struct1.Fields[0]
+	field2 := struct1.Fields[1]
+	namedType, ok := field1.Type.(*types.Named)
+	assert.True(t, ok)
+	assert.Equal(t, "newint", namedType.Obj().Name())
+	assert.Equal(t, field2.Type, namedType.Underlying())
+}
+
+func TestTypeAliasIsIdenticalToType(t *testing.T) {
+	sourceCode := `
+package test
+type newint = int
+type Struct struct {
+	Field1 newint
+	Field2 int
+}
+`
+	structWalker := parseCode(t, sourceCode)
+	struct1 := structWalker.Structs()[0]
+	field1 := struct1.Fields[0]
+	field2 := struct1.Fields[1]
+	assert.Equal(t, field1.Type, field2.Type)
+}
+
 func TestWalkFieldInfos(t *testing.T) {
-	var sourceCode = `
+	sourceCode := `
 package test
 import "go/ast"
 type Struct1 struct {
@@ -23,9 +72,7 @@ type Struct2 struct {
 	
 }
 `
-	structWalker := NewStructWalker()
-	err := structWalker.Parse(sourceCode)
-	assert.Nil(t, err)
+	structWalker := parseCode(t, sourceCode)
 	structs := structWalker.Structs()
 	struct1 := structs[0]
 	assert.Equal(t, 6, len(struct1.Fields))
@@ -54,6 +101,13 @@ type Struct2 struct {
 	assert.Equal(t, "*go/ast.Decl", field6.Type.String())
 }
 
+func parseCode(t *testing.T, sourceCode string) *structWalker {
+	structWalker := NewStructWalker()
+	err := structWalker.Parse(sourceCode)
+	assert.Nil(t, err)
+	return structWalker
+}
+
 func TestWalkStructNames(t *testing.T) {
 	const structName1 = "Struct"
 	const structName2 = "Struct2"
@@ -77,9 +131,7 @@ type %s struct{
 		field1Name,
 		field2Name)
 
-	structWalker := NewStructWalker()
-	err := structWalker.Parse(structDefine1)
-	assert.Nil(t, err)
+	structWalker := parseCode(t, structDefine1)
 	structs := structWalker.Structs()
 	assert.Len(t, structs, 2)
 	structInfo := structs[0]

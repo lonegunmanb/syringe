@@ -12,19 +12,18 @@ import (
 type FieldInfo struct {
 	Name string
 	Type types.Type
+	Tag  string
 }
 
-func (structInfo *StructInfo) addFields(names []*ast.Ident, fieldType types.Type) {
+func (structInfo *StructInfo) addFields(field *ast.Field, fieldType types.Type) {
+	names := field.Names
 	for _, fieldName := range names {
-		structInfo.addField(fieldName.Name, fieldType)
+		structInfo.Fields = append(structInfo.Fields, &FieldInfo{
+			Name: fieldName.Name,
+			Type: fieldType,
+			Tag:  getTag(field),
+		})
 	}
-}
-
-func (structInfo *StructInfo) addField(fieldName string, fieldType types.Type) {
-	structInfo.Fields = append(structInfo.Fields, &FieldInfo{
-		Name: fieldName,
-		Type: fieldType,
-	})
 }
 
 type StructInfo struct {
@@ -101,7 +100,7 @@ func (walker *structWalker) WalkField(field *ast.Field) {
 	structInfo := walker.structInfoStack.Peek().(*StructInfo)
 	fieldType := walker.typeInfo.Types[field.Type].Type
 	emitTypeNameIfFiledIsNestedStruct(walker, fieldType)
-	structInfo.addFields(field.Names, fieldType)
+	structInfo.addFields(field, fieldType)
 }
 
 func (*structWalker) EndWalkField(field *ast.Field) {
@@ -442,4 +441,11 @@ func (walker *structWalker) addStructInfo(structName string, structType types.Ty
 		Name: structName,
 		Type: structType,
 	})
+}
+
+func getTag(field *ast.Field) string {
+	if field.Tag == nil {
+		return ""
+	}
+	return field.Tag.Value
 }
