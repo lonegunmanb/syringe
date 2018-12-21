@@ -4,8 +4,72 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"go/types"
+	"reflect"
 	"testing"
 )
+
+const pkgPath = "github.com/lonegunmanb/syrinx"
+
+func TestStructWithInterface(t *testing.T) {
+	sourceCode := `
+package syrinx
+type TestStruct struct {
+}
+type TestInterface interface {
+	Hello()
+}
+`
+	typeWalker := parseCode(t, sourceCode)
+	assert.Equal(t, 2, len(typeWalker.Types()))
+	testStruct := typeWalker.Types()[0]
+	assert.Equal(t, 0, len(testStruct.Fields))
+	assert.Equal(t, reflect.Struct, testStruct.Kind)
+	testInterface := typeWalker.Types()[1]
+	assert.Equal(t, 1, len(testInterface.Fields))
+	assert.Equal(t, reflect.Interface, testInterface.Kind)
+}
+
+type TestStruct struct {
+	Field1 int
+	Field2 TestInterface
+}
+type TestInterface interface {
+	Hello()
+}
+
+func TestAstTypeShouldEqualToReflectedType(t *testing.T) {
+	sourceCode := `
+package syrinx
+type TestStruct struct {
+	Field1 int
+	Field2 TestInterface
+}
+type TestInterface interface {
+	Hello()
+}
+`
+	typeWalker := parseCode(t, sourceCode)
+	testStruct := typeWalker.Types()[0]
+	testStructInstance := TestStruct{}
+	for i := 0; i < 2; i++ {
+		assertFieldTypeNameEqual(t, testStruct, testStructInstance, i)
+	}
+}
+
+func assertFieldTypeNameEqual(t *testing.T, testStruct *TypeInfo, testStructInstance TestStruct, fieldIndex int) {
+	astFieldTypeName := testStruct.Fields[fieldIndex].Type.String()
+	reflectedFieldType := reflect.TypeOf(testStructInstance).Field(fieldIndex).Type
+	pkgPath := reflectedFieldType.PkgPath()
+	reflectedTypeName := reflectedFieldType.Name()
+	if notEmpty(pkgPath) {
+		reflectedTypeName = fmt.Sprintf("%s.%s", pkgPath, reflectedTypeName)
+	}
+	assert.Equal(t, reflectedTypeName, astFieldTypeName)
+}
+
+func notEmpty(pkgPath string) bool {
+	return pkgPath != ""
+}
 
 func TestFieldTag(t *testing.T) {
 	souceCode := `
@@ -14,8 +78,8 @@ type Struct struct {
 	Field2 int ` + "`" + "inject:\"Field2\"`" + `
 }
 `
-	structWalker := parseCode(t, souceCode)
-	struct1 := structWalker.Structs()[0]
+	typeWalker := parseCode(t, souceCode)
+	struct1 := typeWalker.Types()[0]
 	field := struct1.Fields[0]
 	tag := field.Tag
 	assert.Equal(t, "`inject:\"Field2\"`", tag)
@@ -30,8 +94,8 @@ type Struct struct {
 	Field2 int
 }
 `
-	structWalker := parseCode(t, sourceCode)
-	struct1 := structWalker.Structs()[0]
+	typeWalker := parseCode(t, sourceCode)
+	struct1 := typeWalker.Types()[0]
 	field1 := struct1.Fields[0]
 	field2 := struct1.Fields[1]
 	namedType, ok := field1.Type.(*types.Named)
@@ -49,11 +113,26 @@ type Struct struct {
 	Field2 int
 }
 `
-	structWalker := parseCode(t, sourceCode)
-	struct1 := structWalker.Structs()[0]
+	typeWalker := parseCode(t, sourceCode)
+	struct1 := typeWalker.Types()[0]
 	field1 := struct1.Fields[0]
 	field2 := struct1.Fields[1]
 	assert.Equal(t, field1.Type, field2.Type)
+}
+
+func TestTypeFromImportWithDot(t *testing.T) {
+	sourceCode := `
+package test
+import . "go/ast"
+type Struct1 struct {
+	Field *Decl
+}
+`
+	typeWalker := parseCode(t, sourceCode)
+	structs := typeWalker.Types()
+	struct1 := structs[0]
+	field := struct1.Fields[0]
+	assert.Equal(t, "*go/ast.Decl", field.Type.String())
 }
 
 func TestWalkFieldInfos(t *testing.T) {
@@ -72,8 +151,8 @@ type Struct2 struct {
 	
 }
 `
-	structWalker := parseCode(t, sourceCode)
-	structs := structWalker.Structs()
+	typeWalker := parseCode(t, sourceCode)
+	structs := typeWalker.Types()
 	struct1 := structs[0]
 	assert.Equal(t, 6, len(struct1.Fields))
 	field1 := struct1.Fields[0]
@@ -101,11 +180,12 @@ type Struct2 struct {
 	assert.Equal(t, "*go/ast.Decl", field6.Type.String())
 }
 
-func parseCode(t *testing.T, sourceCode string) *structWalker {
-	structWalker := NewStructWalker()
-	err := structWalker.Parse(sourceCode)
+func parseCode(t *testing.T, sourceCode string) *typeWalker {
+	typeWalker := NewTypeWalker()
+
+	err := typeWalker.Parse(pkgPath, sourceCode)
 	assert.Nil(t, err)
-	return structWalker
+	return typeWalker
 }
 
 func TestWalkStructNames(t *testing.T) {
@@ -131,8 +211,8 @@ type %s struct{
 		field1Name,
 		field2Name)
 
-	structWalker := parseCode(t, structDefine1)
-	structs := structWalker.Structs()
+	typeWalker := parseCode(t, structDefine1)
+	structs := typeWalker.Types()
 	assert.Len(t, structs, 2)
 	structInfo := structs[0]
 	assert.Equal(t, structName1, structInfo.Name)
@@ -156,10 +236,9 @@ type NestedStruct struct {
 	}
 }
 `
-	structWalker := NewStructWalker()
-	err := structWalker.Parse(structDefine)
-	assert.Nil(t, err)
-	structs := structWalker.Structs()
+
+	typeWalker := parseCode(t, structDefine)
+	structs := typeWalker.Types()
 	assert.Len(t, structs, 4)
 	structInfo := structs[0]
 	assert.Equal(t, "NestedStruct", structInfo.Name)
