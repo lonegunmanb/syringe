@@ -13,7 +13,7 @@ import (
 // A Walker's BeginWalk method is invoked for each node encountered by Visit.
 // If the result visitor w is not nil, Visit visits each of the children
 // of node with the visitor w, followed by a call of w.BeginWalk(nil).
-//go:generate mockgen -package=syrinx -destination=./mock_walker.go github.com/lonegunmanb/syrinx Walker
+//go:generate mockgen -package=syrinx -destination=./mock_walker_test.go github.com/lonegunmanb/syrinx Walker
 type Walker interface {
 	BeginWalk(node ast.Node) (w Walker)
 	EndWalk(node ast.Node)

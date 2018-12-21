@@ -33,12 +33,6 @@ func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
 	return nil
 }
 
-func (*typeWalker) parseTypeInfo(pkgPath string, fset *token.FileSet, astFile *ast.File) (types.Info, error) {
-	typeInfo := types.Info{Types: make(map[ast.Expr]types.TypeAndValue)}
-	_, err := (&types.Config{Importer: importer.Default()}).Check(pkgPath, fset, []*ast.File{astFile}, &typeInfo)
-	return typeInfo, err
-}
-
 func (walker *typeWalker) Types() []*TypeInfo {
 	if walker.types != nil {
 		return walker.types
@@ -76,10 +70,24 @@ func NewTypeWalker() *typeWalker {
 	return &typeWalker{}
 }
 
+func (*typeWalker) parseTypeInfo(pkgPath string, fset *token.FileSet, astFile *ast.File) (types.Info, error) {
+	typeInfo := types.Info{Types: make(map[ast.Expr]types.TypeAndValue)}
+	_, err := (&types.Config{Importer: importer.Default()}).Check(pkgPath, fset, []*ast.File{astFile}, &typeInfo)
+	return typeInfo, err
+}
+
 func addTypeInfo(walker *typeWalker, structTypeExpr ast.Expr, kind reflect.Kind) {
 	typeName := walker.typeNameStack.Pop().(string)
 	resolvedType := walker.typeInfo.Types[structTypeExpr].Type
 	walker.addTypeInfo(typeName, resolvedType, kind)
+}
+
+func (walker *typeWalker) addTypeInfo(structName string, structType types.Type, kind reflect.Kind) {
+	walker.typeInfoStack.Push(&TypeInfo{
+		Name: structName,
+		Type: structType,
+		Kind: kind,
+	})
 }
 
 func emitTypeNameIfFiledIsNestedStruct(walker *typeWalker, fieldType types.Type) {
@@ -90,14 +98,6 @@ func emitTypeNameIfFiledIsNestedStruct(walker *typeWalker, fieldType types.Type)
 			walker.typeNameStack.Push(typeName)
 		}
 	}
-}
-
-func (walker *typeWalker) addTypeInfo(structName string, structType types.Type, kind reflect.Kind) {
-	walker.typeInfoStack.Push(&TypeInfo{
-		Name: structName,
-		Type: structType,
-		Kind: kind,
-	})
 }
 
 func getTag(field *ast.Field) string {
