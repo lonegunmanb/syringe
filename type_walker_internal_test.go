@@ -10,6 +10,23 @@ import (
 
 const pkgPath = "github.com/lonegunmanb/syrinx"
 
+func TestFuncDecl(t *testing.T) {
+	sourceCode := `
+package test
+type Struct struct {
+}
+func Test(input int) int{
+	i := input
+	print(input)
+	print(i)
+	return 1
+}
+`
+	typeWalker := parseCode(t, sourceCode)
+	struct1 := typeWalker.Types()[0]
+	assert.Equal(t, 0, len(struct1.Fields))
+}
+
 func TestStructWithInterface(t *testing.T) {
 	sourceCode := `
 package syrinx

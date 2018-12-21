@@ -16,6 +16,7 @@ type typeWalker struct {
 	typeInfoStack stack.Stack
 	typeNameStack stack.Stack
 	typeInfo      types.Info
+	analyzingType bool
 }
 
 func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
@@ -48,10 +49,12 @@ func (walker *typeWalker) Types() []*TypeInfo {
 }
 
 func (walker *typeWalker) WalkField(field *ast.Field) {
-	typeInfo := walker.typeInfoStack.Peek().(*TypeInfo)
-	fieldType := walker.typeInfo.Types[field.Type].Type
-	emitTypeNameIfFiledIsNestedStruct(walker, fieldType)
-	typeInfo.addFields(field, fieldType)
+	if walker.analyzingType {
+		typeInfo := walker.typeInfoStack.Peek().(*TypeInfo)
+		fieldType := walker.typeInfo.Types[field.Type].Type
+		emitTypeNameIfFiledIsNestedStruct(walker, fieldType)
+		typeInfo.addFields(field, fieldType)
+	}
 }
 
 func (walker *typeWalker) WalkStructType(structTypeExpr *ast.StructType) {
@@ -64,6 +67,11 @@ func (walker *typeWalker) WalkInterfaceType(interfaceType *ast.InterfaceType) {
 
 func (walker *typeWalker) WalkTypeSpec(spec *ast.TypeSpec) {
 	walker.typeNameStack.Push(spec.Name.Name)
+	walker.analyzingType = true
+}
+
+func (walker *typeWalker) EndWalkTypeSpec(spec *ast.TypeSpec) {
+	walker.analyzingType = false
 }
 
 func NewTypeWalker() *typeWalker {
