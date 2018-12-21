@@ -1,4 +1,4 @@
-package syrinx
+package ast
 
 import "go/types"
 

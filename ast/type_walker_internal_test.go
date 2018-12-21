@@ -1,4 +1,4 @@
-package syrinx
+package ast
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const pkgPath = "github.com/lonegunmanb/syrinx"
+const pkgPath = "github.com/lonegunmanb/syrinx/ast"
 
 func TestFuncDecl(t *testing.T) {
 	sourceCode := `
@@ -56,7 +56,7 @@ type TestInterface interface {
 
 func TestAstTypeShouldEqualToReflectedType(t *testing.T) {
 	sourceCode := `
-package syrinx
+package ast
 type TestStruct struct {
 	Field1 int
 	Field2 TestInterface
