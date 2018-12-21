@@ -165,7 +165,7 @@ func walkDeclList(v Walker, list []ast.Decl) {
 // w.BeginWalk(nil).
 //
 func Visit(v Walker, node ast.Node) {
-	if v = v.BeginWalk(node); v == nil {
+	if v.BeginWalk(node) == nil {
 		return
 	}
 	walkNode(v, node)
