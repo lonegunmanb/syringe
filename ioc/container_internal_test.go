@@ -1,52 +1,52 @@
 package ioc
 
 import (
-	"github.com/lonegunmanb/syrinx/test_code"
+	"github.com/lonegunmanb/syrinx/test_code/engine"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-const engineInterfaceTypeName = "github.com/lonegunmanb/syrinx/test_code.Engine"
+const engineInterfaceTypeName = "github.com/lonegunmanb/syrinx/test_code/engine.Engine"
 
-var engineInterfaceType interface{} = (*test_code.Engine)(nil)
+var engineInterfaceType interface{} = (*engine.Engine)(nil)
 
 func TestRegisterInstance(t *testing.T) {
 	ioc := newContainer()
-	engine := test_code.NewEngine(100)
-	ioc.RegisterInstance(engineInterfaceType, engine)
+	e := engine.NewEngine(100)
+	ioc.RegisterInstance(engineInterfaceType, e)
 	instances := ioc.instances
 
 	resolvedEngine, ok := instances[engineInterfaceTypeName]
 	assert.True(t, ok)
-	assert.Equal(t, engine, resolvedEngine)
+	assert.Equal(t, e, resolvedEngine)
 }
 
 func TestRegisterFactory(t *testing.T) {
-	ioc := newContainer()
-	engine := test_code.NewEngine(100)
+	c := newContainer()
+	e := engine.NewEngine(100)
 	factory := func() interface{} {
-		return engine
+		return e
 	}
-	ioc.RegisterFactory(engineInterfaceType, factory)
-	resolvedFactory := ioc.factories[engineInterfaceTypeName]
+	c.RegisterFactory(engineInterfaceType, factory)
+	resolvedFactory := c.factories[engineInterfaceTypeName]
 	assert.NotNil(t, resolvedFactory)
-	assert.Equal(t, engine, resolvedFactory())
+	assert.Equal(t, e, resolvedFactory())
 }
 
 func TestResolveWithInstanceOnly(t *testing.T) {
-	ioc := newContainer()
-	engine := test_code.NewEngine(100)
-	ioc.RegisterInstance(engineInterfaceType, engine)
-	resolvedEngine := ioc.Resolve(engineInterfaceTypeName)
-	assert.Equal(t, engine, resolvedEngine)
+	c := newContainer()
+	e := engine.NewEngine(100)
+	c.RegisterInstance(engineInterfaceType, e)
+	resolvedEngine := c.Resolve(engineInterfaceTypeName)
+	assert.Equal(t, e, resolvedEngine)
 }
 
 func TestResolveWithInstanceAndFactoryShouldReturnFromFactory(t *testing.T) {
 	ioc := newContainer()
-	staticEngine := test_code.NewEngine(100)
+	staticEngine := engine.NewEngine(100)
 
 	ioc.RegisterInstance(engineInterfaceType, staticEngine)
-	engineFromFactory := test_code.NewEngine(200)
+	engineFromFactory := engine.NewEngine(200)
 	ioc.RegisterFactory(engineInterfaceType, func() interface{} {
 		return engineFromFactory
 	})
