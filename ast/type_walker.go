@@ -54,7 +54,7 @@ func (walker *typeWalker) WalkField(field *ast.Field) {
 	if walker.analyzingType {
 		typeInfo := walker.typeInfoStack.Peek().(*TypeInfo)
 		fieldType := walker.typeInfo.Types[field.Type].Type
-		emitTypeNameIfFiledIsNestedStruct(walker, fieldType)
+		emitTypeNameIfFiledIsNestedType(walker, fieldType)
 		typeInfo.addFields(field, fieldType)
 	}
 }
@@ -101,9 +101,14 @@ func (walker *typeWalker) addTypeInfo(structName string, structType types.Type, 
 	})
 }
 
-func emitTypeNameIfFiledIsNestedStruct(walker *typeWalker, fieldType types.Type) {
+func emitTypeNameIfFiledIsNestedType(walker *typeWalker, fieldType types.Type) {
 	switch fieldType.(type) {
 	case *types.Struct:
+		{
+			typeName := fieldType.String()
+			walker.typeNameStack.Push(typeName)
+		}
+	case *types.Interface:
 		{
 			typeName := fieldType.String()
 			walker.typeNameStack.Push(typeName)
@@ -118,14 +123,14 @@ func getTag(field *ast.Field) string {
 	return field.Tag.Value
 }
 
-func (structInfo *TypeInfo) addFields(field *ast.Field, fieldType types.Type) {
+func (typeInfo *TypeInfo) addFields(field *ast.Field, fieldType types.Type) {
 	names := field.Names
 	for _, fieldName := range names {
-		structInfo.Fields = append(structInfo.Fields, &FieldInfo{
+		typeInfo.Fields = append(typeInfo.Fields, &FieldInfo{
 			Name:   fieldName.Name,
 			Type:   fieldType,
 			Tag:    getTag(field),
-			Parent: structInfo,
+			Parent: typeInfo,
 		})
 	}
 }

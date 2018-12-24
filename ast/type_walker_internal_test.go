@@ -245,16 +245,32 @@ type NestedStruct struct {
 `
 
 	typeWalker := parseCode(t, structDefine)
-	structs := typeWalker.Types()
-	assert.Len(t, structs, 4)
-	structInfo := structs[0]
+	walkedTypes := typeWalker.Types()
+	assert.Len(t, walkedTypes, 4)
+	structInfo := walkedTypes[0]
 	assert.Equal(t, "NestedStruct", structInfo.Name)
-	structInfo = structs[1]
+	structInfo = walkedTypes[1]
 	assert.Equal(t, "struct{MiddleStructField struct{Field1 int; Field2 string; BottomStructField struct{Field1 int; Field2 string}}}", structInfo.Name)
-	structInfo = structs[2]
+	structInfo = walkedTypes[2]
 	assert.Equal(t, "struct{Field1 int; Field2 string; BottomStructField struct{Field1 int; Field2 string}}", structInfo.Name)
-	structInfo = structs[3]
+	structInfo = walkedTypes[3]
 	assert.Equal(t, "struct{Field1 int; Field2 string}", structInfo.Name)
+}
+
+func TestWalkStructWithNestedInterface(t *testing.T) {
+	const structDefine = `
+package test
+type Struct struct {
+	Field interface {
+		Name() string
+	}
+}
+`
+	typeWalker := parseCode(t, structDefine)
+	walkedTypes := typeWalker.Types()
+	assert.Equal(t, 2, len(walkedTypes))
+	nestedType := walkedTypes[1]
+	assert.Equal(t, "interface{Name() string}", nestedType.Name)
 }
 
 type Struct struct {
