@@ -8,11 +8,9 @@ import (
 	"testing"
 )
 
-const pkgPath = "github.com/lonegunmanb/syrinx/ast"
-
 func TestFuncDecl(t *testing.T) {
 	sourceCode := `
-package test
+package ast
 type Struct struct {
 }
 func Test(input int) int{
@@ -29,7 +27,7 @@ func Test(input int) int{
 
 func TestStructWithInterface(t *testing.T) {
 	sourceCode := `
-package syrinx
+package ast
 type TestStruct struct {
 }
 type TestInterface interface {
@@ -90,7 +88,7 @@ func notEmpty(pkgPath string) bool {
 
 func TestFieldTag(t *testing.T) {
 	souceCode := `
-package test
+package ast
 type Struct struct {
 	Field2 int ` + "`" + "inject:\"Field2\"`" + `
 }
@@ -104,7 +102,7 @@ type Struct struct {
 
 func TestNewTypeDefinition(t *testing.T) {
 	sourceCode := `
-package test
+package ast
 type newint int
 type Struct struct {
 	Field newint
@@ -123,7 +121,7 @@ type Struct struct {
 
 func TestTypeAliasIsIdenticalToType(t *testing.T) {
 	sourceCode := `
-package test
+package ast
 type newint = int
 type Struct struct {
 	Field1 newint
@@ -139,7 +137,7 @@ type Struct struct {
 
 func TestTypeFromImportWithDot(t *testing.T) {
 	sourceCode := `
-package test
+package ast
 import . "go/ast"
 type Struct1 struct {
 	Field *Decl
@@ -195,14 +193,6 @@ type Struct2 struct {
 	assert.Equal(t, "float64", float64Type.String())
 	field6 := struct1.Fields[5]
 	assert.Equal(t, "*go/ast.Decl", field6.Type.String())
-}
-
-func parseCode(t *testing.T, sourceCode string) *typeWalker {
-	typeWalker := NewTypeWalker()
-
-	err := typeWalker.Parse(pkgPath, sourceCode)
-	assert.Nil(t, err)
-	return typeWalker
 }
 
 func TestWalkStructNames(t *testing.T) {

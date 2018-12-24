@@ -17,6 +17,7 @@ type typeWalker struct {
 	typeNameStack stack.Stack
 	typeInfo      types.Info
 	analyzingType bool
+	pkgPath       string
 }
 
 func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
@@ -30,6 +31,7 @@ func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
 		return err
 	}
 	walker.typeInfo = typeInfo
+	walker.pkgPath = pkgPath
 	Visit(walker, astFile)
 	return nil
 }
@@ -92,9 +94,10 @@ func addTypeInfo(walker *typeWalker, structTypeExpr ast.Expr, kind reflect.Kind)
 
 func (walker *typeWalker) addTypeInfo(structName string, structType types.Type, kind reflect.Kind) {
 	walker.typeInfoStack.Push(&TypeInfo{
-		Name: structName,
-		Type: structType,
-		Kind: kind,
+		Name:    structName,
+		PkgPath: walker.pkgPath,
+		Type:    structType,
+		Kind:    kind,
 	})
 }
 
@@ -119,9 +122,10 @@ func (structInfo *TypeInfo) addFields(field *ast.Field, fieldType types.Type) {
 	names := field.Names
 	for _, fieldName := range names {
 		structInfo.Fields = append(structInfo.Fields, &FieldInfo{
-			Name: fieldName.Name,
-			Type: fieldType,
-			Tag:  getTag(field),
+			Name:   fieldName.Name,
+			Type:   fieldType,
+			Tag:    getTag(field),
+			Parent: structInfo,
 		})
 	}
 }

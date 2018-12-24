@@ -6,8 +6,9 @@ import (
 )
 
 type TypeInfo struct {
-	Name   string
-	Fields []*FieldInfo
-	Type   types.Type
-	Kind   reflect.Kind
+	Name    string
+	PkgPath string
+	Fields  []*FieldInfo
+	Type    types.Type
+	Kind    reflect.Kind
 }
