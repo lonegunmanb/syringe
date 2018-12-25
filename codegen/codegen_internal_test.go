@@ -36,6 +36,7 @@ func TestGenImportsDecl(t *testing.T) {
 	code := writer.String()
 	expected := `
 import (
+"github.com/lonegunmanb/syrinx/ioc"
 "go/ast"
 "go/token"
 "go/types"
@@ -43,7 +44,7 @@ import (
 	assert.Equal(t, expected, code)
 }
 
-func TestShouldNotGenImportsIfDepPathsEmpty(t *testing.T) {
+func TestShouldNotGenExtraImportsIfDepPathsEmpty(t *testing.T) {
 	writer := &bytes.Buffer{}
 	ctrl, typeInfo := prepareMock(t)
 	defer ctrl.Finish()
@@ -53,7 +54,10 @@ func TestShouldNotGenImportsIfDepPathsEmpty(t *testing.T) {
 	err := codegen.genImportDecls()
 	assert.Nil(t, err)
 	code := writer.String()
-	expected := "\n"
+	expected := `
+import (
+"github.com/lonegunmanb/syrinx/ioc"
+)`
 	assert.Equal(t, expected, code)
 }
 

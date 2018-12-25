@@ -13,7 +13,7 @@ import (
 //	"github.com/lonegunmanb/syrinx/ioc"
 //	"github.com/lonegunmanb/syrinx/test_code/engine"
 //)
-//
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++
 //func Create_car(container ioc.Container) *Car {
 //	r := new(Car)
 //	r.Engine = container.Resolve("github.com/lonegunmanb/syrinx/test_code/engine.Engine").(engine.Engine)
@@ -36,9 +36,10 @@ func (c *codegen) genPkgDecl() (err error) {
 }
 
 const importDecl = `
-{{with .GetDepPkgPaths}}import (
-{{range .}}"{{.}}"
-{{end}}){{end}}`
+import (
+"github.com/lonegunmanb/syrinx/ioc"
+{{with .GetDepPkgPaths}}{{range .}}"{{.}}"
+{{end}}{{end}})`
 
 func (c *codegen) genImportDecls() (err error) {
 	return c.gen("imports", importDecl)
