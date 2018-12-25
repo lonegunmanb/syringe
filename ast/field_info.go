@@ -6,10 +6,10 @@ import (
 )
 
 type FieldInfo struct {
-	Name   string
-	Type   types.Type
-	Tag    string
-	Parent *TypeInfo
+	Name          string
+	Type          types.Type
+	Tag           string
+	ReferenceFrom *TypeInfo
 }
 
 func (f *FieldInfo) DepPkgPaths() []string {
@@ -24,24 +24,19 @@ func getDepPkgPaths(fieldInfo *FieldInfo, t types.Type) []string {
 		}
 	case *types.Named:
 		{
-			namedType := t.(*types.Named)
-			obj := namedType.Obj()
-			if obj == nil {
+			path := getNamedTypePkg(t.(*types.Named))
+			if path == "" {
 				return []string{}
 			}
-			pkg := obj.Pkg()
-			if pkg == nil {
-				return []string{}
-			}
-			return []string{pkg.Path()}
+			return []string{path}
 		}
 	case *types.Struct:
 		{
-			return []string{fieldInfo.Parent.PkgPath}
+			return []string{fieldInfo.ReferenceFrom.PkgPath}
 		}
 	case *types.Interface:
 		{
-			return []string{fieldInfo.Parent.PkgPath}
+			return []string{fieldInfo.ReferenceFrom.PkgPath}
 		}
 	case *types.Pointer:
 		{
@@ -86,4 +81,16 @@ func tupleDeps(fieldInfo *FieldInfo, tuple *types.Tuple) []string {
 		depPaths = append(depPaths, getDepPkgPaths(fieldInfo, tuple.At(i).Type())...)
 	}
 	return depPaths
+}
+
+func getNamedTypePkg(namedType *types.Named) string {
+	obj := namedType.Obj()
+	if obj == nil {
+		return ""
+	}
+	pkg := obj.Pkg()
+	if pkg == nil {
+		return ""
+	}
+	return pkg.Path()
 }

@@ -1,17 +1,26 @@
 package ast
 
 import (
+	"fmt"
 	"github.com/ahmetb/go-linq"
 	"go/types"
 	"reflect"
 )
 
 type TypeInfo struct {
-	Name    string
-	PkgPath string
-	Fields  []*FieldInfo
-	Type    types.Type
-	Kind    reflect.Kind
+	Name          string
+	PkgPath       string
+	Fields        []*FieldInfo
+	Kind          reflect.Kind
+	Type          types.Type
+	EmbeddedTypes []*EmbeddedType
+}
+
+func (typeInfo *TypeInfo) FullName() string {
+	if typeInfo.PkgPath == "" {
+		return typeInfo.Name
+	}
+	return fmt.Sprintf("%s.%s", typeInfo.PkgPath, typeInfo.Name)
 }
 
 func (typeInfo *TypeInfo) DepPkgPaths() []string {

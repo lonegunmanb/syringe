@@ -273,6 +273,42 @@ type Struct struct {
 	assert.Equal(t, "interface{Name() string}", nestedType.Name)
 }
 
+func TestWalkStructInheritingAnotherStruct(t *testing.T) {
+	const structDefine = `
+package test
+type Interface interface {
+	Hello()
+}
+type Struct1 struct {
+	FullName string
+}
+type Struct2 struct {
+	Age int
+}
+type Struct3 struct {
+	Interface
+	Struct1
+	*Struct2
+}
+`
+	typeWalker := parseCode(t, structDefine)
+	interface1 := typeWalker.Types()[0]
+	struct1 := typeWalker.Types()[1]
+	struct2 := typeWalker.Types()[2]
+	struct3 := typeWalker.Types()[3]
+	assert.Equal(t, 3, len(struct3.EmbeddedTypes))
+	assertType(t, interface1, interface1.FullName(), EmbeddedByInterface, struct3.EmbeddedTypes[0])
+	assertType(t, struct1, struct1.FullName(), EmbeddedByStruct, struct3.EmbeddedTypes[1])
+	assertType(t, struct2, "*"+struct2.FullName(), EmbeddedByPointer, struct3.EmbeddedTypes[2])
+}
+
+func assertType(t *testing.T, typeInfo *TypeInfo, fullName string, expectedKind EmbeddedKind, embeddedType *EmbeddedType) {
+	assert.Equal(t, fullName, embeddedType.FullName)
+	assert.Equal(t, typeInfo.PkgPath, embeddedType.PkgPath)
+	assert.Equal(t, expectedKind, embeddedType.Kind)
+	assert.Equal(t, "", embeddedType.Tag)
+}
+
 type Struct struct {
 	Field struct {
 		Field1 string

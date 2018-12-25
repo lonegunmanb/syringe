@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"fmt"
 	"github.com/golang-collections/collections/stack"
 	"go/ast"
 	"go/importer"
@@ -10,13 +11,17 @@ import (
 	"reflect"
 )
 
+type opsKind string
+
+var analyzingType opsKind = "isAnalyzingType"
+var analyzingFunc opsKind = "analyzingFunc"
+
 type typeWalker struct {
 	DefaultWalker
 	types         []*TypeInfo
 	typeInfoStack stack.Stack
-	typeNameStack stack.Stack
+	opsStack      stack.Stack
 	typeInfo      types.Info
-	analyzingType bool
 	pkgPath       string
 }
 
@@ -37,68 +42,80 @@ func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
 }
 
 func (walker *typeWalker) Types() []*TypeInfo {
-	if walker.types != nil {
-		return walker.types
-	}
-	r := make([]*TypeInfo, walker.typeInfoStack.Len())
-
-	for i := len(r); i > 0; i-- {
-		structInfo := walker.typeInfoStack.Pop()
-		r[i-1] = structInfo.(*TypeInfo)
-	}
-	walker.types = r
-	return r
+	return walker.types
 }
 
 func (walker *typeWalker) WalkField(field *ast.Field) {
-	if walker.analyzingType {
+	if walker.isAnalyzingType() {
 		typeInfo := walker.typeInfoStack.Peek().(*TypeInfo)
 		fieldType := walker.typeInfo.Types[field.Type].Type
 		emitTypeNameIfFiledIsNestedType(walker, fieldType)
-		typeInfo.addFields(field, fieldType)
+		typeInfo.processField(field, fieldType)
 	}
 }
 
-func (walker *typeWalker) WalkStructType(structTypeExpr *ast.StructType) {
-	addTypeInfo(walker, structTypeExpr, reflect.Struct)
+func (walker *typeWalker) WalkStructType(structType *ast.StructType) {
+	walker.addTypeInfo(structType, reflect.Struct)
+}
+
+func (walker *typeWalker) EndWalkStructType(structType *ast.StructType) {
+	walker.typeInfoStack.Pop()
 }
 
 func (walker *typeWalker) WalkInterfaceType(interfaceType *ast.InterfaceType) {
-	addTypeInfo(walker, interfaceType, reflect.Interface)
+	walker.addTypeInfo(interfaceType, reflect.Interface)
+}
+
+func (walker *typeWalker) EndWalkInterfaceType(interfaceType *ast.InterfaceType) {
+	walker.typeInfoStack.Pop()
 }
 
 func (walker *typeWalker) WalkTypeSpec(spec *ast.TypeSpec) {
-	walker.typeNameStack.Push(spec.Name.Name)
-	walker.analyzingType = true
+	walker.typeInfoStack.Push(spec.Name.Name)
+	walker.opsStack.Push(analyzingType)
 }
 
 func (walker *typeWalker) EndWalkTypeSpec(spec *ast.TypeSpec) {
-	walker.analyzingType = false
+	walker.opsStack.Pop()
+}
+
+func (walker *typeWalker) WalkFuncType(funcType *ast.FuncType) {
+	walker.opsStack.Push(analyzingFunc)
+}
+
+func (walker *typeWalker) EndWalkFuncType(funcType *ast.FuncType) {
+	walker.opsStack.Pop()
 }
 
 func NewTypeWalker() *typeWalker {
-	return &typeWalker{}
+	return &typeWalker{
+		types: []*TypeInfo{},
+	}
 }
 
-func (*typeWalker) parseTypeInfo(pkgPath string, fset *token.FileSet, astFile *ast.File) (types.Info, error) {
+func (*typeWalker) parseTypeInfo(pkgPath string, fileSet *token.FileSet,
+	astFile *ast.File) (types.Info, error) {
 	typeInfo := types.Info{Types: make(map[ast.Expr]types.TypeAndValue)}
-	_, err := (&types.Config{Importer: importer.Default()}).Check(pkgPath, fset, []*ast.File{astFile}, &typeInfo)
+	_, err := (&types.Config{Importer: importer.Default()}).
+		Check(pkgPath, fileSet, []*ast.File{astFile}, &typeInfo)
 	return typeInfo, err
 }
 
-func addTypeInfo(walker *typeWalker, structTypeExpr ast.Expr, kind reflect.Kind) {
-	typeName := walker.typeNameStack.Pop().(string)
-	resolvedType := walker.typeInfo.Types[structTypeExpr].Type
-	walker.addTypeInfo(typeName, resolvedType, kind)
-}
-
-func (walker *typeWalker) addTypeInfo(structName string, structType types.Type, kind reflect.Kind) {
-	walker.typeInfoStack.Push(&TypeInfo{
-		Name:    structName,
+func (walker *typeWalker) addTypeInfo(structTypeExpr ast.Expr, kind reflect.Kind) {
+	typeName := walker.typeInfoStack.Pop().(string)
+	structType := walker.typeInfo.Types[structTypeExpr].Type
+	typeInfo := &TypeInfo{
+		Name:    typeName,
 		PkgPath: walker.pkgPath,
 		Type:    structType,
 		Kind:    kind,
-	})
+	}
+	walker.typeInfoStack.Push(typeInfo)
+	walker.types = append(walker.types, typeInfo)
+}
+
+func (walker *typeWalker) isAnalyzingType() bool {
+	return walker.opsStack.Peek() == analyzingType
 }
 
 func emitTypeNameIfFiledIsNestedType(walker *typeWalker, fieldType types.Type) {
@@ -106,12 +123,12 @@ func emitTypeNameIfFiledIsNestedType(walker *typeWalker, fieldType types.Type) {
 	case *types.Struct:
 		{
 			typeName := fieldType.String()
-			walker.typeNameStack.Push(typeName)
+			walker.typeInfoStack.Push(typeName)
 		}
 	case *types.Interface:
 		{
 			typeName := fieldType.String()
-			walker.typeNameStack.Push(typeName)
+			walker.typeInfoStack.Push(typeName)
 		}
 	}
 }
@@ -123,14 +140,66 @@ func getTag(field *ast.Field) string {
 	return field.Tag.Value
 }
 
-func (typeInfo *TypeInfo) addFields(field *ast.Field, fieldType types.Type) {
+func (typeInfo *TypeInfo) processField(field *ast.Field, fieldType types.Type) {
+	if isEmbeddedField(field) {
+		typeInfo.addInheritance(field, fieldType)
+	} else {
+		typeInfo.addFieldInfos(field, fieldType)
+	}
+}
+
+func (typeInfo *TypeInfo) addFieldInfos(field *ast.Field, fieldType types.Type) {
 	names := field.Names
 	for _, fieldName := range names {
 		typeInfo.Fields = append(typeInfo.Fields, &FieldInfo{
-			Name:   fieldName.Name,
-			Type:   fieldType,
-			Tag:    getTag(field),
-			Parent: typeInfo,
+			Name:          fieldName.Name,
+			Type:          fieldType,
+			Tag:           getTag(field),
+			ReferenceFrom: typeInfo,
 		})
 	}
+}
+
+func (typeInfo *TypeInfo) addInheritance(field *ast.Field, fieldType types.Type) {
+	var kind EmbeddedKind
+	var packagePath string
+	switch t := fieldType.(type) {
+	case *types.Named:
+		{
+			if isStructType(t) {
+				kind = EmbeddedByStruct
+			} else {
+				kind = EmbeddedByInterface
+			}
+			packagePath = getNamedTypePkg(t)
+		}
+	case *types.Pointer:
+		{
+			elemType, ok := t.Elem().(*types.Named)
+			if !ok {
+				panic(fmt.Sprintf("unknown embedded type %s", fieldType.String()))
+			}
+			kind = EmbeddedByPointer
+			packagePath = getNamedTypePkg(elemType)
+		}
+	default:
+		panic(fmt.Sprintf("unknown embedded type %s", t.String()))
+	}
+
+	embeddedType := &EmbeddedType{
+		Kind:     kind,
+		FullName: fieldType.String(),
+		PkgPath:  packagePath,
+		Tag:      getTag(field),
+	}
+	typeInfo.EmbeddedTypes = append(typeInfo.EmbeddedTypes, embeddedType)
+}
+
+func isStructType(t types.Type) bool {
+	_, ok := t.Underlying().(*types.Struct)
+	return ok
+}
+
+func isEmbeddedField(field *ast.Field) bool {
+	return field.Names == nil
 }
