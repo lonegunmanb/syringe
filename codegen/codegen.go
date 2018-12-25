@@ -1,7 +1,15 @@
 package codegen
 
+import (
+	"github.com/lonegunmanb/syrinx/ast"
+	"html/template"
+	"io"
+)
+
+const pkgDecl = `package {{.PkgName}}`
+
 //`
-//package {{.package}}
+//package {{.PkgName}}
 //
 //import (
 //	"github.com/lonegunmanb/syrinx/ioc"
@@ -14,3 +22,21 @@ package codegen
 //	return r
 //}
 //`
+type codegen struct {
+	typeInfo *ast.TypeInfo
+	writer   io.Writer
+}
+
+func newCodegen(t *ast.TypeInfo, writer io.Writer) *codegen {
+	return &codegen{t, writer}
+}
+
+func (c *codegen) genPkgDecl() (err error) {
+	t := template.New("pkg")
+	t, err = t.Parse(pkgDecl)
+	if err != nil {
+		return
+	}
+	err = t.Execute(c.writer, c.typeInfo)
+	return
+}
