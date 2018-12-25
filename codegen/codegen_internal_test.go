@@ -9,55 +9,54 @@ import (
 )
 
 func TestGenPackageDecl(t *testing.T) {
-	writer := &bytes.Buffer{}
-	ctrl, typeInfo := prepareMock(t)
-	defer ctrl.Finish()
-	typeInfo.EXPECT().GetPkgName().Times(1).Return("ast")
-	codegen := newCodegen(typeInfo, writer)
-	err := codegen.genPkgDecl()
-	assert.Nil(t, err)
-	code := writer.String()
-	assert.Equal(t, "package ast", code)
+	testGen(t, func(typeInfo *MockTypeInfo) {
+		typeInfo.EXPECT().GetPkgName().Times(1).Return("ast")
+	}, func(gen *codegen) error {
+		return gen.genPkgDecl()
+	}, "package ast")
 }
 
 func TestGenImportsDecl(t *testing.T) {
-	writer := &bytes.Buffer{}
-	ctrl, typeInfo := prepareMock(t)
-	defer ctrl.Finish()
-	depImports := []string{
-		"go/ast",
-		"go/token",
-		"go/types",
-	}
-	setupMockToGenImports(typeInfo, depImports)
-	codegen := newCodegen(typeInfo, writer)
-	err := codegen.genImportDecls()
-	assert.Nil(t, err)
-	code := writer.String()
-	expected := `
+	testGen(t, func(typeInfo *MockTypeInfo) {
+		depImports := []string{
+			"go/ast",
+			"go/token",
+			"go/types",
+		}
+		setupMockToGenImports(typeInfo, depImports)
+	}, func(gen *codegen) error {
+		return gen.genImportDecls()
+	}, `
 import (
 "github.com/lonegunmanb/syrinx/ioc"
 "go/ast"
 "go/token"
 "go/types"
-)`
-	assert.Equal(t, expected, code)
+)`)
 }
 
 func TestShouldNotGenExtraImportsIfDepPathsEmpty(t *testing.T) {
+	testGen(t, func(typeInfo *MockTypeInfo) {
+		var depImports []string
+		setupMockToGenImports(typeInfo, depImports)
+	}, func(gen *codegen) error {
+		return gen.genImportDecls()
+	}, `
+import (
+"github.com/lonegunmanb/syrinx/ioc"
+)`)
+}
+
+func testGen(t *testing.T, setupMockFunc func(info *MockTypeInfo), testMethod func(gen *codegen) error, expected string) {
 	writer := &bytes.Buffer{}
 	ctrl, typeInfo := prepareMock(t)
 	defer ctrl.Finish()
-	var depImports []string
-	setupMockToGenImports(typeInfo, depImports)
+	//
+	setupMockFunc(typeInfo)
 	codegen := newCodegen(typeInfo, writer)
-	err := codegen.genImportDecls()
+	err := testMethod(codegen)
 	assert.Nil(t, err)
 	code := writer.String()
-	expected := `
-import (
-"github.com/lonegunmanb/syrinx/ioc"
-)`
 	assert.Equal(t, expected, code)
 }
 
