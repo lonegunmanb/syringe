@@ -16,7 +16,7 @@ type TypeInfo interface {
 	GetType() types.Type
 	GetEmbeddedTypes() []*EmbeddedType
 	GetFullName() string
-	DepPkgPaths() []string
+	GetDepPkgPaths() []string
 }
 
 type typeInfo struct {
@@ -64,13 +64,15 @@ func (typeInfo *typeInfo) GetFullName() string {
 	return fmt.Sprintf("%s.%s", typeInfo.PkgPath, typeInfo.Name)
 }
 
-func (typeInfo *typeInfo) DepPkgPaths() []string {
+func (typeInfo *typeInfo) GetDepPkgPaths() []string {
 	result := make([]string, 0)
 	linq.From(typeInfo.Fields).SelectMany(
 		func(fieldInfo interface{}) linq.Query {
-			paths := fieldInfo.(*FieldInfo).DepPkgPaths()
+			paths := fieldInfo.(*FieldInfo).GetDepPkgPaths()
 			return linq.From(paths)
 		}).
-		Distinct().ToSlice(&result)
+		Distinct().Where(func(path interface{}) bool {
+		return path.(string) != typeInfo.PkgPath
+	}).ToSlice(&result)
 	return result
 }

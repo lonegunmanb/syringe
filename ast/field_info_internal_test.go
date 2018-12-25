@@ -22,10 +22,10 @@ type Struct struct {
 	structInfo := walker.Types()[0]
 	field1 := structInfo.Fields[0]
 	field2 := structInfo.Fields[1]
-	fieldPackages := field1.DepPkgPaths()
+	fieldPackages := field1.GetDepPkgPaths()
 	assert.Equal(t, 1, len(fieldPackages))
 	assert.Equal(t, "go/scanner", fieldPackages[0])
-	fieldPackages = field2.DepPkgPaths()
+	fieldPackages = field2.GetDepPkgPaths()
 	assert.Equal(t, 1, len(fieldPackages))
 	assert.Equal(t, "go/token", fieldPackages[0])
 }
@@ -100,7 +100,7 @@ type Struct struct {
 	walker := parseCode(t, sourceCode)
 	structInfo := walker.Types()[0]
 	field1 := structInfo.Fields[0]
-	packagePaths := field1.DepPkgPaths()
+	packagePaths := field1.GetDepPkgPaths()
 	assert.Equal(t, 2, len(packagePaths))
 	assert.Equal(t, "go/token", packagePaths[0])
 	assert.Equal(t, "go/scanner", packagePaths[1])
@@ -121,7 +121,7 @@ type Struct struct {
 	walker := parseCode(t, sourceCode)
 	structInfo := walker.Types()[0]
 	field1 := structInfo.Fields[0]
-	packagePaths := field1.DepPkgPaths()
+	packagePaths := field1.GetDepPkgPaths()
 	assert.Equal(t, 3, len(packagePaths))
 	assert.Equal(t, "go/token", packagePaths[0])
 	assert.Equal(t, "go/scanner", packagePaths[1])
@@ -167,7 +167,7 @@ type Struct struct {
 	walker := parseCode(t, sourceCode)
 	structInfo := walker.Types()[0]
 	field1 := structInfo.Fields[0]
-	assert.Equal(t, 0, len(field1.DepPkgPaths()))
+	assert.Equal(t, 0, len(field1.GetDepPkgPaths()))
 }
 
 func TestChanFieldPkgPath(t *testing.T) {
@@ -196,7 +196,7 @@ type Struct struct {
 `
 	walker := parseCode(t, sourceCode)
 	structInfo := walker.Types()[0]
-	depPkgPaths := structInfo.DepPkgPaths()
+	depPkgPaths := structInfo.GetDepPkgPaths()
 	assert.Equal(t, 3, len(depPkgPaths))
 	assert.True(t, linq.From(depPkgPaths).Contains("go/scanner"))
 	assert.True(t, linq.From(depPkgPaths).Contains("go/token"))
@@ -206,7 +206,7 @@ type Struct struct {
 func assertPkgPath(t *testing.T, walker *typeWalker, pkgPath string) {
 	structInfo := walker.Types()[0]
 	field1 := structInfo.Fields[0]
-	packagePaths := field1.DepPkgPaths()
+	packagePaths := field1.GetDepPkgPaths()
 	assert.Equal(t, 1, len(packagePaths))
 	assert.Equal(t, pkgPath, packagePaths[0])
 }

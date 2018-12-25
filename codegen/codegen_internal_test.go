@@ -47,7 +47,7 @@ func TestShouldNotGenImportsIfDepPathsEmpty(t *testing.T) {
 	writer := &bytes.Buffer{}
 	ctrl, typeInfo := prepareMock(t)
 	defer ctrl.Finish()
-	depImports := []string{}
+	var depImports []string
 	setupMockToGenImports(typeInfo, depImports)
 	codegen := newCodegen(typeInfo, writer)
 	err := codegen.genImportDecls()
@@ -58,7 +58,7 @@ func TestShouldNotGenImportsIfDepPathsEmpty(t *testing.T) {
 }
 
 func setupMockToGenImports(typeInfo *MockTypeInfo, depImports []string) {
-	typeInfo.EXPECT().DepPkgPaths().Times(1).Return(depImports)
+	typeInfo.EXPECT().GetDepPkgPaths().Times(1).Return(depImports)
 }
 
 func prepareMock(t *testing.T) (*gomock.Controller, *MockTypeInfo) {

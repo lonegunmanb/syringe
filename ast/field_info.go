@@ -12,7 +12,7 @@ type FieldInfo struct {
 	ReferenceFrom *typeInfo
 }
 
-func (f *FieldInfo) DepPkgPaths() []string {
+func (f *FieldInfo) GetDepPkgPaths() []string {
 	return getDepPkgPaths(f, f.Type)
 }
 

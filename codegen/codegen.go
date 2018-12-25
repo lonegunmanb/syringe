@@ -36,7 +36,7 @@ func (c *codegen) genPkgDecl() (err error) {
 }
 
 const importDecl = `
-{{with .DepPkgPaths}}import (
+{{with .GetDepPkgPaths}}import (
 {{range .}}"{{.}}"
 {{end}}){{end}}`
 
