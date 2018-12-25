@@ -18,7 +18,7 @@ var analyzingFunc opsKind = "analyzingFunc"
 
 type typeWalker struct {
 	DefaultWalker
-	types         []*TypeInfo
+	types         []*typeInfo
 	typeInfoStack stack.Stack
 	opsStack      stack.Stack
 	typeInfo      types.Info
@@ -42,7 +42,7 @@ func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
 	return nil
 }
 
-func (walker *typeWalker) Types() []*TypeInfo {
+func (walker *typeWalker) Types() []*typeInfo {
 	return walker.types
 }
 
@@ -52,7 +52,7 @@ func (walker *typeWalker) WalkFile(f *ast.File) {
 
 func (walker *typeWalker) WalkField(field *ast.Field) {
 	if walker.isAnalyzingType() {
-		typeInfo := walker.typeInfoStack.Peek().(*TypeInfo)
+		typeInfo := walker.typeInfoStack.Peek().(*typeInfo)
 		fieldType := walker.typeInfo.Types[field.Type].Type
 		emitTypeNameIfFiledIsNestedType(walker, fieldType)
 		typeInfo.processField(field, fieldType)
@@ -94,7 +94,7 @@ func (walker *typeWalker) EndWalkFuncType(funcType *ast.FuncType) {
 
 func NewTypeWalker() *typeWalker {
 	return &typeWalker{
-		types: []*TypeInfo{},
+		types: []*typeInfo{},
 	}
 }
 
@@ -109,7 +109,7 @@ func (*typeWalker) parseTypeInfo(pkgPath string, fileSet *token.FileSet,
 func (walker *typeWalker) addTypeInfo(structTypeExpr ast.Expr, kind reflect.Kind) {
 	typeName := walker.typeInfoStack.Pop().(string)
 	structType := walker.typeInfo.Types[structTypeExpr].Type
-	typeInfo := &TypeInfo{
+	typeInfo := &typeInfo{
 		Name:    typeName,
 		PkgPath: walker.pkgPath,
 		PkgName: walker.pkgName,
@@ -146,7 +146,7 @@ func getTag(field *ast.Field) string {
 	return field.Tag.Value
 }
 
-func (typeInfo *TypeInfo) processField(field *ast.Field, fieldType types.Type) {
+func (typeInfo *typeInfo) processField(field *ast.Field, fieldType types.Type) {
 	if isEmbeddedField(field) {
 		typeInfo.addInheritance(field, fieldType)
 	} else {
@@ -154,7 +154,7 @@ func (typeInfo *TypeInfo) processField(field *ast.Field, fieldType types.Type) {
 	}
 }
 
-func (typeInfo *TypeInfo) addFieldInfos(field *ast.Field, fieldType types.Type) {
+func (typeInfo *typeInfo) addFieldInfos(field *ast.Field, fieldType types.Type) {
 	names := field.Names
 	for _, fieldName := range names {
 		typeInfo.Fields = append(typeInfo.Fields, &FieldInfo{
@@ -166,7 +166,7 @@ func (typeInfo *TypeInfo) addFieldInfos(field *ast.Field, fieldType types.Type) 
 	}
 }
 
-func (typeInfo *TypeInfo) addInheritance(field *ast.Field, fieldType types.Type) {
+func (typeInfo *typeInfo) addInheritance(field *ast.Field, fieldType types.Type) {
 	var kind EmbeddedKind
 	var packagePath string
 	switch t := fieldType.(type) {

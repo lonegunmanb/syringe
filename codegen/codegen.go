@@ -6,8 +6,6 @@ import (
 	"io"
 )
 
-const pkgDecl = `package {{.PkgName}}`
-
 //`
 //package {{.PkgName}}
 //
@@ -23,17 +21,32 @@ const pkgDecl = `package {{.PkgName}}`
 //}
 //`
 type codegen struct {
-	typeInfo *ast.TypeInfo
+	typeInfo ast.TypeInfo
 	writer   io.Writer
 }
 
-func newCodegen(t *ast.TypeInfo, writer io.Writer) *codegen {
+func newCodegen(t ast.TypeInfo, writer io.Writer) *codegen {
 	return &codegen{t, writer}
 }
 
+const pkgDecl = `package {{.GetPkgName}}`
+
 func (c *codegen) genPkgDecl() (err error) {
-	t := template.New("pkg")
-	t, err = t.Parse(pkgDecl)
+	return c.gen("pkg", pkgDecl)
+}
+
+const importDecl = `
+{{with .DepPkgPaths}}import (
+{{range .}}"{{.}}"
+{{end}}){{end}}`
+
+func (c *codegen) genImportDecls() (err error) {
+	return c.gen("imports", importDecl)
+}
+
+func (c *codegen) gen(templateName string, text string) (err error) {
+	t := template.New(templateName)
+	t, err = t.Parse(text)
 	if err != nil {
 		return
 	}

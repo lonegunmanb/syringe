@@ -71,7 +71,7 @@ type TestInterface interface {
 	}
 }
 
-func assertFieldTypeNameEqual(t *testing.T, testStruct *TypeInfo, testStructInstance TestStruct, fieldIndex int) {
+func assertFieldTypeNameEqual(t *testing.T, testStruct *typeInfo, testStructInstance TestStruct, fieldIndex int) {
 	astFieldTypeName := testStruct.Fields[fieldIndex].Type.String()
 	reflectedFieldType := reflect.TypeOf(testStructInstance).Field(fieldIndex).Type
 	pkgPath := reflectedFieldType.PkgPath()
@@ -297,12 +297,12 @@ type Struct3 struct {
 	struct2 := typeWalker.Types()[2]
 	struct3 := typeWalker.Types()[3]
 	assert.Equal(t, 3, len(struct3.EmbeddedTypes))
-	assertType(t, interface1, interface1.FullName(), EmbeddedByInterface, struct3.EmbeddedTypes[0])
-	assertType(t, struct1, struct1.FullName(), EmbeddedByStruct, struct3.EmbeddedTypes[1])
-	assertType(t, struct2, "*"+struct2.FullName(), EmbeddedByPointer, struct3.EmbeddedTypes[2])
+	assertType(t, interface1, interface1.GetFullName(), EmbeddedByInterface, struct3.EmbeddedTypes[0])
+	assertType(t, struct1, struct1.GetFullName(), EmbeddedByStruct, struct3.EmbeddedTypes[1])
+	assertType(t, struct2, "*"+struct2.GetFullName(), EmbeddedByPointer, struct3.EmbeddedTypes[2])
 }
 
-func assertType(t *testing.T, typeInfo *TypeInfo, fullName string, expectedKind EmbeddedKind, embeddedType *EmbeddedType) {
+func assertType(t *testing.T, typeInfo *typeInfo, fullName string, expectedKind EmbeddedKind, embeddedType *EmbeddedType) {
 	assert.Equal(t, fullName, embeddedType.FullName)
 	assert.Equal(t, typeInfo.PkgPath, embeddedType.PkgPath)
 	assert.Equal(t, expectedKind, embeddedType.Kind)

@@ -9,7 +9,7 @@ type FieldInfo struct {
 	Name          string
 	Type          types.Type
 	Tag           string
-	ReferenceFrom *TypeInfo
+	ReferenceFrom *typeInfo
 }
 
 func (f *FieldInfo) DepPkgPaths() []string {

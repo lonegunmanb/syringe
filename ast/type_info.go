@@ -7,7 +7,19 @@ import (
 	"reflect"
 )
 
-type TypeInfo struct {
+type TypeInfo interface {
+	GetName() string
+	GetPkgPath() string
+	GetPkgName() string
+	GetFields() []*FieldInfo
+	GetKind() reflect.Kind
+	GetType() types.Type
+	GetEmbeddedTypes() []*EmbeddedType
+	GetFullName() string
+	DepPkgPaths() []string
+}
+
+type typeInfo struct {
 	Name          string
 	PkgPath       string
 	PkgName       string
@@ -17,14 +29,42 @@ type TypeInfo struct {
 	EmbeddedTypes []*EmbeddedType
 }
 
-func (typeInfo *TypeInfo) FullName() string {
+func (typeInfo *typeInfo) GetName() string {
+	return typeInfo.Name
+}
+
+func (typeInfo *typeInfo) GetPkgPath() string {
+	return typeInfo.PkgPath
+}
+
+func (typeInfo *typeInfo) GetPkgName() string {
+	return typeInfo.PkgName
+}
+
+func (typeInfo *typeInfo) GetFields() []*FieldInfo {
+	return typeInfo.Fields
+}
+
+func (typeInfo *typeInfo) GetKind() reflect.Kind {
+	return typeInfo.Kind
+}
+
+func (typeInfo *typeInfo) GetType() types.Type {
+	return typeInfo.Type
+}
+
+func (typeInfo *typeInfo) GetEmbeddedTypes() []*EmbeddedType {
+	return typeInfo.EmbeddedTypes
+}
+
+func (typeInfo *typeInfo) GetFullName() string {
 	if typeInfo.PkgPath == "" {
 		return typeInfo.Name
 	}
 	return fmt.Sprintf("%s.%s", typeInfo.PkgPath, typeInfo.Name)
 }
 
-func (typeInfo *TypeInfo) DepPkgPaths() []string {
+func (typeInfo *typeInfo) DepPkgPaths() []string {
 	result := make([]string, 0)
 	linq.From(typeInfo.Fields).SelectMany(
 		func(fieldInfo interface{}) linq.Query {
