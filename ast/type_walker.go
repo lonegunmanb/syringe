@@ -23,6 +23,7 @@ type typeWalker struct {
 	opsStack      stack.Stack
 	typeInfo      types.Info
 	pkgPath       string
+	pkgName       string
 }
 
 func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
@@ -43,6 +44,10 @@ func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
 
 func (walker *typeWalker) Types() []*TypeInfo {
 	return walker.types
+}
+
+func (walker *typeWalker) WalkFile(f *ast.File) {
+	walker.pkgName = f.Name.Name
 }
 
 func (walker *typeWalker) WalkField(field *ast.Field) {
@@ -107,6 +112,7 @@ func (walker *typeWalker) addTypeInfo(structTypeExpr ast.Expr, kind reflect.Kind
 	typeInfo := &TypeInfo{
 		Name:    typeName,
 		PkgPath: walker.pkgPath,
+		PkgName: walker.pkgName,
 		Type:    structType,
 		Kind:    kind,
 	}

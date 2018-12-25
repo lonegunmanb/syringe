@@ -13,7 +13,21 @@ type Struct struct{
 }
 `
 	walker := parseCode(t, sourceCode)
-	assert.Equal(t, pkgPath, walker.Types()[0].PkgPath)
+	typeInfo := walker.Types()[0]
+	assert.Equal(t, pkgPath, typeInfo.PkgPath)
+	assert.Equal(t, "ast", typeInfo.PkgName)
+}
+
+func TestPackageNameDifferentWithPkgPath(t *testing.T) {
+	sourceCode := `
+package test
+type Struct struct{
+}
+`
+	walker := parseCode(t, sourceCode)
+	typeInfo := walker.Types()[0]
+	assert.Equal(t, pkgPath, typeInfo.PkgPath)
+	assert.Equal(t, "test", typeInfo.PkgName)
 }
 
 func TestGetStructDepImportPkgPaths(t *testing.T) {

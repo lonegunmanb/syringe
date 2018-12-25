@@ -10,6 +10,7 @@ import (
 type TypeInfo struct {
 	Name          string
 	PkgPath       string
+	PkgName       string
 	Fields        []*FieldInfo
 	Kind          reflect.Kind
 	Type          types.Type
