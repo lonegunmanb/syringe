@@ -11,10 +11,10 @@ type TypeInfo interface {
 	GetName() string
 	GetPkgPath() string
 	GetPkgName() string
-	GetFields() []*FieldInfo
+	GetFields() []FieldInfo
 	GetKind() reflect.Kind
 	GetType() types.Type
-	GetEmbeddedTypes() []*EmbeddedType
+	GetEmbeddedTypes() []EmbeddedType
 	GetFullName() string
 	GetDepPkgPaths() []string
 }
@@ -23,10 +23,10 @@ type typeInfo struct {
 	Name          string
 	PkgPath       string
 	PkgName       string
-	Fields        []*FieldInfo
+	Fields        []FieldInfo
 	Kind          reflect.Kind
 	Type          types.Type
-	EmbeddedTypes []*EmbeddedType
+	EmbeddedTypes []EmbeddedType
 }
 
 func (typeInfo *typeInfo) GetName() string {
@@ -41,7 +41,7 @@ func (typeInfo *typeInfo) GetPkgName() string {
 	return typeInfo.PkgName
 }
 
-func (typeInfo *typeInfo) GetFields() []*FieldInfo {
+func (typeInfo *typeInfo) GetFields() []FieldInfo {
 	return typeInfo.Fields
 }
 
@@ -53,7 +53,7 @@ func (typeInfo *typeInfo) GetType() types.Type {
 	return typeInfo.Type
 }
 
-func (typeInfo *typeInfo) GetEmbeddedTypes() []*EmbeddedType {
+func (typeInfo *typeInfo) GetEmbeddedTypes() []EmbeddedType {
 	return typeInfo.EmbeddedTypes
 }
 
@@ -68,7 +68,7 @@ func (typeInfo *typeInfo) GetDepPkgPaths() []string {
 	result := make([]string, 0)
 	linq.From(typeInfo.Fields).SelectMany(
 		func(fieldInfo interface{}) linq.Query {
-			paths := fieldInfo.(*FieldInfo).GetDepPkgPaths()
+			paths := fieldInfo.(FieldInfo).GetDepPkgPaths()
 			return linq.From(paths)
 		}).
 		Distinct().Where(func(path interface{}) bool {

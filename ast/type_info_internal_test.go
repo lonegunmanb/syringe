@@ -6,6 +6,17 @@ import (
 	"testing"
 )
 
+func TestStructName(t *testing.T) {
+	sourceCode := `
+package ast
+type Struct struct{
+}
+`
+	walker := parseCode(t, sourceCode)
+	typeInfo := walker.Types()[0]
+	assert.Equal(t, "Struct", typeInfo.Name)
+}
+
 func TestGetStructPkgPath(t *testing.T) {
 	sourceCode := `
 package ast

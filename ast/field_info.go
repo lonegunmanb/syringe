@@ -5,18 +5,42 @@ import (
 	"go/types"
 )
 
-type FieldInfo struct {
+type FieldInfo interface {
+	GetName() string
+	GetType() types.Type
+	GetTag() string
+	GetReferenceFrom() TypeInfo
+	GetDepPkgPaths() []string
+}
+
+type fieldInfo struct {
 	Name          string
 	Type          types.Type
 	Tag           string
 	ReferenceFrom *typeInfo
 }
 
-func (f *FieldInfo) GetDepPkgPaths() []string {
+func (f *fieldInfo) GetName() string {
+	return f.Name
+}
+
+func (f *fieldInfo) GetType() types.Type {
+	return f.Type
+}
+
+func (f *fieldInfo) GetTag() string {
+	return f.Tag
+}
+
+func (f *fieldInfo) GetReferenceFrom() TypeInfo {
+	return f.ReferenceFrom
+}
+
+func (f *fieldInfo) GetDepPkgPaths() []string {
 	return getDepPkgPaths(f, f.Type)
 }
 
-func getDepPkgPaths(fieldInfo *FieldInfo, t types.Type) []string {
+func getDepPkgPaths(fieldInfo FieldInfo, t types.Type) []string {
 	switch t.(type) {
 	case *types.Basic:
 		{
@@ -32,11 +56,11 @@ func getDepPkgPaths(fieldInfo *FieldInfo, t types.Type) []string {
 		}
 	case *types.Struct:
 		{
-			return []string{fieldInfo.ReferenceFrom.PkgPath}
+			return []string{fieldInfo.GetReferenceFrom().GetPkgPath()}
 		}
 	case *types.Interface:
 		{
-			return []string{fieldInfo.ReferenceFrom.PkgPath}
+			return []string{fieldInfo.GetReferenceFrom().GetPkgPath()}
 		}
 	case *types.Pointer:
 		{
@@ -75,7 +99,7 @@ func getDepPkgPaths(fieldInfo *FieldInfo, t types.Type) []string {
 	}
 }
 
-func tupleDeps(fieldInfo *FieldInfo, tuple *types.Tuple) []string {
+func tupleDeps(fieldInfo FieldInfo, tuple *types.Tuple) []string {
 	depPaths := make([]string, 0, tuple.Len())
 	for i := 0; i < tuple.Len(); i++ {
 		depPaths = append(depPaths, getDepPkgPaths(fieldInfo, tuple.At(i).Type())...)

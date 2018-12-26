@@ -157,7 +157,7 @@ func (typeInfo *typeInfo) processField(field *ast.Field, fieldType types.Type) {
 func (typeInfo *typeInfo) addFieldInfos(field *ast.Field, fieldType types.Type) {
 	names := field.Names
 	for _, fieldName := range names {
-		typeInfo.Fields = append(typeInfo.Fields, &FieldInfo{
+		typeInfo.Fields = append(typeInfo.Fields, &fieldInfo{
 			Name:          fieldName.Name,
 			Type:          fieldType,
 			Tag:           getTag(field),
@@ -192,7 +192,7 @@ func (typeInfo *typeInfo) addInheritance(field *ast.Field, fieldType types.Type)
 		panic(fmt.Sprintf("unknown embedded type %s", t.String()))
 	}
 
-	embeddedType := &EmbeddedType{
+	embeddedType := &embeddedType{
 		Kind:     kind,
 		FullName: fieldType.String(),
 		PkgPath:  packagePath,

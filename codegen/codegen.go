@@ -13,11 +13,18 @@ import (
 //	"github.com/lonegunmanb/syrinx/ioc"
 //	"github.com/lonegunmanb/syrinx/test_code/engine"
 //)
+//
+//func Create_FlyCar(container ioc.Container) *FlyCar {
+//	product := new(FlyCar)
+//	Assemble_FlyCar(product, container)
+//	return product
+//}
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++
-//func Create_car(container ioc.Container) *Car {
-//	r := new(Car)
-//	r.Engine = container.Resolve("github.com/lonegunmanb/syrinx/test_code/engine.Engine").(engine.Engine)
-//	return r
+//func Assemble_FlyCar(l *FlyCar, container ioc.Container) {
+//	l.Car = new(car.Car)
+//	car.Assemble_car(l.Car, container)
+//	flyer.Assemble_plane(&l.Plane, container)
+//	l.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)
 //}
 //`
 type codegen struct {
@@ -43,6 +50,17 @@ import (
 
 func (c *codegen) genImportDecls() (err error) {
 	return c.gen("imports", importDecl)
+}
+
+const createFuncDecl = `
+func Create_{{.GetName}}(container ioc.Container) *{{.GetName}} {
+	product := new({{.GetName}})
+	Assemble_{{.GetName}}(product, container)
+	return product
+}`
+
+func (c *codegen) genCreateFuncDecl() (err error) {
+	return c.gen("createFunc", createFuncDecl)
 }
 
 func (c *codegen) gen(templateName string, text string) (err error) {

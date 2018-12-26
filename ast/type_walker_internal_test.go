@@ -72,7 +72,7 @@ type TestInterface interface {
 }
 
 func assertFieldTypeNameEqual(t *testing.T, testStruct *typeInfo, testStructInstance TestStruct, fieldIndex int) {
-	astFieldTypeName := testStruct.Fields[fieldIndex].Type.String()
+	astFieldTypeName := testStruct.Fields[fieldIndex].GetType().String()
 	reflectedFieldType := reflect.TypeOf(testStructInstance).Field(fieldIndex).Type
 	pkgPath := reflectedFieldType.PkgPath()
 	reflectedTypeName := reflectedFieldType.Name()
@@ -96,7 +96,7 @@ type Struct struct {
 	typeWalker := parseCode(t, souceCode)
 	struct1 := typeWalker.Types()[0]
 	field := struct1.Fields[0]
-	tag := field.Tag
+	tag := field.GetTag()
 	assert.Equal(t, "`inject:\"Field2\"`", tag)
 }
 
@@ -113,10 +113,10 @@ type Struct struct {
 	struct1 := typeWalker.Types()[0]
 	field1 := struct1.Fields[0]
 	field2 := struct1.Fields[1]
-	namedType, ok := field1.Type.(*types.Named)
+	namedType, ok := field1.GetType().(*types.Named)
 	assert.True(t, ok)
 	assert.Equal(t, "newint", namedType.Obj().Name())
-	assert.Equal(t, field2.Type, namedType.Underlying())
+	assert.Equal(t, field2.GetType(), namedType.Underlying())
 }
 
 func TestTypeAliasIsIdenticalToType(t *testing.T) {
@@ -132,7 +132,7 @@ type Struct struct {
 	struct1 := typeWalker.Types()[0]
 	field1 := struct1.Fields[0]
 	field2 := struct1.Fields[1]
-	assert.Equal(t, field1.Type, field2.Type)
+	assert.Equal(t, field1.GetType(), field2.GetType())
 }
 
 func TestTypeFromImportWithDot(t *testing.T) {
@@ -147,7 +147,7 @@ type Struct1 struct {
 	structs := typeWalker.Types()
 	struct1 := structs[0]
 	field := struct1.Fields[0]
-	assert.Equal(t, "*go/ast.Decl", field.Type.String())
+	assert.Equal(t, "*go/ast.Decl", field.GetType().String())
 }
 
 func TestWalkFieldInfos(t *testing.T) {
@@ -171,28 +171,28 @@ type Struct2 struct {
 	struct1 := structs[0]
 	assert.Equal(t, 6, len(struct1.Fields))
 	field1 := struct1.Fields[0]
-	assert.Equal(t, "Field1", field1.Name)
-	assert.Equal(t, "int", field1.Type.String())
+	assert.Equal(t, "Field1", field1.GetName())
+	assert.Equal(t, "int", field1.GetType().String())
 	field2 := struct1.Fields[1]
-	assert.Equal(t, "Field2", field2.Name)
-	namedType, ok := field2.Type.(*types.Named)
+	assert.Equal(t, "Field2", field2.GetName())
+	namedType, ok := field2.GetType().(*types.Named)
 	assert.True(t, ok)
 	assert.Equal(t, "Struct2", namedType.Obj().Name())
 	struct2Type, ok := namedType.Underlying().(*types.Struct)
 	assert.True(t, ok)
 	assert.Equal(t, structs[1].Type, struct2Type)
 	field3 := struct1.Fields[2]
-	pointer, ok := field3.Type.(*types.Pointer)
+	pointer, ok := field3.GetType().(*types.Pointer)
 	assert.True(t, ok)
 	assert.Equal(t, "int", pointer.Elem().String())
 	field4 := struct1.Fields[3]
 	field5 := struct1.Fields[4]
-	assert.Equal(t, field4.Type, field5.Type)
-	float64Type, ok := field4.Type.(*types.Basic)
+	assert.Equal(t, field4.GetType(), field5.GetType())
+	float64Type, ok := field4.GetType().(*types.Basic)
 	assert.True(t, ok)
 	assert.Equal(t, "float64", float64Type.String())
 	field6 := struct1.Fields[5]
-	assert.Equal(t, "*go/ast.Decl", field6.Type.String())
+	assert.Equal(t, "*go/ast.Decl", field6.GetType().String())
 }
 
 func TestWalkStructNames(t *testing.T) {
@@ -302,11 +302,11 @@ type Struct3 struct {
 	assertType(t, struct2, "*"+struct2.GetFullName(), EmbeddedByPointer, struct3.EmbeddedTypes[2])
 }
 
-func assertType(t *testing.T, typeInfo *typeInfo, fullName string, expectedKind EmbeddedKind, embeddedType *EmbeddedType) {
-	assert.Equal(t, fullName, embeddedType.FullName)
-	assert.Equal(t, typeInfo.PkgPath, embeddedType.PkgPath)
-	assert.Equal(t, expectedKind, embeddedType.Kind)
-	assert.Equal(t, "", embeddedType.Tag)
+func assertType(t *testing.T, typeInfo *typeInfo, fullName string, expectedKind EmbeddedKind, embeddedType EmbeddedType) {
+	assert.Equal(t, fullName, embeddedType.GetFullName())
+	assert.Equal(t, typeInfo.PkgPath, embeddedType.GetPkgPath())
+	assert.Equal(t, expectedKind, embeddedType.GetKind())
+	assert.Equal(t, "", embeddedType.GetTag())
 }
 
 type Struct struct {

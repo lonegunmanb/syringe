@@ -47,6 +47,19 @@ import (
 )`)
 }
 
+func TestGenCreateFuncDecl(t *testing.T) {
+	testGen(t, func(typeInfo *MockTypeInfo) {
+		typeInfo.EXPECT().GetName().Times(4).Return("FlyCar")
+	}, func(gen *codegen) error {
+		return gen.genCreateFuncDecl()
+	}, `
+func Create_FlyCar(container ioc.Container) *FlyCar {
+	product := new(FlyCar)
+	Assemble_FlyCar(product, container)
+	return product
+}`)
+}
+
 func testGen(t *testing.T, setupMockFunc func(info *MockTypeInfo), testMethod func(gen *codegen) error, expected string) {
 	writer := &bytes.Buffer{}
 	ctrl, typeInfo := prepareMock(t)
