@@ -1,9 +1,11 @@
 package codegen
 
 //go:generate mockgen -package=codegen -destination=./mock_type_info.go github.com/lonegunmanb/syrinx/ast TypeInfo
+//go:generate mockgen -package=codegen -destination=./mock_field_info.go github.com/lonegunmanb/syrinx/ast FieldInfo
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
+	"github.com/lonegunmanb/syrinx/ast"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -60,7 +62,22 @@ func Create_FlyCar(container ioc.Container) *FlyCar {
 }`)
 }
 
-func testGen(t *testing.T, setupMockFunc func(info *MockTypeInfo), testMethod func(gen *productCodegen) error, expected string) {
+func TestProductTypeInfoWrap_GetFields(t *testing.T) {
+	ctrl, typeInfo := prepareMock(t)
+	defer ctrl.Finish()
+	mockFieldInfo := NewMockFieldInfo(ctrl)
+	fieldInfos := []ast.FieldInfo{mockFieldInfo}
+	typeInfo.EXPECT().GetFields().Times(1).Return(fieldInfos)
+	sut := &productTypeInfoWrap{TypeInfo: typeInfo}
+	fields := sut.GetFields()
+	assert.Equal(t, 1, len(fields))
+	fieldWrap, ok := fields[0].(*productFieldInfoWrap)
+	assert.True(t, ok)
+	assert.Equal(t, mockFieldInfo, fieldWrap.FieldInfo)
+}
+
+func testGen(t *testing.T, setupMockFunc func(info *MockTypeInfo),
+	testMethod func(gen *productCodegen) error, expected string) {
 	writer := &bytes.Buffer{}
 	ctrl, typeInfo := prepareMock(t)
 	defer ctrl.Finish()
