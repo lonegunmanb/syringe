@@ -6,14 +6,14 @@ type Engine interface {
 	OutputPower() HorsePower
 }
 
-type pistonEngin struct {
+type pistonEngine struct {
 	horsePower HorsePower
 }
 
-func (e *pistonEngin) OutputPower() HorsePower {
+func (e *pistonEngine) OutputPower() HorsePower {
 	return e.horsePower
 }
 
 func NewEngine(horsePower HorsePower) Engine {
-	return &pistonEngin{horsePower: horsePower}
+	return &pistonEngine{horsePower: horsePower}
 }

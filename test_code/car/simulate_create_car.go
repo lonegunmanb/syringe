@@ -6,12 +6,18 @@ import (
 )
 
 //noinspection GoUnusedExportedFunction
-func Create_car(container ioc.Container) *Car {
+func Create_Car(container ioc.Container) *Car {
 	r := new(Car)
-	Assemble_car(r, container)
+	Assemble_Car(r, container)
 	return r
 }
 
-func Assemble_car(c *Car, container ioc.Container) {
+func Assemble_Car(c *Car, container ioc.Container) {
 	c.Engine = container.Resolve("github.com/lonegunmanb/syrinx/test_code/engine.Engine").(engine.Engine)
+}
+
+func Register_Car(container ioc.Container) {
+	container.RegisterFactory((*Car)(nil), func(ioc ioc.Container) interface{} {
+		return Create_Car(ioc)
+	})
 }
