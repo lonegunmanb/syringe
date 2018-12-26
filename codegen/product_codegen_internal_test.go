@@ -11,7 +11,7 @@ import (
 func TestGenPackageDecl(t *testing.T) {
 	testGen(t, func(typeInfo *MockTypeInfo) {
 		typeInfo.EXPECT().GetPkgName().Times(1).Return("ast")
-	}, func(gen *codegen) error {
+	}, func(gen *productCodegen) error {
 		return gen.genPkgDecl()
 	}, "package ast")
 }
@@ -24,7 +24,7 @@ func TestGenImportsDecl(t *testing.T) {
 			"go/types",
 		}
 		setupMockToGenImports(typeInfo, depImports)
-	}, func(gen *codegen) error {
+	}, func(gen *productCodegen) error {
 		return gen.genImportDecls()
 	}, `
 import (
@@ -39,7 +39,7 @@ func TestShouldNotGenExtraImportsIfDepPathsEmpty(t *testing.T) {
 	testGen(t, func(typeInfo *MockTypeInfo) {
 		var depImports []string
 		setupMockToGenImports(typeInfo, depImports)
-	}, func(gen *codegen) error {
+	}, func(gen *productCodegen) error {
 		return gen.genImportDecls()
 	}, `
 import (
@@ -50,7 +50,7 @@ import (
 func TestGenCreateFuncDecl(t *testing.T) {
 	testGen(t, func(typeInfo *MockTypeInfo) {
 		typeInfo.EXPECT().GetName().Times(4).Return("FlyCar")
-	}, func(gen *codegen) error {
+	}, func(gen *productCodegen) error {
 		return gen.genCreateFuncDecl()
 	}, `
 func Create_FlyCar(container ioc.Container) *FlyCar {
@@ -60,13 +60,13 @@ func Create_FlyCar(container ioc.Container) *FlyCar {
 }`)
 }
 
-func testGen(t *testing.T, setupMockFunc func(info *MockTypeInfo), testMethod func(gen *codegen) error, expected string) {
+func testGen(t *testing.T, setupMockFunc func(info *MockTypeInfo), testMethod func(gen *productCodegen) error, expected string) {
 	writer := &bytes.Buffer{}
 	ctrl, typeInfo := prepareMock(t)
 	defer ctrl.Finish()
 	//
 	setupMockFunc(typeInfo)
-	codegen := newCodegen(typeInfo, writer)
+	codegen := newProductCodegen(typeInfo, writer)
 	err := testMethod(codegen)
 	assert.Nil(t, err)
 	code := writer.String()
