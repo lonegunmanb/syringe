@@ -8,7 +8,7 @@ import (
 const pkgPath = "github.com/lonegunmanb/syrinx/ast"
 
 func parseCode(t *testing.T, sourceCode string) *typeWalker {
-	typeWalker := NewTypeWalker()
+	typeWalker := NewTypeWalker().(*typeWalker)
 
 	err := typeWalker.Parse(pkgPath, sourceCode)
 	assert.Nil(t, err)

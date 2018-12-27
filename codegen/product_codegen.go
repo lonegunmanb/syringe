@@ -4,10 +4,9 @@
 package codegen
 
 import (
-	"github.com/ahmetb/go-linq"
 	"github.com/lonegunmanb/syrinx/ast"
-	"html/template"
 	"io"
+	"text/template"
 )
 
 //`
@@ -36,23 +35,6 @@ import (
 //	})
 //}
 //`
-
-type productTypeInfoWrap struct {
-	ast.TypeInfo
-}
-
-type productFieldInfoWrap struct {
-	ast.FieldInfo
-}
-
-func (t *productTypeInfoWrap) GetFields() []ast.FieldInfo {
-	fields := t.TypeInfo.GetFields()
-	results := make([]ast.FieldInfo, 0, len(fields))
-	linq.From(fields).Select(func(fieldInfo interface{}) interface{} {
-		return &productFieldInfoWrap{FieldInfo: fieldInfo.(ast.FieldInfo)}
-	}).ToSlice(&results)
-	return results
-}
 
 type productCodegen struct {
 	codegen

@@ -147,7 +147,13 @@ type Struct1 struct {
 	structs := typeWalker.Types()
 	struct1 := structs[0]
 	field := struct1.Fields[0]
+	ft := field.GetType()
+	d := ft.String()
+	d2 := ft.Underlying().String()
+	println(d)
+	println(d2)
 	assert.Equal(t, "*go/ast.Decl", field.GetType().String())
+	//assert.Equal(t, "ast", fieldInfo.GetPkgName())
 }
 
 func TestWalkFieldInfos(t *testing.T) {
@@ -271,6 +277,26 @@ type Struct struct {
 	assert.Equal(t, 2, len(walkedTypes))
 	nestedType := walkedTypes[1]
 	assert.Equal(t, "interface{Name() string}", nestedType.Name)
+}
+
+func TestWalkStructWithNestedStructByPointer(t *testing.T) {
+	testNestedStructWithStar(t, "*")
+	testNestedStructWithStar(t, "**")
+	testNestedStructWithStar(t, "***")
+}
+
+func testNestedStructWithStar(t *testing.T, star string) {
+	const structDefine = `
+	package test
+	type Struct struct {
+		Field %sstruct{Name string}
+	}
+	`
+	typeWalker := parseCode(t, fmt.Sprintf(structDefine, star))
+	walkedTypes := typeWalker.Types()
+	assert.Equal(t, 2, len(walkedTypes))
+	nestedType := walkedTypes[1]
+	assert.Equal(t, "struct{Name string}", nestedType.Name)
 }
 
 func TestWalkStructInheritingAnotherStruct(t *testing.T) {

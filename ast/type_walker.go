@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"github.com/ahmetb/go-linq"
 	"github.com/golang-collections/collections/stack"
 	"go/ast"
 	"go/importer"
@@ -16,6 +17,12 @@ type opsKind string
 var analyzingType opsKind = "isAnalyzingType"
 var analyzingFunc opsKind = "analyzingFunc"
 
+type TypeWalker interface {
+	Walker
+	GetTypes() []TypeInfo
+	Parse(pkgPath string, sourceCode string) error
+}
+
 type typeWalker struct {
 	DefaultWalker
 	types         []*typeInfo
@@ -24,6 +31,14 @@ type typeWalker struct {
 	typeInfo      types.Info
 	pkgPath       string
 	pkgName       string
+}
+
+func (walker *typeWalker) GetTypes() []TypeInfo {
+	result := make([]TypeInfo, 0, len(walker.types))
+	linq.From(walker.types).Select(func(t interface{}) interface{} {
+		return t.(TypeInfo)
+	}).ToSlice(&result)
+	return result
 }
 
 func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
@@ -92,7 +107,7 @@ func (walker *typeWalker) EndWalkFuncType(funcType *ast.FuncType) {
 	walker.opsStack.Pop()
 }
 
-func NewTypeWalker() *typeWalker {
+func NewTypeWalker() TypeWalker {
 	return &typeWalker{
 		types: []*typeInfo{},
 	}
@@ -101,7 +116,7 @@ func NewTypeWalker() *typeWalker {
 func (*typeWalker) parseTypeInfo(pkgPath string, fileSet *token.FileSet,
 	astFile *ast.File) (types.Info, error) {
 	typeInfo := types.Info{Types: make(map[ast.Expr]types.TypeAndValue)}
-	_, err := (&types.Config{Importer: importer.Default()}).
+	_, err := (&types.Config{ /*Importer: importer.Default()*/ Importer: importer.For("source", nil)}).
 		Check(pkgPath, fileSet, []*ast.File{astFile}, &typeInfo)
 	return typeInfo, err
 }
@@ -125,16 +140,18 @@ func (walker *typeWalker) isAnalyzingType() bool {
 }
 
 func emitTypeNameIfFiledIsNestedType(walker *typeWalker, fieldType types.Type) {
-	switch fieldType.(type) {
+	switch t := fieldType.(type) {
 	case *types.Struct:
 		{
-			typeName := fieldType.String()
-			walker.typeInfoStack.Push(typeName)
+			walker.typeInfoStack.Push(t.String())
 		}
 	case *types.Interface:
 		{
-			typeName := fieldType.String()
-			walker.typeInfoStack.Push(typeName)
+			walker.typeInfoStack.Push(t.String())
+		}
+	case *types.Pointer:
+		{
+			emitTypeNameIfFiledIsNestedType(walker, t.Elem())
 		}
 	}
 }
@@ -177,7 +194,7 @@ func (typeInfo *typeInfo) addInheritance(field *ast.Field, fieldType types.Type)
 			} else {
 				kind = EmbeddedByInterface
 			}
-			packagePath = getNamedTypePkg(t)
+			packagePath = GetNamedTypePkg(t).Path()
 		}
 	case *types.Pointer:
 		{
@@ -186,7 +203,7 @@ func (typeInfo *typeInfo) addInheritance(field *ast.Field, fieldType types.Type)
 				panic(fmt.Sprintf("unknown embedded type %s", fieldType.String()))
 			}
 			kind = EmbeddedByPointer
-			packagePath = getNamedTypePkg(elemType)
+			packagePath = GetNamedTypePkg(elemType).Path()
 		}
 	default:
 		panic(fmt.Sprintf("unknown embedded type %s", t.String()))

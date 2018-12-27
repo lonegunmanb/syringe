@@ -48,11 +48,11 @@ func getDepPkgPaths(fieldInfo FieldInfo, t types.Type) []string {
 		}
 	case *types.Named:
 		{
-			path := getNamedTypePkg(t.(*types.Named))
-			if path == "" {
+			pkg := GetNamedTypePkg(t.(*types.Named))
+			if pkg == nil {
 				return []string{}
 			}
-			return []string{path}
+			return []string{pkg.Path()}
 		}
 	case *types.Struct:
 		{
@@ -107,14 +107,14 @@ func tupleDeps(fieldInfo FieldInfo, tuple *types.Tuple) []string {
 	return depPaths
 }
 
-func getNamedTypePkg(namedType *types.Named) string {
+func GetNamedTypePkg(namedType *types.Named) *types.Package {
 	obj := namedType.Obj()
 	if obj == nil {
-		return ""
+		return nil
 	}
 	pkg := obj.Pkg()
 	if pkg == nil {
-		return ""
+		return nil
 	}
-	return pkg.Path()
+	return pkg
 }
