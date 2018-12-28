@@ -1,18 +1,18 @@
 package codegen
 
 type M struct {
-	err error
+	Err error
 }
 
 func (m *M) Call(f func() error) *M {
-	if m.err == nil {
-		m.err = f()
+	if m.Err == nil {
+		m.Err = f()
 	}
 	return m
 }
 
 func Call(f func() error) *M {
 	return &M{
-		err: f(),
+		Err: f(),
 	}
 }

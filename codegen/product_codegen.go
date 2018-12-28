@@ -67,7 +67,7 @@ func (c *productCodegen) GenerateCode() error {
 		return c.genCreateFuncDecl()
 	}).Call(func() error {
 		return c.genAssembleFuncDecl()
-	}).err
+	}).Err
 }
 
 const pkgDecl = `package {{.GetPkgName}}`
