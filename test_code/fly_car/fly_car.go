@@ -6,9 +6,9 @@ import (
 )
 
 type FlyCar struct {
-	*car.Car
-	flyer.Plane
-	Decoration Decoration
+	*car.Car    `inject:""`
+	flyer.Plane `inject:""`
+	Decoration  Decoration `inject:""`
 }
 
 type Decoration interface {
