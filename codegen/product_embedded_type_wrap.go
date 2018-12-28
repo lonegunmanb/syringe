@@ -6,13 +6,13 @@ import (
 	"go/types"
 )
 
-type productEmbeddedType struct {
+type productEmbeddedTypeWrap struct {
 	ast.EmbeddedType
 }
 
 const embeddedTypeInitTemplate = `product.%s = %scontainer.Resolve("%s").(%s)`
 
-func (f *productEmbeddedType) AssembleCode() string {
+func (f *productEmbeddedTypeWrap) AssembleCode() string {
 	pkgPath := f.GetReferenceFrom().GetPkgPath()
 	typeDecl := getDeclType(pkgPath, f.GetType())
 

@@ -9,11 +9,28 @@ type productTypeInfoWrap struct {
 	ast.TypeInfo
 }
 
-func (t *productTypeInfoWrap) GetFields() []ast.FieldInfo {
+type TypeCodegen interface {
+	GetName() string
+	GetPkgName() string
+	GetDepPkgPaths() []string
+	GetFieldAssigns() []Assembler
+	GetEmbeddedTypeAssigns() []Assembler
+}
+
+func (t *productTypeInfoWrap) GetFieldAssigns() []Assembler {
 	fields := t.TypeInfo.GetFields()
-	results := make([]ast.FieldInfo, 0, len(fields))
+	results := make([]Assembler, 0, len(fields))
 	linq.From(fields).Select(func(fieldInfo interface{}) interface{} {
 		return &productFieldInfoWrap{FieldInfo: fieldInfo.(ast.FieldInfo)}
+	}).ToSlice(&results)
+	return results
+}
+
+func (t *productTypeInfoWrap) GetEmbeddedTypeAssigns() []Assembler {
+	embeddedTypes := t.TypeInfo.GetEmbeddedTypes()
+	results := make([]Assembler, 0, len(embeddedTypes))
+	linq.From(embeddedTypes).Select(func(embeddedType interface{}) interface{} {
+		return &productEmbeddedTypeWrap{EmbeddedType: embeddedType.(ast.EmbeddedType)}
 	}).ToSlice(&results)
 	return results
 }

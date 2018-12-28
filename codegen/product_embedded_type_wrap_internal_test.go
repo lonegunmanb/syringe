@@ -33,7 +33,7 @@ func TestEmbedded(t *testing.T) {
 func testEmbeddedType(t *testing.T, importString string, typeDecl string, assignedField string, star string, key string, convertType string) {
 	code := fmt.Sprintf(embeddedAssignTemplate, importString, typeDecl)
 	walker := parseCode(t, code)
-	embeddedType := &productEmbeddedType{walker.GetTypes()[0].GetEmbeddedTypes()[0]}
+	embeddedType := &productEmbeddedTypeWrap{walker.GetTypes()[0].GetEmbeddedTypes()[0]}
 	expected := fmt.Sprintf(`product.%s = %scontainer.Resolve("%s").(%s)`, assignedField, star, key, convertType)
 	assert.Equal(t, expected, embeddedType.AssembleCode())
 }

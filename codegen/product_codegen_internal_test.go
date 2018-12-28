@@ -2,15 +2,19 @@ package codegen
 
 //go:generate mockgen -package=codegen -destination=./mock_type_info.go github.com/lonegunmanb/syrinx/ast TypeInfo
 //go:generate mockgen -package=codegen -destination=./mock_field_info.go github.com/lonegunmanb/syrinx/ast FieldInfo
+//go:generate mockgen -package=codegen -destination=./mock_embedded_type.go github.com/lonegunmanb/syrinx/ast EmbeddedType
+//go:generate mockgen -package=codegen -destination=./mock_assembler.go github.com/lonegunmanb/syrinx/codegen Assembler
+//go:generate mockgen -package=codegen -destination=./mock_type_codegen.go github.com/lonegunmanb/syrinx/codegen TypeCodegen
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
+	"github.com/lonegunmanb/syrinx/ast"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestGenPackageDecl(t *testing.T) {
-	testGen(t, func(typeInfo *MockTypeInfo) {
+	testGen(t, func(typeInfo *MockTypeCodegen) {
 		typeInfo.EXPECT().GetPkgName().Times(1).Return("ast")
 	}, func(gen *productCodegen) error {
 		return gen.genPkgDecl()
@@ -18,7 +22,7 @@ func TestGenPackageDecl(t *testing.T) {
 }
 
 func TestGenImportsDecl(t *testing.T) {
-	testGen(t, func(typeInfo *MockTypeInfo) {
+	testGen(t, func(typeInfo *MockTypeCodegen) {
 		depImports := []string{
 			"go/ast",
 			"go/token",
@@ -37,7 +41,7 @@ import (
 }
 
 func TestShouldNotGenExtraImportsIfDepPathsEmpty(t *testing.T) {
-	testGen(t, func(typeInfo *MockTypeInfo) {
+	testGen(t, func(typeInfo *MockTypeCodegen) {
 		var depImports []string
 		setupMockToGenImports(typeInfo, depImports)
 	}, func(gen *productCodegen) error {
@@ -48,39 +52,84 @@ import (
 )`)
 }
 
-func TestGenCreateFuncDecl(t *testing.T) {
-	testGen(t, func(typeInfo *MockTypeInfo) {
-		typeInfo.EXPECT().GetName().Times(4).Return("FlyCar")
-	}, func(gen *productCodegen) error {
-		return gen.genCreateFuncDecl()
-	}, `
+const expectedFlyCarAssembleCode = `
 func Create_FlyCar(container ioc.Container) *FlyCar {
-	product := new(FlyCar)
-	Assemble_FlyCar(product, container)
+	product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)
+	product.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)
+	product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)
 	return product
-}`)
+}`
+
+func TestGenCreateFuncDecl(t *testing.T) {
+
+	testGen(t, func(typeInfo *MockTypeCodegen) {
+		embeddedCarMock := NewMockAssembler(typeInfo.ctrl)
+		embeddedCarMock.EXPECT().AssembleCode().Times(1).Return(`product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)`)
+		embeddedPlaneMock := NewMockAssembler(typeInfo.ctrl)
+		embeddedPlaneMock.EXPECT().AssembleCode().Times(1).Return(`product.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)`)
+		typeInfo.EXPECT().GetName().Times(2).Return("FlyCar")
+		typeInfo.EXPECT().GetEmbeddedTypeAssigns().Times(1).Return([]Assembler{embeddedCarMock, embeddedPlaneMock})
+		decorationMock := NewMockAssembler(typeInfo.ctrl)
+		decorationMock.EXPECT().AssembleCode().Times(1).Return(`product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)`)
+		typeInfo.EXPECT().GetFieldAssigns().Times(1).Return([]Assembler{decorationMock})
+	}, func(gen *productCodegen) error {
+		r := gen.genCreateFuncDecl()
+		return r
+	}, expectedFlyCarAssembleCode)
 }
 
-func testGen(t *testing.T, setupMockFunc func(info *MockTypeInfo),
+const actualFlyCarCode = `
+package fly_car
+
+import (
+	"github.com/lonegunmanb/syrinx/test_code/car"
+	"github.com/lonegunmanb/syrinx/test_code/flyer"
+)
+
+type FlyCar struct {
+	*car.Car
+	flyer.Plane
+	Decoration Decoration
+}
+
+type Decoration interface {
+	LookAndFeel() string
+}
+`
+
+func TestActualCreateFuncDecl(t *testing.T) {
+	walker := ast.NewTypeWalker()
+	err := walker.Parse("github.com/lonegunmanb/syrinx/test_code/fly_car", actualFlyCarCode)
+	assert.Nil(t, err)
+	flyCar := walker.GetTypes()[0]
+	writer := &bytes.Buffer{}
+	codegen := newProductCodegen(flyCar, writer)
+	err = codegen.genCreateFuncDecl()
+	assert.Nil(t, err)
+	code := writer.String()
+	assert.Equal(t, expectedFlyCarAssembleCode, code)
+}
+
+func testGen(t *testing.T, setupMockFunc func(info *MockTypeCodegen),
 	testMethod func(gen *productCodegen) error, expected string) {
 	writer := &bytes.Buffer{}
 	ctrl, typeInfo := prepareMock(t)
 	defer ctrl.Finish()
 	//
 	setupMockFunc(typeInfo)
-	codegen := newProductCodegen(typeInfo, writer)
+	codegen := &productCodegen{codegen: codegen{writer}, typeInfo: typeInfo}
 	err := testMethod(codegen)
 	assert.Nil(t, err)
 	code := writer.String()
 	assert.Equal(t, expected, code)
 }
 
-func setupMockToGenImports(typeInfo *MockTypeInfo, depImports []string) {
+func setupMockToGenImports(typeInfo *MockTypeCodegen, depImports []string) {
 	typeInfo.EXPECT().GetDepPkgPaths().Times(1).Return(depImports)
 }
 
-func prepareMock(t *testing.T) (*gomock.Controller, *MockTypeInfo) {
+func prepareMock(t *testing.T) (*gomock.Controller, *MockTypeCodegen) {
 	ctrl := gomock.NewController(t)
-	mock := NewMockTypeInfo(ctrl)
-	return ctrl, mock
+	typeCodegen := NewMockTypeCodegen(ctrl)
+	return ctrl, typeCodegen
 }

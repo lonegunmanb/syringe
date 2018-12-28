@@ -38,7 +38,7 @@ import (
 
 type productCodegen struct {
 	codegen
-	typeInfo *productTypeInfoWrap
+	typeInfo TypeCodegen
 }
 
 func newProductCodegen(t ast.TypeInfo, writer io.Writer) *productCodegen {
@@ -63,8 +63,8 @@ func (c *productCodegen) genImportDecls() (err error) {
 
 const createFuncDecl = `
 func Create_{{.GetName}}(container ioc.Container) *{{.GetName}} {
-	product := new({{.GetName}})
-	Assemble_{{.GetName}}(product, container)
+{{with .GetEmbeddedTypeAssigns}}{{range .}}	{{.AssembleCode}}
+{{end}}{{end}}{{with .GetFieldAssigns}}{{range .}}	{{.AssembleCode}}{{end}}{{end}}
 	return product
 }`
 
