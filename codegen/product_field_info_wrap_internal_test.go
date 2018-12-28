@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const tmlt = `
+const fieldAssignTestTemplate = `
 package test
 %s
 type Struct struct {
@@ -131,6 +131,8 @@ type FlyCar struct {
 	*car.Car
 	flyer.Plane
 	D Decoration
+	C car.Car
+	P *flyer.Plane
 }
 
 type Decoration interface {
@@ -143,9 +145,15 @@ func TestGenerateAssembleCode(t *testing.T) {
 	err := walker.Parse("github.com/lonegunmanb/syrinx/test_code/fly_car", flyCarCode)
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
-	carField := &productFieldInfoWrap{flyCar.GetFields()[0]}
+	decorationField := &productFieldInfoWrap{flyCar.GetFields()[0]}
 	assert.Equal(t, `product.D = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)`,
+		decorationField.AssembleCode())
+	carField := &productFieldInfoWrap{flyCar.GetFields()[1]}
+	assert.Equal(t, `product.C = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)`,
 		carField.AssembleCode())
+	planeField := &productFieldInfoWrap{flyCar.GetFields()[2]}
+	assert.Equal(t, `product.P = container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)`,
+		planeField.AssembleCode())
 }
 
 func testTypeDecls(t *testing.T, args []funk.Tuple) {
@@ -162,15 +170,8 @@ func testTypeDecl(t *testing.T, importString string, typeString string) {
 }
 
 func getField(t *testing.T, importString string, typeString string) ast.FieldInfo {
-	code := fmt.Sprintf(tmlt, importString, typeString)
+	code := fmt.Sprintf(fieldAssignTestTemplate, importString, typeString)
 	walker := parseCode(t, code)
 	struct1 := walker.GetTypes()[0]
 	return struct1.GetFields()[0]
-}
-
-func parseCode(t *testing.T, sourceCode string) ast.TypeWalker {
-	typeWalker := ast.NewTypeWalker()
-	err := typeWalker.Parse("github.com/lonegunmanb/syrinx/test", sourceCode)
-	assert.Nil(t, err)
-	return typeWalker
 }

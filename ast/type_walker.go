@@ -210,10 +210,12 @@ func (typeInfo *typeInfo) addInheritance(field *ast.Field, fieldType types.Type)
 	}
 
 	embeddedType := &embeddedType{
-		Kind:     kind,
-		FullName: fieldType.String(),
-		PkgPath:  packagePath,
-		Tag:      getTag(field),
+		Kind:          kind,
+		FullName:      fieldType.String(),
+		PkgPath:       packagePath,
+		Tag:           getTag(field),
+		Type:          fieldType,
+		ReferenceFrom: typeInfo,
 	}
 	typeInfo.EmbeddedTypes = append(typeInfo.EmbeddedTypes, embeddedType)
 }
