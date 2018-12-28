@@ -67,12 +67,14 @@ func (c *productCodegen) GenerateCode() error {
 		return c.genCreateFuncDecl()
 	}).Call(func() error {
 		return c.genAssembleFuncDecl()
+	}).Call(func() error {
+		return c.genRegisterFuncDecl()
 	}).Err
 }
 
 const pkgDecl = `package {{.GetPkgName}}`
 
-func (c *productCodegen) genPkgDecl() (err error) {
+func (c *productCodegen) genPkgDecl() error {
 	return c.gen("pkg", pkgDecl)
 }
 
@@ -82,7 +84,7 @@ import (
 {{with .GetDepPkgPaths}}{{range .}}    "{{.}}"
 {{end}}{{end}})`
 
-func (c *productCodegen) genImportDecls() (err error) {
+func (c *productCodegen) genImportDecls() error {
 	return c.gen("imports", importDecl)
 }
 
@@ -93,7 +95,7 @@ func Create_{{.GetName}}(container ioc.Container) *{{.GetName}} {
 	return product
 }`
 
-func (c *productCodegen) genCreateFuncDecl() (err error) {
+func (c *productCodegen) genCreateFuncDecl() error {
 	return c.gen("createFunc", createFuncDecl)
 }
 
@@ -103,8 +105,19 @@ func Assemble_{{.GetName}}(product *{{.GetName}}, container ioc.Container) {
 {{end}}{{end}}{{with .GetFieldAssigns}}{{range .}}	{{.AssembleCode}}{{end}}{{end}}
 }`
 
-func (c *productCodegen) genAssembleFuncDecl() (err error) {
+func (c *productCodegen) genAssembleFuncDecl() error {
 	return c.gen("assembleFunc", assembleFuncDecl)
+}
+
+const registerFuncDecl = `
+func Register_{{.GetName}}(container ioc.Container) {
+	container.RegisterFactory((*{{.GetName}})(nil), func(ioc ioc.Container) interface{} {
+		return Create_{{.GetName}}(ioc)
+	})
+}`
+
+func (c *productCodegen) genRegisterFuncDecl() (err error) {
+	return c.gen("registerFunc", registerFuncDecl)
 }
 
 func (c *productCodegen) gen(templateName string, text string) (err error) {

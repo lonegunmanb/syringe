@@ -124,6 +124,22 @@ func TestActualAssembleFuncDecl(t *testing.T) {
 	assert.Equal(t, expectedFlyCarAssembleCode, code)
 }
 
+const expectedRegisterFuncCode = `
+func Register_FlyCar(container ioc.Container) {
+	container.RegisterFactory((*FlyCar)(nil), func(ioc ioc.Container) interface{} {
+		return Create_FlyCar(ioc)
+	})
+}`
+
+func TestRegisterFuncDecl(t *testing.T) {
+	testGen(t, func(typeInfo *MockTypeCodegen) {
+		typeInfo.EXPECT().GetName().Times(3).Return("FlyCar")
+	}, func(gen *productCodegen) error {
+		r := gen.genRegisterFuncDecl()
+		return r
+	}, expectedRegisterFuncCode)
+}
+
 func testGen(t *testing.T, setupMockFunc func(info *MockTypeCodegen),
 	testMethod func(gen *productCodegen) error, expected string) {
 	writer := &bytes.Buffer{}
