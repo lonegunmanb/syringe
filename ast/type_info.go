@@ -70,7 +70,11 @@ func (typeInfo *typeInfo) GetDepPkgPaths() []string {
 		func(fieldInfo interface{}) linq.Query {
 			paths := fieldInfo.(FieldInfo).GetDepPkgPaths()
 			return linq.From(paths)
-		}).
+		}).Union(
+		linq.From(typeInfo.EmbeddedTypes).Select(
+			func(embeddedType interface{}) interface{} {
+				return embeddedType.(EmbeddedType).GetPkgPath()
+			})).
 		Distinct().Where(func(path interface{}) bool {
 		return path.(string) != typeInfo.PkgPath
 	}).ToSlice(&result)

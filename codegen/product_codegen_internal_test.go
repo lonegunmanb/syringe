@@ -33,10 +33,10 @@ func TestGenImportsDecl(t *testing.T) {
 		return gen.genImportDecls()
 	}, `
 import (
-"github.com/lonegunmanb/syrinx/ioc"
-"go/ast"
-"go/token"
-"go/types"
+    "github.com/lonegunmanb/syrinx/ioc"
+    "go/ast"
+    "go/token"
+    "go/types"
 )`)
 }
 
@@ -48,26 +48,40 @@ func TestShouldNotGenExtraImportsIfDepPathsEmpty(t *testing.T) {
 		return gen.genImportDecls()
 	}, `
 import (
-"github.com/lonegunmanb/syrinx/ioc"
+    "github.com/lonegunmanb/syrinx/ioc"
 )`)
 }
 
-const expectedFlyCarAssembleCode = `
-func Assemble_FlyCar(product *FlyCar, container ioc.Container) *FlyCar {
-	product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)
-	product.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)
-	product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)
+const expectedFlyCarCreateCode = `
+func Create_FlyCar(container ioc.Container) *FlyCar {
+	product := new(FlyCar)
+	Assemble_FlyCar(product, container)
 	return product
 }`
 
 func TestGenCreateFuncDecl(t *testing.T) {
+	testGen(t, func(typeInfo *MockTypeCodegen) {
+		typeInfo.EXPECT().GetName().Times(4).Return("FlyCar")
+	}, func(gen *productCodegen) error {
+		r := gen.genCreateFuncDecl()
+		return r
+	}, expectedFlyCarCreateCode)
+}
 
+const expectedFlyCarAssembleCode = `
+func Assemble_FlyCar(product *FlyCar, container ioc.Container) {
+	product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)
+	product.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)
+	product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)
+}`
+
+func TestGenAssembleFuncDecl(t *testing.T) {
 	testGen(t, func(typeInfo *MockTypeCodegen) {
 		embeddedCarMock := NewMockAssembler(typeInfo.ctrl)
 		embeddedCarMock.EXPECT().AssembleCode().Times(1).Return(`product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)`)
 		embeddedPlaneMock := NewMockAssembler(typeInfo.ctrl)
 		embeddedPlaneMock.EXPECT().AssembleCode().Times(1).Return(`product.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)`)
-		typeInfo.EXPECT().GetName().Times(3).Return("FlyCar")
+		typeInfo.EXPECT().GetName().Times(2).Return("FlyCar")
 		typeInfo.EXPECT().GetEmbeddedTypeAssigns().Times(1).Return([]Assembler{embeddedCarMock, embeddedPlaneMock})
 		decorationMock := NewMockAssembler(typeInfo.ctrl)
 		decorationMock.EXPECT().AssembleCode().Times(1).Return(`product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)`)
@@ -97,7 +111,7 @@ type Decoration interface {
 }
 `
 
-func TestActualCreateFuncDecl(t *testing.T) {
+func TestActualAssembleFuncDecl(t *testing.T) {
 	walker := ast.NewTypeWalker()
 	err := walker.Parse("github.com/lonegunmanb/syrinx/test_code/fly_car", actualFlyCarCode)
 	assert.Nil(t, err)

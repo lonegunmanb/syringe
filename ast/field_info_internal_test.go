@@ -203,6 +203,24 @@ type Struct struct {
 	assert.True(t, linq.From(depPkgPaths).Contains("go/types"))
 }
 
+func TestFuncEmbeddedTypePkgPath(t *testing.T) {
+	sourceCode := `
+package ast
+import (
+"go/types"
+)
+type Struct struct {
+	types.Named
+}
+`
+	walker := parseCode(t, sourceCode)
+	structInfo := walker.Types()[0]
+	depPkgPaths := structInfo.GetDepPkgPaths()
+	assert.Equal(t, 1, len(depPkgPaths))
+	dep := depPkgPaths[0]
+	assert.Equal(t, "go/types", dep)
+}
+
 func assertPkgPath(t *testing.T, walker *typeWalker, pkgPath string) {
 	structInfo := walker.Types()[0]
 	field1 := structInfo.Fields[0]

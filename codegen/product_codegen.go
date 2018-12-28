@@ -36,6 +36,11 @@ import (
 //}
 //`
 
+type ProductCodegen interface {
+	GenerateCode() error
+	Writer() io.Writer
+}
+
 type productCodegen struct {
 	codegen
 	typeInfo TypeCodegen
@@ -43,6 +48,26 @@ type productCodegen struct {
 
 func newProductCodegen(t ast.TypeInfo, writer io.Writer) *productCodegen {
 	return &productCodegen{codegen: codegen{writer}, typeInfo: &productTypeInfoWrap{TypeInfo: t}}
+}
+
+func NewProductCodegen(t ast.TypeInfo, writer io.Writer) ProductCodegen {
+	return newProductCodegen(t, writer)
+}
+
+func (c *productCodegen) Writer() io.Writer {
+	return c.writer
+}
+
+func (c *productCodegen) GenerateCode() error {
+	return Call(func() error {
+		return c.genPkgDecl()
+	}).Call(func() error {
+		return c.genImportDecls()
+	}).Call(func() error {
+		return c.genCreateFuncDecl()
+	}).Call(func() error {
+		return c.genAssembleFuncDecl()
+	}).err
 }
 
 const pkgDecl = `package {{.GetPkgName}}`
@@ -53,19 +78,29 @@ func (c *productCodegen) genPkgDecl() (err error) {
 
 const importDecl = `
 import (
-"github.com/lonegunmanb/syrinx/ioc"
-{{with .GetDepPkgPaths}}{{range .}}"{{.}}"
+    "github.com/lonegunmanb/syrinx/ioc"
+{{with .GetDepPkgPaths}}{{range .}}    "{{.}}"
 {{end}}{{end}})`
 
 func (c *productCodegen) genImportDecls() (err error) {
 	return c.gen("imports", importDecl)
 }
 
+const createFuncDecl = `
+func Create_{{.GetName}}(container ioc.Container) *{{.GetName}} {
+	product := new({{.GetName}})
+	Assemble_{{.GetName}}(product, container)
+	return product
+}`
+
+func (c *productCodegen) genCreateFuncDecl() (err error) {
+	return c.gen("createFunc", createFuncDecl)
+}
+
 const assembleFuncDecl = `
-func Assemble_{{.GetName}}(product *{{.GetName}}, container ioc.Container) *{{.GetName}} {
+func Assemble_{{.GetName}}(product *{{.GetName}}, container ioc.Container) {
 {{with .GetEmbeddedTypeAssigns}}{{range .}}	{{.AssembleCode}}
 {{end}}{{end}}{{with .GetFieldAssigns}}{{range .}}	{{.AssembleCode}}{{end}}{{end}}
-	return product
 }`
 
 func (c *productCodegen) genAssembleFuncDecl() (err error) {
