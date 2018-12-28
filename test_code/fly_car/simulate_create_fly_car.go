@@ -12,10 +12,10 @@ func Create_FlyCar(container ioc.Container) *FlyCar {
 	return r
 }
 
-func Assemble_FlyCar(l *FlyCar, container ioc.Container) {
-	l.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)
-	l.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)
-	l.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)
+func Assemble_FlyCar(product *FlyCar, container ioc.Container) {
+	product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)
+	product.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)
+	product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)
 }
 
 func Register_FlyCar(container ioc.Container) {

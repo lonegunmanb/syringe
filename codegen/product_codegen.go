@@ -61,15 +61,15 @@ func (c *productCodegen) genImportDecls() (err error) {
 	return c.gen("imports", importDecl)
 }
 
-const createFuncDecl = `
-func Create_{{.GetName}}(container ioc.Container) *{{.GetName}} {
+const assembleFuncDecl = `
+func Assemble_{{.GetName}}(product *{{.GetName}}, container ioc.Container) *{{.GetName}} {
 {{with .GetEmbeddedTypeAssigns}}{{range .}}	{{.AssembleCode}}
 {{end}}{{end}}{{with .GetFieldAssigns}}{{range .}}	{{.AssembleCode}}{{end}}{{end}}
 	return product
 }`
 
-func (c *productCodegen) genCreateFuncDecl() (err error) {
-	return c.gen("createFunc", createFuncDecl)
+func (c *productCodegen) genAssembleFuncDecl() (err error) {
+	return c.gen("assembleFunc", assembleFuncDecl)
 }
 
 func (c *productCodegen) gen(templateName string, text string) (err error) {

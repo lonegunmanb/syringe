@@ -53,7 +53,7 @@ import (
 }
 
 const expectedFlyCarAssembleCode = `
-func Create_FlyCar(container ioc.Container) *FlyCar {
+func Assemble_FlyCar(product *FlyCar, container ioc.Container) *FlyCar {
 	product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)
 	product.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)
 	product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)
@@ -67,13 +67,13 @@ func TestGenCreateFuncDecl(t *testing.T) {
 		embeddedCarMock.EXPECT().AssembleCode().Times(1).Return(`product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)`)
 		embeddedPlaneMock := NewMockAssembler(typeInfo.ctrl)
 		embeddedPlaneMock.EXPECT().AssembleCode().Times(1).Return(`product.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)`)
-		typeInfo.EXPECT().GetName().Times(2).Return("FlyCar")
+		typeInfo.EXPECT().GetName().Times(3).Return("FlyCar")
 		typeInfo.EXPECT().GetEmbeddedTypeAssigns().Times(1).Return([]Assembler{embeddedCarMock, embeddedPlaneMock})
 		decorationMock := NewMockAssembler(typeInfo.ctrl)
 		decorationMock.EXPECT().AssembleCode().Times(1).Return(`product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)`)
 		typeInfo.EXPECT().GetFieldAssigns().Times(1).Return([]Assembler{decorationMock})
 	}, func(gen *productCodegen) error {
-		r := gen.genCreateFuncDecl()
+		r := gen.genAssembleFuncDecl()
 		return r
 	}, expectedFlyCarAssembleCode)
 }
@@ -104,7 +104,7 @@ func TestActualCreateFuncDecl(t *testing.T) {
 	flyCar := walker.GetTypes()[0]
 	writer := &bytes.Buffer{}
 	codegen := newProductCodegen(flyCar, writer)
-	err = codegen.genCreateFuncDecl()
+	err = codegen.genAssembleFuncDecl()
 	assert.Nil(t, err)
 	code := writer.String()
 	assert.Equal(t, expectedFlyCarAssembleCode, code)
