@@ -54,7 +54,8 @@ func TestGenerateCreateProductCode(t *testing.T) {
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
 	writer := &bytes.Buffer{}
-	gen := codegen.NewProductCodegen(flyCar, writer)
+	//gen := codegen.NewProductCodegen(flyCar, writer)
+	gen := codegen.NewCodegen(writer, codegen.NewCodegenTask("fly_car", []ast.TypeInfo{flyCar}))
 	err = gen.GenerateCode()
 	assert.Nil(t, err)
 	code := writer.String()

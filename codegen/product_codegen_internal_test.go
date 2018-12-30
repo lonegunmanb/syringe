@@ -13,16 +13,8 @@ import (
 	"testing"
 )
 
-func TestGenPackageDecl(t *testing.T) {
-	testGen(t, func(typeInfo *MockTypeCodegen) {
-		typeInfo.EXPECT().GetPkgName().Times(1).Return("ast")
-	}, func(gen *productCodegen) error {
-		return gen.genPkgDecl()
-	}, "package ast")
-}
-
 func TestGenImportsDecl(t *testing.T) {
-	testGen(t, func(typeInfo *MockTypeCodegen) {
+	testProductGen(t, func(typeInfo *MockTypeCodegen) {
 		depImports := []string{
 			"go/ast",
 			"go/token",
@@ -41,7 +33,7 @@ import (
 }
 
 func TestShouldNotGenExtraImportsIfDepPathsEmpty(t *testing.T) {
-	testGen(t, func(typeInfo *MockTypeCodegen) {
+	testProductGen(t, func(typeInfo *MockTypeCodegen) {
 		var depImports []string
 		setupMockToGenImports(typeInfo, depImports)
 	}, func(gen *productCodegen) error {
@@ -60,7 +52,7 @@ func Create_fly_car_FlyCar(container ioc.Container) *FlyCar {
 }`
 
 func TestGenCreateFuncDecl(t *testing.T) {
-	testGen(t, func(typeInfo *MockTypeCodegen) {
+	testProductGen(t, func(typeInfo *MockTypeCodegen) {
 		typeInfo.EXPECT().GetName().Times(4).Return("FlyCar")
 		typeInfo.EXPECT().GetPkgName().Times(1).Return("fly_car")
 	}, func(gen *productCodegen) error {
@@ -77,7 +69,7 @@ func Assemble_fly_car_FlyCar(product *FlyCar, container ioc.Container) {
 }`
 
 func TestGenAssembleFuncDecl(t *testing.T) {
-	testGen(t, func(typeInfo *MockTypeCodegen) {
+	testProductGen(t, func(typeInfo *MockTypeCodegen) {
 		embeddedCarMock := NewMockAssembler(typeInfo.ctrl)
 		embeddedCarMock.EXPECT().AssembleCode().Times(1).Return(`product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)`)
 		embeddedPlaneMock := NewMockAssembler(typeInfo.ctrl)
@@ -134,7 +126,7 @@ func Register(container ioc.Container) {
 }`
 
 func TestRegisterFuncDecl(t *testing.T) {
-	testGen(t, func(typeInfo *MockTypeCodegen) {
+	testProductGen(t, func(typeInfo *MockTypeCodegen) {
 		typeInfo.EXPECT().GetName().Times(2).Return("FlyCar")
 	}, func(gen *productCodegen) error {
 		r := gen.genRegisterFuncDecl()
@@ -142,14 +134,14 @@ func TestRegisterFuncDecl(t *testing.T) {
 	}, expectedRegisterFuncCode)
 }
 
-func testGen(t *testing.T, setupMockFunc func(info *MockTypeCodegen),
+func testProductGen(t *testing.T, setupMockFunc func(info *MockTypeCodegen),
 	testMethod func(gen *productCodegen) error, expected string) {
 	writer := &bytes.Buffer{}
-	ctrl, typeInfo := prepareMock(t)
+	ctrl, typeInfo := prepareTypeCodegenMock(t)
 	defer ctrl.Finish()
 	//
 	setupMockFunc(typeInfo)
-	codegen := &productCodegen{codegen: codegen{writer}, typeInfo: typeInfo}
+	codegen := &productCodegen{writer: writer, typeInfo: typeInfo}
 	err := testMethod(codegen)
 	assert.Nil(t, err)
 	code := writer.String()
@@ -160,7 +152,7 @@ func setupMockToGenImports(typeInfo *MockTypeCodegen, depImports []string) {
 	typeInfo.EXPECT().GetDepPkgPaths().Times(1).Return(depImports)
 }
 
-func prepareMock(t *testing.T) (*gomock.Controller, *MockTypeCodegen) {
+func prepareTypeCodegenMock(t *testing.T) (*gomock.Controller, *MockTypeCodegen) {
 	ctrl := gomock.NewController(t)
 	typeCodegen := NewMockTypeCodegen(ctrl)
 	return ctrl, typeCodegen

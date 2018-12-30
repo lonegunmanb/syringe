@@ -42,12 +42,12 @@ type ProductCodegen interface {
 }
 
 type productCodegen struct {
-	codegen
+	writer   io.Writer
 	typeInfo TypeCodegen
 }
 
 func newProductCodegen(t ast.TypeInfo, writer io.Writer) *productCodegen {
-	return &productCodegen{codegen: codegen{writer}, typeInfo: &productTypeInfoWrap{TypeInfo: t}}
+	return &productCodegen{writer: writer, typeInfo: &productTypeInfoWrap{TypeInfo: t}}
 }
 
 func NewProductCodegen(t ast.TypeInfo, writer io.Writer) ProductCodegen {
@@ -60,8 +60,6 @@ func (c *productCodegen) Writer() io.Writer {
 
 func (c *productCodegen) GenerateCode() error {
 	return Call(func() error {
-		return c.genPkgDecl()
-	}).Call(func() error {
 		return c.genImportDecls()
 	}).Call(func() error {
 		return c.genCreateFuncDecl()
@@ -70,12 +68,6 @@ func (c *productCodegen) GenerateCode() error {
 	}).Call(func() error {
 		return c.genRegisterFuncDecl()
 	}).Err
-}
-
-const pkgDecl = `package {{.GetPkgName}}`
-
-func (c *productCodegen) genPkgDecl() error {
-	return c.gen("pkg", pkgDecl)
 }
 
 const importDecl = `
