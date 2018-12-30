@@ -5,16 +5,16 @@ import (
 	"github.com/lonegunmanb/syrinx/ast"
 )
 
-type productTypeInfoWrap struct {
-	ast.TypeInfo
-}
-
 type TypeCodegen interface {
 	GetName() string
 	GetPkgName() string
 	GetDepPkgPaths() []string
 	GetFieldAssigns() []Assembler
 	GetEmbeddedTypeAssigns() []Assembler
+}
+
+type productTypeInfoWrap struct {
+	ast.TypeInfo
 }
 
 func (t *productTypeInfoWrap) GetFieldAssigns() []Assembler {

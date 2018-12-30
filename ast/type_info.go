@@ -66,16 +66,14 @@ func (typeInfo *typeInfo) GetFullName() string {
 
 func (typeInfo *typeInfo) GetDepPkgPaths() []string {
 	result := make([]string, 0)
-	linq.From(typeInfo.Fields).SelectMany(
+	linq.From(typeInfo.EmbeddedTypes).Select(
+		func(embeddedType interface{}) interface{} {
+			return embeddedType.(EmbeddedType).GetPkgPath()
+		}).Union(linq.From(typeInfo.Fields).SelectMany(
 		func(fieldInfo interface{}) linq.Query {
 			paths := fieldInfo.(FieldInfo).GetDepPkgPaths()
 			return linq.From(paths)
-		}).Union(
-		linq.From(typeInfo.EmbeddedTypes).Select(
-			func(embeddedType interface{}) interface{} {
-				return embeddedType.(EmbeddedType).GetPkgPath()
-			})).
-		Distinct().Where(func(path interface{}) bool {
+		})).Distinct().Where(func(path interface{}) bool {
 		return path.(string) != typeInfo.PkgPath
 	}).ToSlice(&result)
 	return result

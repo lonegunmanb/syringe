@@ -53,7 +53,7 @@ import (
 }
 
 const expectedFlyCarCreateCode = `
-func Create_FlyCar(container ioc.Container) *FlyCar {
+func Create_fly_car_FlyCar(container ioc.Container) *FlyCar {
 	product := new(FlyCar)
 	Assemble_FlyCar(product, container)
 	return product
@@ -62,6 +62,7 @@ func Create_FlyCar(container ioc.Container) *FlyCar {
 func TestGenCreateFuncDecl(t *testing.T) {
 	testGen(t, func(typeInfo *MockTypeCodegen) {
 		typeInfo.EXPECT().GetName().Times(4).Return("FlyCar")
+		typeInfo.EXPECT().GetPkgName().Times(1).Return("fly_car")
 	}, func(gen *productCodegen) error {
 		r := gen.genCreateFuncDecl()
 		return r
@@ -69,7 +70,7 @@ func TestGenCreateFuncDecl(t *testing.T) {
 }
 
 const expectedFlyCarAssembleCode = `
-func Assemble_FlyCar(product *FlyCar, container ioc.Container) {
+func Assemble_fly_car_FlyCar(product *FlyCar, container ioc.Container) {
 	product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/car.Car").(*car.Car)
 	product.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)
 	product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)
@@ -83,6 +84,7 @@ func TestGenAssembleFuncDecl(t *testing.T) {
 		embeddedPlaneMock.EXPECT().AssembleCode().Times(1).Return(`product.Plane = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/flyer.Plane").(*flyer.Plane)`)
 		typeInfo.EXPECT().GetName().Times(2).Return("FlyCar")
 		typeInfo.EXPECT().GetEmbeddedTypeAssigns().Times(1).Return([]Assembler{embeddedCarMock, embeddedPlaneMock})
+		typeInfo.EXPECT().GetPkgName().Times(1).Return("fly_car")
 		decorationMock := NewMockAssembler(typeInfo.ctrl)
 		decorationMock.EXPECT().AssembleCode().Times(1).Return(`product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)`)
 		typeInfo.EXPECT().GetFieldAssigns().Times(1).Return([]Assembler{decorationMock})
@@ -103,7 +105,7 @@ import (
 type FlyCar struct {
 	*car.Car
 	flyer.Plane
-	Decoration Decoration
+	Decoration  Decoration
 }
 
 type Decoration interface {
@@ -125,7 +127,7 @@ func TestActualAssembleFuncDecl(t *testing.T) {
 }
 
 const expectedRegisterFuncCode = `
-func Register_FlyCar(container ioc.Container) {
+func Register(container ioc.Container) {
 	container.RegisterFactory((*FlyCar)(nil), func(ioc ioc.Container) interface{} {
 		return Create_FlyCar(ioc)
 	})
@@ -133,7 +135,7 @@ func Register_FlyCar(container ioc.Container) {
 
 func TestRegisterFuncDecl(t *testing.T) {
 	testGen(t, func(typeInfo *MockTypeCodegen) {
-		typeInfo.EXPECT().GetName().Times(3).Return("FlyCar")
+		typeInfo.EXPECT().GetName().Times(2).Return("FlyCar")
 	}, func(gen *productCodegen) error {
 		r := gen.genRegisterFuncDecl()
 		return r
