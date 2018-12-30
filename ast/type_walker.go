@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ahmetb/go-linq"
 	"github.com/golang-collections/collections/stack"
+	"github.com/lonegunmanb/johnnie"
 	"go/ast"
 	"go/importer"
 	"go/parser"
@@ -18,13 +19,13 @@ var analyzingType opsKind = "isAnalyzingType"
 var analyzingFunc opsKind = "analyzingFunc"
 
 type TypeWalker interface {
-	Walker
+	johnnie.Walker
 	GetTypes() []TypeInfo
 	Parse(pkgPath string, sourceCode string) error
 }
 
 type typeWalker struct {
-	DefaultWalker
+	johnnie.DefaultWalker
 	types         []*typeInfo
 	typeInfoStack stack.Stack
 	opsStack      stack.Stack
@@ -53,7 +54,7 @@ func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
 	}
 	walker.typeInfo = typeInfo
 	walker.pkgPath = pkgPath
-	Visit(walker, astFile)
+	johnnie.Visit(walker, astFile)
 	return nil
 }
 
