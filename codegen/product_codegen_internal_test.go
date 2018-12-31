@@ -80,8 +80,9 @@ func TestActualAssembleFuncDecl(t *testing.T) {
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
 	writer := &bytes.Buffer{}
-	codegen := newProductCodegen(flyCar, writer)
-	err = codegen.genAssembleFuncDecl()
+	codegen := NewCodegen(writer, &genTask{typeInfos: []ast.TypeInfo{flyCar}})
+	productCodegen := newProductCodegen(flyCar, writer, codegen)
+	err = productCodegen.genAssembleFuncDecl()
 	assert.Nil(t, err)
 	code := writer.String()
 	assert.Equal(t, expectedFlyCarAssembleCode, code)

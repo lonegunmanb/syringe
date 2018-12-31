@@ -30,10 +30,36 @@ func TestEmbedded(t *testing.T) {
 	testEmbeddedType(t, importDecl, "engine.Engine", "Engine", "", "github.com/lonegunmanb/syrinx/test_code/engine.Engine", "engine.Engine")
 }
 
+type stubTypeCodegen struct{}
+
+func (*stubTypeCodegen) GetName() string {
+	panic("implement me")
+}
+
+func (*stubTypeCodegen) GetPkgName() string {
+	panic("implement me")
+}
+
+func (*stubTypeCodegen) GetDepPkgPaths() []string {
+	panic("implement me")
+}
+
+func (*stubTypeCodegen) GetFieldAssigns() []Assembler {
+	panic("implement me")
+}
+
+func (*stubTypeCodegen) GetEmbeddedTypeAssigns() []Assembler {
+	panic("implement me")
+}
+
+func (*stubTypeCodegen) GetPkgNameFromPkgPath(pkgPath string) string {
+	return getPkgNameFromPkgPath(pkgPath)
+}
+
 func testEmbeddedType(t *testing.T, importString string, typeDecl string, assignedField string, star string, key string, convertType string) {
 	code := fmt.Sprintf(embeddedAssignTemplate, importString, typeDecl)
 	walker := parseCode(t, code)
-	embeddedType := &productEmbeddedTypeWrap{walker.GetTypes()[0].GetEmbeddedTypes()[0]}
+	embeddedType := &productEmbeddedTypeWrap{walker.GetTypes()[0].GetEmbeddedTypes()[0], &stubTypeCodegen{}}
 	expected := fmt.Sprintf(`product.%s = %scontainer.Resolve("%s").(%s)`, assignedField, star, key, convertType)
 	assert.Equal(t, expected, embeddedType.AssembleCode())
 }

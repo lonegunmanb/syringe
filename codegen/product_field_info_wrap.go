@@ -8,6 +8,7 @@ import (
 
 type productFieldInfoWrap struct {
 	ast.FieldInfo
+	typeInfo TypeCodegen
 }
 
 //  By Interface
@@ -25,7 +26,9 @@ func (f *productFieldInfoWrap) AssembleCode() string {
 		key = f.GetTag()
 	}
 	pkgPath := f.GetReferenceFrom().GetPkgPath()
-	declType := getDeclType(pkgPath, fieldType)
+	declType := getDeclType(pkgPath, fieldType, func(p *types.Package) string {
+		return f.typeInfo.GetPkgNameFromPkgPath(p.Path())
+	})
 	star := "*"
 	switch t := f.GetType().(type) {
 	case *types.Named:

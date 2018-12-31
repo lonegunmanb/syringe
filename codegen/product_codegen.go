@@ -39,19 +39,27 @@ import (
 type ProductCodegen interface {
 	GenerateCode() error
 	Writer() io.Writer
+	GetPkgNameFromPkgPath(pkgPath string) string
 }
 
 type productCodegen struct {
+	codegen  Codegen
 	writer   io.Writer
 	typeInfo TypeCodegen
 }
 
-func newProductCodegen(t ast.TypeInfo, writer io.Writer) *productCodegen {
-	return &productCodegen{writer: writer, typeInfo: &productTypeInfoWrap{TypeInfo: t}}
+func (c *productCodegen) GetPkgNameFromPkgPath(pkgPath string) string {
+	return c.codegen.GetPkgNameFromPkgPath(pkgPath)
 }
 
-func NewProductCodegen(t ast.TypeInfo, writer io.Writer) ProductCodegen {
-	return newProductCodegen(t, writer)
+func newProductCodegen(t ast.TypeInfo, writer io.Writer, codegen Codegen) *productCodegen {
+	c := &productCodegen{codegen: codegen, writer: writer}
+	c.typeInfo = &typeInfoWrap{TypeInfo: t, codegen: c}
+	return c
+}
+
+func NewProductCodegen(t ast.TypeInfo, writer io.Writer, codegen Codegen) ProductCodegen {
+	return newProductCodegen(t, writer, codegen)
 }
 
 func (c *productCodegen) Writer() io.Writer {

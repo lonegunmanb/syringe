@@ -19,9 +19,9 @@ func TestGenPackageDecl(t *testing.T) {
 func TestGenImportsDecl(t *testing.T) {
 	testGen(t, func(mockTask *MockGenTask) {
 		depImports := []string{
-			"go/ast",
-			"go/token",
-			"go/types",
+			`"go/ast"`,
+			`"go/token"`,
+			`"go/types"`,
 		}
 		setupMockToGenImports(mockTask, depImports)
 	}, func(gen *codegen) error {
@@ -47,6 +47,22 @@ import (
 )`)
 }
 
+func TestGenImportsDeclForDuplicatePkgName(t *testing.T) {
+	testGen(t, func(mockTask *MockGenTask) {
+		setupMockToGenImports(mockTask, []string{
+			`p0 "a/pkg"`,
+			`p1 "b/pkg"`,
+		})
+	}, func(gen *codegen) error {
+		return gen.genImportDecls()
+	}, `
+import (
+    "github.com/lonegunmanb/syrinx/ioc"
+    p0 "a/pkg"
+    p1 "b/pkg"
+)`)
+}
+
 func testGen(t *testing.T, setupMockFunc func(info *MockGenTask),
 	testMethod func(gen *codegen) error, expected string) {
 	writer := &bytes.Buffer{}
@@ -67,6 +83,6 @@ func prepareCodegenTaskMock(t *testing.T) (*gomock.Controller, *MockGenTask) {
 	return ctrl, task
 }
 
-func setupMockToGenImports(typeInfo *MockGenTask, depImports []string) {
-	typeInfo.EXPECT().GetDepPkgPaths().Times(1).Return(depImports)
+func setupMockToGenImports(mockGenTask *MockGenTask, expectedImports []string) {
+	mockGenTask.EXPECT().GenImportDecls().Times(1).Return(expectedImports)
 }

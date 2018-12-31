@@ -11,13 +11,23 @@ type TypeCodegen interface {
 	GetDepPkgPaths() []string
 	GetFieldAssigns() []Assembler
 	GetEmbeddedTypeAssigns() []Assembler
+	GetPkgNameFromPkgPath(pkgPath string) string
 }
 
-type productTypeInfoWrap struct {
+type typeInfoWrap struct {
 	ast.TypeInfo
+	codegen ProductCodegen
 }
 
-func (t *productTypeInfoWrap) GetFieldAssigns() []Assembler {
+func (t *typeInfoWrap) GetPkgNameFromPkgPath(pkgPath string) string {
+	return t.codegen.GetPkgNameFromPkgPath(pkgPath)
+}
+
+func (t *typeInfoWrap) GetPkgName() string {
+	return t.codegen.GetPkgNameFromPkgPath(t.GetPkgPath())
+}
+
+func (t *typeInfoWrap) GetFieldAssigns() []Assembler {
 	fields := t.TypeInfo.GetFields()
 	results := make([]Assembler, 0, len(fields))
 	linq.From(fields).Select(func(fieldInfo interface{}) interface{} {
@@ -26,11 +36,11 @@ func (t *productTypeInfoWrap) GetFieldAssigns() []Assembler {
 	return results
 }
 
-func (t *productTypeInfoWrap) GetEmbeddedTypeAssigns() []Assembler {
+func (t *typeInfoWrap) GetEmbeddedTypeAssigns() []Assembler {
 	embeddedTypes := t.TypeInfo.GetEmbeddedTypes()
 	results := make([]Assembler, 0, len(embeddedTypes))
 	linq.From(embeddedTypes).Select(func(embeddedType interface{}) interface{} {
-		return &productEmbeddedTypeWrap{EmbeddedType: embeddedType.(ast.EmbeddedType)}
+		return &productEmbeddedTypeWrap{EmbeddedType: embeddedType.(ast.EmbeddedType), typeCodegen: t}
 	}).ToSlice(&results)
 	return results
 }

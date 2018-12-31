@@ -19,7 +19,7 @@ func Resolve(key string, container ioc.Container) interface{} {
 		}
 	case "github.com/lonegunmanb/syrinx/fly_car.FlyCar":
 		{
-			return fly_car.Create_FlyCar(container)
+			return fly_car.Create_fly_car_FlyCar(container)
 		}
 	default:
 		{

@@ -6,7 +6,7 @@ import (
 	"go/types"
 )
 
-func getDeclType(pkgPath string, t types.Type) string {
+func getDeclType(pkgPath string, t types.Type, qf func(p *types.Package) string) string {
 	switch t.(type) {
 	case *types.Basic:
 		{
@@ -37,21 +37,21 @@ func getDeclType(pkgPath string, t types.Type) string {
 		}
 	case *types.Pointer:
 		{
-			return fmt.Sprintf("*%s", getDeclType(pkgPath, t.(*types.Pointer).Elem()))
+			return fmt.Sprintf("*%s", getDeclType(pkgPath, t.(*types.Pointer).Elem(), qf))
 		}
 	case *types.Slice:
 		{
-			return fmt.Sprintf("[]%s", getDeclType(pkgPath, t.(*types.Slice).Elem()))
+			return fmt.Sprintf("[]%s", getDeclType(pkgPath, t.(*types.Slice).Elem(), qf))
 		}
 	case *types.Array:
 		{
-			return fmt.Sprintf("[%d]%s", t.(*types.Array).Len(), getDeclType(pkgPath, t.(*types.Array).Elem()))
+			return fmt.Sprintf("[%d]%s", t.(*types.Array).Len(), getDeclType(pkgPath, t.(*types.Array).Elem(), qf))
 		}
 	case *types.Map:
 		{
 			mapType := t.(*types.Map)
-			keyDecl := getDeclType(pkgPath, mapType.Key())
-			valueDecl := getDeclType(pkgPath, mapType.Elem())
+			keyDecl := getDeclType(pkgPath, mapType.Key(), qf)
+			valueDecl := getDeclType(pkgPath, mapType.Elem(), qf)
 			return fmt.Sprintf("map[%s]%s", keyDecl, valueDecl)
 		}
 	case *types.Chan:
@@ -72,7 +72,7 @@ func getDeclType(pkgPath string, t types.Type) string {
 					chanTmlt = "<-chan %s"
 				}
 			}
-			return fmt.Sprintf(chanTmlt, getDeclType(pkgPath, chanType.Elem()))
+			return fmt.Sprintf(chanTmlt, getDeclType(pkgPath, chanType.Elem(), qf))
 		}
 	case *types.Signature:
 		{

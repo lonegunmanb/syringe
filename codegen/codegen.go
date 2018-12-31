@@ -8,11 +8,16 @@ import (
 
 type Codegen interface {
 	GenerateCode() error
+	GetPkgNameFromPkgPath(pkgPath string) string
 }
 
 type codegen struct {
 	writer  io.Writer
 	genTask GenTask
+}
+
+func (c *codegen) GetPkgNameFromPkgPath(pkgPath string) string {
+	return c.genTask.GetPkgNameFromPkgPath(pkgPath)
 }
 
 func NewCodegen(writer io.Writer, genTask GenTask) Codegen {
@@ -28,7 +33,7 @@ func (c *codegen) genPkgDecl() error {
 const importDecl = `
 import (
     "github.com/lonegunmanb/syrinx/ioc"
-{{with .GetDepPkgPaths}}{{range .}}    "{{.}}"
+{{with .GenImportDecls}}{{range .}}    {{.}}
 {{end}}{{end}})`
 
 func (c *codegen) genImportDecls() error {
@@ -41,7 +46,7 @@ func (c *codegen) GenerateCode() error {
 	}).Call(func() error {
 		return c.genImportDecls()
 	}).CallEach(c.genTask.GetTypeInfos(), func(t interface{}) error {
-		return NewProductCodegen(t.(ast.TypeInfo), c.writer).GenerateCode()
+		return NewProductCodegen(t.(ast.TypeInfo), c.writer, c).GenerateCode()
 	}).Err
 }
 

@@ -13,7 +13,7 @@ func TestProductTypeInfoWrap_GetFields(t *testing.T) {
 	mockFieldInfo := NewMockFieldInfo(ctrl)
 	fieldInfos := []ast.FieldInfo{mockFieldInfo}
 	typeInfo.EXPECT().GetFields().Times(1).Return(fieldInfos)
-	sut := &productTypeInfoWrap{TypeInfo: typeInfo}
+	sut := &typeInfoWrap{TypeInfo: typeInfo}
 	fields := sut.GetFieldAssigns()
 	assert.Equal(t, 1, len(fields))
 	fieldWrap, ok := fields[0].(*productFieldInfoWrap)
@@ -27,7 +27,7 @@ func TestProductTypeInfoWrap_GetEmbeddedTypes(t *testing.T) {
 	mockEmbeddedTypes := NewMockEmbeddedType(ctrl)
 	embeddedTypes := []ast.EmbeddedType{mockEmbeddedTypes}
 	typeInfo.EXPECT().GetEmbeddedTypes().Times(1).Return(embeddedTypes)
-	sut := &productTypeInfoWrap{TypeInfo: typeInfo}
+	sut := &typeInfoWrap{TypeInfo: typeInfo}
 	embeddedTypesGot := sut.GetEmbeddedTypeAssigns()
 	assert.Equal(t, 1, len(embeddedTypesGot))
 	embeddedTypeWrap, ok := embeddedTypesGot[0].(*productEmbeddedTypeWrap)
