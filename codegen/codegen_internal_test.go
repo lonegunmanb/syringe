@@ -16,6 +16,37 @@ func TestGenPackageDecl(t *testing.T) {
 	}, "package ast")
 }
 
+func TestGenImportsDecl(t *testing.T) {
+	testGen(t, func(mockTask *MockGenTask) {
+		depImports := []string{
+			"go/ast",
+			"go/token",
+			"go/types",
+		}
+		setupMockToGenImports(mockTask, depImports)
+	}, func(gen *codegen) error {
+		return gen.genImportDecls()
+	}, `
+import (
+    "github.com/lonegunmanb/syrinx/ioc"
+    "go/ast"
+    "go/token"
+    "go/types"
+)`)
+}
+
+func TestShouldNotGenExtraImportsIfDepPathsEmpty(t *testing.T) {
+	testGen(t, func(mockTask *MockGenTask) {
+		var depImports []string
+		setupMockToGenImports(mockTask, depImports)
+	}, func(gen *codegen) error {
+		return gen.genImportDecls()
+	}, `
+import (
+    "github.com/lonegunmanb/syrinx/ioc"
+)`)
+}
+
 func testGen(t *testing.T, setupMockFunc func(info *MockGenTask),
 	testMethod func(gen *codegen) error, expected string) {
 	writer := &bytes.Buffer{}
@@ -34,4 +65,8 @@ func prepareCodegenTaskMock(t *testing.T) (*gomock.Controller, *MockGenTask) {
 	ctrl := gomock.NewController(t)
 	task := NewMockGenTask(ctrl)
 	return ctrl, task
+}
+
+func setupMockToGenImports(typeInfo *MockGenTask, depImports []string) {
+	typeInfo.EXPECT().GetDepPkgPaths().Times(1).Return(depImports)
 }

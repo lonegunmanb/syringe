@@ -60,24 +60,12 @@ func (c *productCodegen) Writer() io.Writer {
 
 func (c *productCodegen) GenerateCode() error {
 	return Call(func() error {
-		return c.genImportDecls()
-	}).Call(func() error {
 		return c.genCreateFuncDecl()
 	}).Call(func() error {
 		return c.genAssembleFuncDecl()
 	}).Call(func() error {
 		return c.genRegisterFuncDecl()
 	}).Err
-}
-
-const importDecl = `
-import (
-    "github.com/lonegunmanb/syrinx/ioc"
-{{with .GetDepPkgPaths}}{{range .}}    "{{.}}"
-{{end}}{{end}})`
-
-func (c *productCodegen) genImportDecls() error {
-	return c.gen("imports", importDecl)
 }
 
 const createFuncDecl = `

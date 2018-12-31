@@ -13,37 +13,6 @@ import (
 	"testing"
 )
 
-func TestGenImportsDecl(t *testing.T) {
-	testProductGen(t, func(typeInfo *MockTypeCodegen) {
-		depImports := []string{
-			"go/ast",
-			"go/token",
-			"go/types",
-		}
-		setupMockToGenImports(typeInfo, depImports)
-	}, func(gen *productCodegen) error {
-		return gen.genImportDecls()
-	}, `
-import (
-    "github.com/lonegunmanb/syrinx/ioc"
-    "go/ast"
-    "go/token"
-    "go/types"
-)`)
-}
-
-func TestShouldNotGenExtraImportsIfDepPathsEmpty(t *testing.T) {
-	testProductGen(t, func(typeInfo *MockTypeCodegen) {
-		var depImports []string
-		setupMockToGenImports(typeInfo, depImports)
-	}, func(gen *productCodegen) error {
-		return gen.genImportDecls()
-	}, `
-import (
-    "github.com/lonegunmanb/syrinx/ioc"
-)`)
-}
-
 const expectedFlyCarCreateCode = `
 func Create_fly_car_FlyCar(container ioc.Container) *FlyCar {
 	product := new(FlyCar)
@@ -146,10 +115,6 @@ func testProductGen(t *testing.T, setupMockFunc func(info *MockTypeCodegen),
 	assert.Nil(t, err)
 	code := writer.String()
 	assert.Equal(t, expected, code)
-}
-
-func setupMockToGenImports(typeInfo *MockTypeCodegen, depImports []string) {
-	typeInfo.EXPECT().GetDepPkgPaths().Times(1).Return(depImports)
 }
 
 func prepareTypeCodegenMock(t *testing.T) (*gomock.Controller, *MockTypeCodegen) {

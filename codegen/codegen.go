@@ -25,9 +25,21 @@ func (c *codegen) genPkgDecl() error {
 	return c.gen("pkg", pkgDecl)
 }
 
+const importDecl = `
+import (
+    "github.com/lonegunmanb/syrinx/ioc"
+{{with .GetDepPkgPaths}}{{range .}}    "{{.}}"
+{{end}}{{end}})`
+
+func (c *codegen) genImportDecls() error {
+	return c.gen("imports", importDecl)
+}
+
 func (c *codegen) GenerateCode() error {
 	return Call(func() error {
 		return c.genPkgDecl()
+	}).Call(func() error {
+		return c.genImportDecls()
 	}).CallEach(c.genTask.GetTypeInfos(), func(t interface{}) error {
 		return NewProductCodegen(t.(ast.TypeInfo), c.writer).GenerateCode()
 	}).Err
