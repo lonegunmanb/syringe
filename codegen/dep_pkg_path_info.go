@@ -3,6 +3,7 @@ package codegen
 import (
 	"fmt"
 	"github.com/ahmetb/go-linq"
+	"github.com/golang-collections/collections/set"
 	"github.com/lonegunmanb/syrinx/ast"
 	"strings"
 )
@@ -14,7 +15,37 @@ type DepPkgPathInfo interface {
 	GetPkgNameFromPkgPath(pkgPath string) string
 }
 
-//
+type packageNamer struct {
+	count       int
+	nameExisted *set.Set
+}
+
+func newNamer() *packageNamer {
+	return &packageNamer{
+		count:       0,
+		nameExisted: set.New(),
+	}
+}
+
+func (n *packageNamer) nextName() string {
+	for {
+		nextName := fmt.Sprintf("p%d", n.count)
+		n.count++
+		if !n.nameExisted.Has(nextName) {
+			n.nameExisted.Insert(nextName)
+			return nextName
+		}
+	}
+}
+
+func (n *packageNamer) uniqueName(name string) string {
+	if n.nameExisted.Has(name) {
+		return n.nextName()
+	}
+	n.nameExisted.Insert(name)
+	return name
+}
+
 type depPkgPathInfo struct {
 	typeInfos            []ast.TypeInfo
 	depPkgPaths          []string
@@ -71,20 +102,19 @@ func (c *depPkgPathInfo) initDepPkgPaths() []string {
 
 func (c *depPkgPathInfo) initDepPkgPathPkgNameMap() map[string]string {
 	pkgNamePkgPathMap := make(map[string][]string)
+	packageNamer := newNamer()
 	for _, path := range c.depPkgPaths {
 		pkgName := getPkgNameFromPkgPath(path)
 		paths := pkgNamePkgPathMap[pkgName]
 		pkgNamePkgPathMap[pkgName] = append(paths, path)
 	}
-	count := 0
 	pkgPathPkgNameMap := make(map[string]string)
 	for pkgName, paths := range pkgNamePkgPathMap {
 		if len(paths) == 1 && pkgName != "ioc" {
-			pkgPathPkgNameMap[paths[0]] = pkgName
+			pkgPathPkgNameMap[paths[0]] = packageNamer.uniqueName(pkgName)
 		} else {
 			for _, path := range paths {
-				pkgPathPkgNameMap[path] = fmt.Sprintf("p%d", count)
-				count++
+				pkgPathPkgNameMap[path] = packageNamer.nextName()
 			}
 		}
 	}

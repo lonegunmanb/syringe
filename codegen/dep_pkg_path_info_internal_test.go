@@ -5,6 +5,7 @@ import (
 	"github.com/lonegunmanb/syrinx/ast"
 	"github.com/stretchr/testify/assert"
 	"go-funk"
+	"sort"
 	"testing"
 )
 
@@ -47,5 +48,44 @@ func TestGetDepPkgPathsWithPkgNameDuplicate(t *testing.T) {
 		`p0 "b/b"`,
 		`p1 "c/b"`,
 	}
+	assert.Equal(t, expected, imports)
+}
+
+func TestGetDepPkgPathsWithPkgNameDuplicateAndConflictWithGeneratedPackageName(t *testing.T) {
+	testDuplicateAndConflictPackageName(t, []string{
+		"p0",
+		"a/b",
+		"b/b",
+	}, []string{
+		`"p0"`,
+		`p1 "a/b"`,
+		`p2 "b/b"`,
+	})
+	testDuplicateAndConflictPackageName(t, []string{
+		"a/b",
+		"b/b",
+		"p0",
+	}, []string{
+		`p0 "a/b"`,
+		`p1 "b/b"`,
+		`p2 "p0"`,
+	})
+}
+
+func testDuplicateAndConflictPackageName(t *testing.T, depPkgPaths []string, expected []string) {
+	typeInfos := []ast.TypeInfo{}
+	ctrl := gomock.NewController(t)
+	for _, path := range depPkgPaths {
+		mockTypeInfo := NewMockTypeInfo(ctrl)
+		mockTypeInfo.EXPECT().GetDepPkgPaths().Times(1).Return([]string{path})
+		typeInfos = append(typeInfos, mockTypeInfo)
+	}
+	sut := &depPkgPathInfo{
+		typeInfos: typeInfos,
+	}
+	imports := sut.GenImportDecls()
+	sort.Strings(expected)
+	sort.Strings(imports)
+	assert.Equal(t, expected, imports)
 	assert.Equal(t, expected, imports)
 }

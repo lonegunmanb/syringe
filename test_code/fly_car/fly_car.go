@@ -11,8 +11,8 @@ type FlyCar struct {
 	*car.Car    `inject:""`
 	flyer.Plane `inject:""`
 	Decoration  Decoration `inject:""`
-	r1          *model1.Request
-	r2          *model2.Request
+	R1          *model1.Request
+	R2          *model2.Request
 }
 
 type Decoration interface {

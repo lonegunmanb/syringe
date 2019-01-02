@@ -24,8 +24,10 @@ func TestCreateFlyCarCarByManualSimulate(t *testing.T) {
 	container.RegisterFactory((*flyer.Wing)(nil), func(ioc ioc.Container) interface{} {
 		return wing
 	})
-	c := fly_car.Create_fly_car_FlyCar(container)
+	c := fly_car.Create_FlyCar(container)
 	assert.Equal(t, e, c.Engine)
 	assert.Equal(t, wing, c.Wing)
 	assert.Equal(t, decoration, c.Decoration)
+	assert.NotNil(t, c.R1)
+	assert.NotNil(t, c.R2)
 }

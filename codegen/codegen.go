@@ -19,6 +19,7 @@ func (c *codegen) GetPkgNameFromPkgPath(pkgPath string) string {
 	return c.depPkgPathInfo.GetPkgNameFromPkgPath(pkgPath)
 }
 
+//noinspection GoUnusedExportedFunction
 func NewCodegen(writer io.Writer, depPkgPathInfo DepPkgPathInfo) Codegen {
 	return &codegen{writer: writer, depPkgPathInfo: depPkgPathInfo}
 }
