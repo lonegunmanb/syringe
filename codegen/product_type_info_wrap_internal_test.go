@@ -67,6 +67,21 @@ func TestProductTypeInfoWrap_GetPkgNameFromPkgPath(t *testing.T) {
 	assert.Equal(t, expected, imports)
 }
 
+func TestProductTypeInfoWrap_GenRegisterCode(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDepPkgPathInfo := NewMockDepPkgPathInfo(ctrl)
+	const pkgPath = "github.com/lonegunmanb/test_code/check_package_name_duplicate_a/model"
+	mockDepPkgPathInfo.EXPECT().GetPkgNameFromPkgPath(pkgPath).Times(1).Return("p0")
+	mockTypeInfo := NewMockTypeInfo(ctrl)
+	mockTypeInfo.EXPECT().GetPkgPath().Times(1).Return(pkgPath)
+	mockTypeInfo.EXPECT().GetName().Times(1).Return("Request")
+	sut := NewTypeInfoWrapWithDepPkgPath(mockTypeInfo, mockDepPkgPathInfo)
+	actual := sut.RegisterCode()
+	const expected = "p0.Register_Request(container)"
+	assert.Equal(t, expected, actual)
+}
+
 func prepareTypeInfoMock(t *testing.T) (*gomock.Controller, *MockTypeInfo) {
 	ctrl := gomock.NewController(t)
 	mockTypeInfo := NewMockTypeInfo(ctrl)

@@ -32,6 +32,10 @@ func TestEmbedded(t *testing.T) {
 
 type stubTypeCodegen struct{}
 
+func (*stubTypeCodegen) RegisterCode() string {
+	panic("implement me")
+}
+
 func (*stubTypeCodegen) GenImportDecls() []string {
 	panic("implement me")
 }
@@ -57,7 +61,7 @@ func (*stubTypeCodegen) GetEmbeddedTypeAssigns() []Assembler {
 }
 
 func (*stubTypeCodegen) GetPkgNameFromPkgPath(pkgPath string) string {
-	return getPkgNameFromPkgPath(pkgPath)
+	return retrievePkgNameFromPkgPath(pkgPath)
 }
 
 func testEmbeddedType(t *testing.T, importString string, typeDecl string, assignedField string, star string, key string, convertType string) {

@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"github.com/ahmetb/go-linq"
 	"github.com/lonegunmanb/syrinx/ast"
 	"io"
 	"text/template"
@@ -18,6 +19,7 @@ type registerCodegen struct {
 	pkgName        string
 	pkgPath        string
 	depPkgPathInfo DepPkgPathInfo
+	typeInfos      []Register
 }
 
 func (c *registerCodegen) GetPkgName() string {
@@ -32,13 +34,23 @@ func (c *registerCodegen) GetPkgNameFromPkgPath(pkgPath string) string {
 	return c.depPkgPathInfo.GetPkgNameFromPkgPath(pkgPath)
 }
 
+func (c *registerCodegen) GetRegisters() []Register {
+	return c.typeInfos
+}
+
 //noinspection GoUnusedExportedFunction
-func NewCodegen(writer io.Writer, typeInfos []ast.TypeInfo, pkgName string, pkgPath string) RegisterCodegen {
+func NewRegisterCodegen(writer io.Writer, typeInfos []ast.TypeInfo, pkgName string, pkgPath string) RegisterCodegen {
+	var typeInfosWraps []Register
+	pkgPathInfo := NewDepPkgPathInfo(typeInfos)
+	linq.From(typeInfos).Select(func(typeInfo interface{}) interface{} {
+		return NewTypeInfoWrapWithDepPkgPath(typeInfo.(ast.TypeInfo), pkgPathInfo)
+	}).ToSlice(&typeInfosWraps)
 	return &registerCodegen{
 		writer:         writer,
-		depPkgPathInfo: NewDepPkgPathInfo(typeInfos),
+		depPkgPathInfo: pkgPathInfo,
 		pkgName:        pkgName,
 		pkgPath:        pkgPath,
+		typeInfos:      typeInfosWraps,
 	}
 }
 
@@ -50,11 +62,24 @@ func (c *registerCodegen) genImportDecls() error {
 	return genImportDecl(c.writer, c.depPkgPathInfo)
 }
 
+const createIocTemplate = `
+func CreateIoc() ioc.Container {
+    container := ioc.NewContainer()
+{{with .GetRegisters}}{{range .}}    {{.RegisterCode}}
+{{end}}{{end}}    return container
+}`
+
+func (c *registerCodegen) genRegister() error {
+	return gen("registerType", createIocTemplate, c.writer, c)
+}
+
 func (c *registerCodegen) GenerateCode() error {
 	return Call(func() error {
 		return c.genPkgDecl()
 	}).Call(func() error {
 		return c.genImportDecls()
+	}).Call(func() error {
+		return c.genRegister()
 	}).Err
 }
 

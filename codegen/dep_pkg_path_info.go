@@ -62,7 +62,7 @@ func (c *depPkgPathInfo) GenImportDecls() []string {
 	//we iterate paths so generated import decls' order is as same as fields' order
 	for _, pkgPath := range paths {
 		pkgName := c.depPkgPathPkgNameMap[pkgPath]
-		if pkgName != getPkgNameFromPkgPath(pkgPath) {
+		if pkgName != retrievePkgNameFromPkgPath(pkgPath) {
 			results = append(results, fmt.Sprintf(`%s "%s"`, pkgName, pkgPath))
 		} else {
 			results = append(results, fmt.Sprintf(`"%s"`, pkgPath))
@@ -74,7 +74,7 @@ func (c *depPkgPathInfo) GenImportDecls() []string {
 func (c *depPkgPathInfo) GetPkgNameFromPkgPath(pkgPath string) string {
 	name, ok := c.depPkgPathPkgNameMap[pkgPath]
 	if !ok {
-		name = getPkgNameFromPkgPath(pkgPath)
+		name = retrievePkgNameFromPkgPath(pkgPath)
 	}
 	return name
 }
@@ -104,7 +104,7 @@ func (c *depPkgPathInfo) initDepPkgPathPkgNameMap() map[string]string {
 	pkgNamePkgPathMap := make(map[string][]string)
 	packageNamer := newNamer()
 	for _, path := range c.depPkgPaths {
-		pkgName := getPkgNameFromPkgPath(path)
+		pkgName := retrievePkgNameFromPkgPath(path)
 		paths := pkgNamePkgPathMap[pkgName]
 		pkgNamePkgPathMap[pkgName] = append(paths, path)
 	}
@@ -121,7 +121,7 @@ func (c *depPkgPathInfo) initDepPkgPathPkgNameMap() map[string]string {
 	return pkgPathPkgNameMap
 }
 
-func getPkgNameFromPkgPath(pkgPath string) string {
+func retrievePkgNameFromPkgPath(pkgPath string) string {
 	if !strings.Contains(pkgPath, "/") {
 		return pkgPath
 	}

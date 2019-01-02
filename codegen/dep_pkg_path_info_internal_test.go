@@ -17,7 +17,7 @@ func TestGetPkgNameFromPkgPath(t *testing.T) {
 		{"github.com/lonegunman/syrinx/codegen", "codegen"},
 	}
 	for _, tuple := range cases {
-		assert.Equal(t, tuple.Element2.(string), getPkgNameFromPkgPath(tuple.Element1.(string)))
+		assert.Equal(t, tuple.Element2.(string), retrievePkgNameFromPkgPath(tuple.Element1.(string)))
 	}
 }
 
@@ -75,6 +75,7 @@ func TestGetDepPkgPathsWithPkgNameDuplicateAndConflictWithGeneratedPackageName(t
 func testDuplicateAndConflictPackageName(t *testing.T, depPkgPaths []string, expected []string) {
 	typeInfos := []ast.TypeInfo{}
 	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 	for _, path := range depPkgPaths {
 		mockTypeInfo := NewMockTypeInfo(ctrl)
 		mockTypeInfo.EXPECT().GetDepPkgPaths().Times(1).Return([]string{path})

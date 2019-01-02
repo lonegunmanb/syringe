@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"fmt"
 	"github.com/ahmetb/go-linq"
 	"github.com/lonegunmanb/syrinx/ast"
 )
@@ -13,6 +14,7 @@ type TypeInfoWrap interface {
 	GetEmbeddedTypeAssigns() []Assembler
 	GetPkgNameFromPkgPath(pkgPath string) string
 	GenImportDecls() []string
+	RegisterCode() string
 }
 
 type typeInfoWrap struct {
@@ -20,10 +22,18 @@ type typeInfoWrap struct {
 	depPkgPathInfo DepPkgPathInfo
 }
 
+func (t *typeInfoWrap) RegisterCode() string {
+	return fmt.Sprintf("%s.Register_%s(container)", t.depPkgPathInfo.GetPkgNameFromPkgPath(t.GetPkgPath()), t.GetName())
+}
+
 func NewTypeInfoWrap(typeInfo ast.TypeInfo) TypeInfoWrap {
+	return NewTypeInfoWrapWithDepPkgPath(typeInfo, NewDepPkgPathInfo([]ast.TypeInfo{typeInfo}))
+}
+
+func NewTypeInfoWrapWithDepPkgPath(typeInfo ast.TypeInfo, depPkgPathInfo DepPkgPathInfo) TypeInfoWrap {
 	return &typeInfoWrap{
 		TypeInfo:       typeInfo,
-		depPkgPathInfo: NewDepPkgPathInfo([]ast.TypeInfo{typeInfo}),
+		depPkgPathInfo: depPkgPathInfo,
 	}
 }
 

@@ -29,3 +29,21 @@ func TestGenRegisterImportDecl(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, expectedImportDecl, writer.String())
 }
+
+func TestGenRegisterCode(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockTypeInfoWrap := NewMockTypeInfoWrap(ctrl)
+	mockTypeInfoWrap.EXPECT().RegisterCode().Times(1).Return("a.Register_a(container)")
+	writer := &bytes.Buffer{}
+	sut := &registerCodegen{writer: writer, typeInfos: []Register{mockTypeInfoWrap}}
+	err := sut.genRegister()
+	assert.Nil(t, err)
+	const expected = `
+func CreateIoc() ioc.Container {
+    container := ioc.NewContainer()
+    a.Register_a(container)
+    return container
+}`
+	assert.Equal(t, expected, writer.String())
+}
