@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestProductTypeInfoWrap_GetFields(t *testing.T) {
+func TestProductTypeInfoWrap_GetFieldAssigns(t *testing.T) {
 	ctrl, typeInfo := prepareTypeInfoMock(t)
 	defer ctrl.Finish()
 	mockFieldInfo := NewMockFieldInfo(ctrl)
@@ -21,7 +21,7 @@ func TestProductTypeInfoWrap_GetFields(t *testing.T) {
 	assert.Equal(t, mockFieldInfo, fieldWrap.FieldInfo)
 }
 
-func TestProductTypeInfoWrap_GetEmbeddedTypes(t *testing.T) {
+func TestProductTypeInfoWrap_GetEmbeddedTypeAssigns(t *testing.T) {
 	ctrl, typeInfo := prepareTypeInfoMock(t)
 	defer ctrl.Finish()
 	mockEmbeddedTypes := NewMockEmbeddedType(ctrl)
@@ -33,6 +33,38 @@ func TestProductTypeInfoWrap_GetEmbeddedTypes(t *testing.T) {
 	embeddedTypeWrap, ok := embeddedTypesGot[0].(*productEmbeddedTypeWrap)
 	assert.True(t, ok)
 	assert.Equal(t, mockEmbeddedTypes, embeddedTypeWrap.EmbeddedType)
+}
+
+func TestProductTypeInfoWrap_GetPkgName(t *testing.T) {
+	ctrl, mockTypeInfo := prepareTypeInfoMock(t)
+	defer ctrl.Finish()
+	expected := "expected"
+	mockTypeInfo.EXPECT().GetPkgName().Times(1).Return(expected)
+	sut := &typeInfoWrap{TypeInfo: mockTypeInfo}
+	actual := sut.GetPkgName()
+	assert.Equal(t, expected, actual)
+}
+
+func TestProductTypeInfoWrap_GetImportDecls(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	expected := []string{"a"}
+	mockDepPkgPathInfo := NewMockDepPkgPathInfo(ctrl)
+	mockDepPkgPathInfo.EXPECT().GenImportDecls().Times(1).Return(expected)
+	sut := &typeInfoWrap{depPkgPathInfo: mockDepPkgPathInfo}
+	imports := sut.GenImportDecls()
+	assert.Equal(t, expected, imports)
+}
+
+func TestProductTypeInfoWrap_GetPkgNameFromPkgPath(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	expected := "pkgName"
+	mockDepPkgPathInfo := NewMockDepPkgPathInfo(ctrl)
+	mockDepPkgPathInfo.EXPECT().GetPkgNameFromPkgPath("input").Times(1).Return(expected)
+	sut := &typeInfoWrap{depPkgPathInfo: mockDepPkgPathInfo}
+	imports := sut.GetPkgNameFromPkgPath("input")
+	assert.Equal(t, expected, imports)
 }
 
 func prepareTypeInfoMock(t *testing.T) (*gomock.Controller, *MockTypeInfo) {

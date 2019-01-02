@@ -32,6 +32,10 @@ func TestEmbedded(t *testing.T) {
 
 type stubTypeCodegen struct{}
 
+func (*stubTypeCodegen) GenImportDecls() []string {
+	panic("implement me")
+}
+
 func (*stubTypeCodegen) GetName() string {
 	panic("implement me")
 }

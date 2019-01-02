@@ -8,6 +8,7 @@ import (
 	"testing"
 )
 
+//go:generate mockgen -package=codegen -destination=./mock_dep_pkg_path_info.go github.com/lonegunmanb/syrinx/codegen DepPkgPathInfo
 func TestGetPkgNameFromPkgPath(t *testing.T) {
 	cases := []*funk.Tuple{
 		{"testing", "testing"},
@@ -32,7 +33,7 @@ func TestGetDepPkgPathsWithPkgNameDuplicate(t *testing.T) {
 		mockTypeInfo.EXPECT().GetDepPkgPaths().Times(1).Return([]string{path})
 		typeInfos = append(typeInfos, mockTypeInfo)
 	}
-	sut := &genTask{
+	sut := &depPkgPathInfo{
 		typeInfos: typeInfos,
 	}
 	pathsReceived := sut.GetDepPkgPaths()

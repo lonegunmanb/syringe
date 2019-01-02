@@ -8,7 +8,7 @@ import (
 
 type productEmbeddedTypeWrap struct {
 	ast.EmbeddedType
-	typeCodegen TypeCodegen
+	typeInfoWrap TypeInfoWrap
 }
 
 const embeddedTypeInitTemplate = `product.%s = %scontainer.Resolve("%s").(%s)`
@@ -16,7 +16,7 @@ const embeddedTypeInitTemplate = `product.%s = %scontainer.Resolve("%s").(%s)`
 func (f *productEmbeddedTypeWrap) AssembleCode() string {
 	pkgPath := f.GetReferenceFrom().GetPkgPath()
 	typeDecl := getDeclType(pkgPath, f.GetType(), func(p *types.Package) string {
-		return f.typeCodegen.GetPkgNameFromPkgPath(p.Path())
+		return f.typeInfoWrap.GetPkgNameFromPkgPath(p.Path())
 	})
 
 	var name string

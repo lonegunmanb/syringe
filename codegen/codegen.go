@@ -1,27 +1,26 @@
 package codegen
 
 import (
-	"github.com/lonegunmanb/syrinx/ast"
 	"io"
 	"text/template"
 )
 
 type Codegen interface {
-	GenerateCode() error
-	GetPkgNameFromPkgPath(pkgPath string) string
+	//GenerateCode() error
+	//GetPkgNameFromPkgPath(pkgPath string) string
 }
 
 type codegen struct {
-	writer  io.Writer
-	genTask GenTask
+	writer         io.Writer
+	depPkgPathInfo DepPkgPathInfo
 }
 
 func (c *codegen) GetPkgNameFromPkgPath(pkgPath string) string {
-	return c.genTask.GetPkgNameFromPkgPath(pkgPath)
+	return c.depPkgPathInfo.GetPkgNameFromPkgPath(pkgPath)
 }
 
-func NewCodegen(writer io.Writer, genTask GenTask) Codegen {
-	return &codegen{writer: writer, genTask: genTask}
+func NewCodegen(writer io.Writer, depPkgPathInfo DepPkgPathInfo) Codegen {
+	return &codegen{writer: writer, depPkgPathInfo: depPkgPathInfo}
 }
 
 const pkgDecl = `package {{.GetPkgName}}`
@@ -40,15 +39,15 @@ func (c *codegen) genImportDecls() error {
 	return c.gen("imports", importDecl)
 }
 
-func (c *codegen) GenerateCode() error {
-	return Call(func() error {
-		return c.genPkgDecl()
-	}).Call(func() error {
-		return c.genImportDecls()
-	}).CallEach(c.genTask.GetTypeInfos(), func(t interface{}) error {
-		return NewProductCodegen(t.(ast.TypeInfo), c.writer, c).GenerateCode()
-	}).Err
-}
+//func (c *codegen) GenerateCode() error {
+//	return Call(func() error {
+//		return c.genPkgDecl()
+//	}).Call(func() error {
+//		return c.genImportDecls()
+//	}).CallEach(c.depPkgPathInfo.GetTypeInfos(), func(t interface{}) error {
+//		return NewProductCodegen(t.(ast.TypeInfo), c.writer, c).GenerateCode()
+//	}).Err
+//}
 
 func (c *codegen) gen(templateName string, text string) (err error) {
 	t := template.New(templateName)
@@ -56,6 +55,6 @@ func (c *codegen) gen(templateName string, text string) (err error) {
 	if err != nil {
 		return
 	}
-	err = t.Execute(c.writer, c.genTask)
+	err = t.Execute(c.writer, c.depPkgPathInfo)
 	return
 }

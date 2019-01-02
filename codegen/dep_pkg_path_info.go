@@ -7,22 +7,25 @@ import (
 	"strings"
 )
 
-type GenTask interface {
-	GetPkgName() string
+type DepPkgPathInfo interface {
 	GetDepPkgPaths() []string
 	GenImportDecls() []string
-	GetTypeInfos() []ast.TypeInfo
+	//GetTypeInfos() []ast.TypeInfo
 	GetPkgNameFromPkgPath(pkgPath string) string
 }
 
-type genTask struct {
-	pkgName              string
+//
+type depPkgPathInfo struct {
 	typeInfos            []ast.TypeInfo
 	depPkgPaths          []string
 	depPkgPathPkgNameMap map[string]string
 }
 
-func (c *genTask) GenImportDecls() []string {
+func NewDepPkgPathInfo(typeInfos []ast.TypeInfo) DepPkgPathInfo {
+	return &depPkgPathInfo{typeInfos: typeInfos}
+}
+
+func (c *depPkgPathInfo) GenImportDecls() []string {
 	paths := c.GetDepPkgPaths()
 	results := make([]string, 0, len(c.depPkgPathPkgNameMap))
 	//we iterate paths so generated import decls' order is as same as fields' order
@@ -37,7 +40,7 @@ func (c *genTask) GenImportDecls() []string {
 	return results
 }
 
-func (c *genTask) GetPkgNameFromPkgPath(pkgPath string) string {
+func (c *depPkgPathInfo) GetPkgNameFromPkgPath(pkgPath string) string {
 	name, ok := c.depPkgPathPkgNameMap[pkgPath]
 	if !ok {
 		name = getPkgNameFromPkgPath(pkgPath)
@@ -45,11 +48,7 @@ func (c *genTask) GetPkgNameFromPkgPath(pkgPath string) string {
 	return name
 }
 
-func (c *genTask) GetPkgName() string {
-	return c.pkgName
-}
-
-func (c *genTask) GetDepPkgPaths() []string {
+func (c *depPkgPathInfo) GetDepPkgPaths() []string {
 	if c.depPkgPaths != nil {
 		return c.depPkgPaths
 	}
@@ -58,15 +57,11 @@ func (c *genTask) GetDepPkgPaths() []string {
 	return c.depPkgPaths
 }
 
-func (c *genTask) GetTypeInfos() []ast.TypeInfo {
+func (c *depPkgPathInfo) GetTypeInfos() []ast.TypeInfo {
 	return c.typeInfos
 }
 
-func NewCodegenTask(pkgName string, typeInfos []ast.TypeInfo) GenTask {
-	return &genTask{pkgName: pkgName, typeInfos: typeInfos}
-}
-
-func (c *genTask) initDepPkgPaths() []string {
+func (c *depPkgPathInfo) initDepPkgPaths() []string {
 	paths := make([]string, len(c.typeInfos))
 	linq.From(c.typeInfos).SelectMany(func(typeInfo interface{}) linq.Query {
 		return linq.From(typeInfo.(ast.TypeInfo).GetDepPkgPaths())
@@ -74,7 +69,7 @@ func (c *genTask) initDepPkgPaths() []string {
 	return paths
 }
 
-func (c *genTask) initDepPkgPathPkgNameMap() map[string]string {
+func (c *depPkgPathInfo) initDepPkgPathPkgNameMap() map[string]string {
 	pkgNamePkgPathMap := make(map[string][]string)
 	for _, path := range c.depPkgPaths {
 		pkgName := getPkgNameFromPkgPath(path)

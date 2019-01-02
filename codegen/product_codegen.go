@@ -39,27 +39,19 @@ import (
 type ProductCodegen interface {
 	GenerateCode() error
 	Writer() io.Writer
-	GetPkgNameFromPkgPath(pkgPath string) string
 }
 
 type productCodegen struct {
-	codegen  Codegen
 	writer   io.Writer
-	typeInfo TypeCodegen
+	typeInfo TypeInfoWrap
 }
 
-func (c *productCodegen) GetPkgNameFromPkgPath(pkgPath string) string {
-	return c.codegen.GetPkgNameFromPkgPath(pkgPath)
+func newProductCodegen(t ast.TypeInfo, writer io.Writer) *productCodegen {
+	return &productCodegen{writer: writer, typeInfo: NewTypeInfoWrap(t)}
 }
 
-func newProductCodegen(t ast.TypeInfo, writer io.Writer, codegen Codegen) *productCodegen {
-	c := &productCodegen{codegen: codegen, writer: writer}
-	c.typeInfo = &typeInfoWrap{TypeInfo: t, codegen: c}
-	return c
-}
-
-func NewProductCodegen(t ast.TypeInfo, writer io.Writer, codegen Codegen) ProductCodegen {
-	return newProductCodegen(t, writer, codegen)
+func NewProductCodegen(t ast.TypeInfo, writer io.Writer) ProductCodegen {
+	return newProductCodegen(t, writer)
 }
 
 func (c *productCodegen) Writer() io.Writer {
@@ -68,6 +60,10 @@ func (c *productCodegen) Writer() io.Writer {
 
 func (c *productCodegen) GenerateCode() error {
 	return Call(func() error {
+		return c.genPkgDecl()
+	}).Call(func() error {
+		return c.genImportDecls()
+	}).Call(func() error {
 		return c.genCreateFuncDecl()
 	}).Call(func() error {
 		return c.genAssembleFuncDecl()
@@ -76,8 +72,24 @@ func (c *productCodegen) GenerateCode() error {
 	}).Err
 }
 
+const productPkgDecl = `package {{.GetPkgName}}`
+
+func (c *productCodegen) genPkgDecl() error {
+	return c.gen("pkg", productPkgDecl)
+}
+
+const productImportDecl = `
+import (
+    "github.com/lonegunmanb/syrinx/ioc"
+{{with .GenImportDecls}}{{range .}}    {{.}}
+{{end}}{{end}})`
+
+func (c *productCodegen) genImportDecls() error {
+	return c.gen("imports", productImportDecl)
+}
+
 const createFuncDecl = `
-func Create_{{.GetPkgName}}_{{.GetName}}(container ioc.Container) *{{.GetName}} {
+func Create_{{.GetName}}(container ioc.Container) *{{.GetName}} {
 	product := new({{.GetName}})
 	Assemble_{{.GetName}}(product, container)
 	return product
@@ -88,7 +100,7 @@ func (c *productCodegen) genCreateFuncDecl() error {
 }
 
 const assembleFuncDecl = `
-func Assemble_{{.GetPkgName}}_{{.GetName}}(product *{{.GetName}}, container ioc.Container) {
+func Assemble_{{.GetName}}(product *{{.GetName}}, container ioc.Container) {
 {{with .GetEmbeddedTypeAssigns}}{{range .}}	{{.AssembleCode}}
 {{end}}{{end}}{{with .GetFieldAssigns}}{{range .}}	{{.AssembleCode}}
 {{end}}{{end}}}`
@@ -98,7 +110,7 @@ func (c *productCodegen) genAssembleFuncDecl() error {
 }
 
 const registerFuncDecl = `
-func Register(container ioc.Container) {
+func Register_{{.GetName}}(container ioc.Container) {
 	container.RegisterFactory((*{{.GetName}})(nil), func(ioc ioc.Container) interface{} {
 		return Create_{{.GetName}}(ioc)
 	})

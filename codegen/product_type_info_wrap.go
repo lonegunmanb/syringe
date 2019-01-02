@@ -5,26 +5,38 @@ import (
 	"github.com/lonegunmanb/syrinx/ast"
 )
 
-type TypeCodegen interface {
+type TypeInfoWrap interface {
 	GetName() string
 	GetPkgName() string
 	GetDepPkgPaths() []string
 	GetFieldAssigns() []Assembler
 	GetEmbeddedTypeAssigns() []Assembler
 	GetPkgNameFromPkgPath(pkgPath string) string
+	GenImportDecls() []string
 }
 
 type typeInfoWrap struct {
 	ast.TypeInfo
-	codegen ProductCodegen
+	depPkgPathInfo DepPkgPathInfo
+}
+
+func NewTypeInfoWrap(typeInfo ast.TypeInfo) TypeInfoWrap {
+	return &typeInfoWrap{
+		TypeInfo:       typeInfo,
+		depPkgPathInfo: NewDepPkgPathInfo([]ast.TypeInfo{typeInfo}),
+	}
+}
+
+func (t *typeInfoWrap) GenImportDecls() []string {
+	return t.depPkgPathInfo.GenImportDecls()
 }
 
 func (t *typeInfoWrap) GetPkgNameFromPkgPath(pkgPath string) string {
-	return t.codegen.GetPkgNameFromPkgPath(pkgPath)
+	return t.depPkgPathInfo.GetPkgNameFromPkgPath(pkgPath)
 }
 
 func (t *typeInfoWrap) GetPkgName() string {
-	return t.codegen.GetPkgNameFromPkgPath(t.GetPkgPath())
+	return t.TypeInfo.GetPkgName()
 }
 
 func (t *typeInfoWrap) GetFieldAssigns() []Assembler {
@@ -40,7 +52,7 @@ func (t *typeInfoWrap) GetEmbeddedTypeAssigns() []Assembler {
 	embeddedTypes := t.TypeInfo.GetEmbeddedTypes()
 	results := make([]Assembler, 0, len(embeddedTypes))
 	linq.From(embeddedTypes).Select(func(embeddedType interface{}) interface{} {
-		return &productEmbeddedTypeWrap{EmbeddedType: embeddedType.(ast.EmbeddedType), typeCodegen: t}
+		return &productEmbeddedTypeWrap{EmbeddedType: embeddedType.(ast.EmbeddedType), typeInfoWrap: t}
 	}).ToSlice(&results)
 	return results
 }

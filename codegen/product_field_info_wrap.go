@@ -8,7 +8,7 @@ import (
 
 type productFieldInfoWrap struct {
 	ast.FieldInfo
-	typeInfo TypeCodegen
+	typeInfo TypeInfoWrap
 }
 
 //  By Interface

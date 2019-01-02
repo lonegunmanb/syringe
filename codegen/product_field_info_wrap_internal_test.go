@@ -144,7 +144,7 @@ type Decoration interface {
 
 func TestGenerateAssembleCode(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	mockTypeCodegen := NewMockTypeCodegen(ctrl)
+	mockTypeCodegen := NewMockTypeInfoWrap(ctrl)
 	mockTypeCodegen.EXPECT().GetPkgNameFromPkgPath("github.com/lonegunmanb/syrinx/test_code/fly_car").Return("fly_car")
 	mockTypeCodegen.EXPECT().GetPkgNameFromPkgPath("github.com/lonegunmanb/syrinx/test_code/car").Return("car")
 	mockTypeCodegen.EXPECT().GetPkgNameFromPkgPath("github.com/lonegunmanb/syrinx/test_code/flyer").Return("flyer")
