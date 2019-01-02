@@ -13,13 +13,23 @@ import (
 	"testing"
 )
 
+const expectedPackageDecl = "package ast"
+
 func TestGenPackageDecl(t *testing.T) {
 	testProductGen(t, func(mockTypeCodegen *MockTypeInfoWrap) {
 		mockTypeCodegen.EXPECT().GetPkgName().Times(1).Return("ast")
 	}, func(gen *productCodegen) error {
 		return gen.genPkgDecl()
-	}, "package ast")
+	}, expectedPackageDecl)
 }
+
+const expectedImportDecl = `
+import (
+    "github.com/lonegunmanb/syrinx/ioc"
+    "go/ast"
+    "go/token"
+    "go/types"
+)`
 
 func TestGenImportsDecl(t *testing.T) {
 	testProductGen(t, func(mockTypeCodegen *MockTypeInfoWrap) {
@@ -31,13 +41,7 @@ func TestGenImportsDecl(t *testing.T) {
 		setupMockToGenImports(mockTypeCodegen, depImports)
 	}, func(gen *productCodegen) error {
 		return gen.genImportDecls()
-	}, `
-import (
-    "github.com/lonegunmanb/syrinx/ioc"
-    "go/ast"
-    "go/token"
-    "go/types"
-)`)
+	}, expectedImportDecl)
 }
 
 func TestShouldNotGenExtraImportsIfDepPathsEmpty(t *testing.T) {

@@ -6,7 +6,6 @@ package codegen
 import (
 	"github.com/lonegunmanb/syrinx/ast"
 	"io"
-	"text/template"
 )
 
 //`
@@ -69,20 +68,12 @@ func (c *productCodegen) GenerateCode() error {
 	}).Err
 }
 
-const productPkgDecl = `package {{.GetPkgName}}`
-
 func (c *productCodegen) genPkgDecl() error {
-	return c.gen("pkg", productPkgDecl)
+	return genPkgDecl(c.writer, c.typeInfo)
 }
 
-const productImportDecl = `
-import (
-    "github.com/lonegunmanb/syrinx/ioc"
-{{with .GenImportDecls}}{{range .}}    {{.}}
-{{end}}{{end}})`
-
 func (c *productCodegen) genImportDecls() error {
-	return c.gen("imports", productImportDecl)
+	return genImportDecl(c.writer, c.typeInfo)
 }
 
 const createFuncDecl = `
@@ -118,11 +109,5 @@ func (c *productCodegen) genRegisterFuncDecl() (err error) {
 }
 
 func (c *productCodegen) gen(templateName string, text string) (err error) {
-	t := template.New(templateName)
-	t, err = t.Parse(text)
-	if err != nil {
-		return
-	}
-	err = t.Execute(c.writer, c.typeInfo)
-	return
+	return gen(templateName, text, c.writer, c.typeInfo)
 }

@@ -14,7 +14,7 @@ func CreateIoc() ioc.Container {
 	car.Register_Car(container)
 	fly_car.Register_FlyCar(container)
 	flyer.Register_Plane(container)
-	p0.Register(container)
-	p1.Register(container)
+	p0.Register_Request(container)
+	p1.Register_Request(container)
 	return container
 }

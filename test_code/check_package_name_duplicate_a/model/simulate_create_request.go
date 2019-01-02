@@ -13,7 +13,7 @@ func Create_Request(container ioc.Container) *Request {
 //noinspection ALL
 func Assemble_Request(product *Request, container ioc.Container) {
 }
-func Register(container ioc.Container) {
+func Register_Request(container ioc.Container) {
 	container.RegisterFactory((*Request)(nil), func(ioc ioc.Container) interface{} {
 		return Create_Request(ioc)
 	})
