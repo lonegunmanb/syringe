@@ -3,6 +3,7 @@ package codegen
 import (
 	"github.com/ahmetb/go-linq"
 	"github.com/lonegunmanb/syrinx/ast"
+	"github.com/lonegunmanb/syrinx/util"
 	"io"
 	"text/template"
 )
@@ -74,7 +75,7 @@ func (c *registerCodegen) genRegister() error {
 }
 
 func (c *registerCodegen) GenerateCode() error {
-	return Call(func() error {
+	return util.Call(func() error {
 		return c.genPkgDecl()
 	}).Call(func() error {
 		return c.genImportDecls()

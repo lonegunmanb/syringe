@@ -5,6 +5,7 @@ package codegen
 
 import (
 	"github.com/lonegunmanb/syrinx/ast"
+	"github.com/lonegunmanb/syrinx/util"
 	"io"
 )
 
@@ -55,7 +56,7 @@ func (c *productCodegen) Writer() io.Writer {
 }
 
 func (c *productCodegen) GenerateCode() error {
-	return Call(func() error {
+	return util.Call(func() error {
 		return c.genPkgDecl()
 	}).Call(func() error {
 		return c.genImportDecls()
