@@ -173,6 +173,10 @@ func TestGenerateAssembleCode(t *testing.T) {
 		planeField.AssembleCode())
 }
 
+func TestGetInjectKeyFromTag(t *testing.T) {
+	assert.Equal(t, "expected", getKeyFromTag("`json:\"name\" xml:\"name\" inject:\"expected\"`"))
+}
+
 func testTypeDecls(t *testing.T, args []funk.Tuple) {
 	for _, tuple := range args {
 		testTypeDecl(t, tuple.Element1.(string), tuple.Element2.(string))

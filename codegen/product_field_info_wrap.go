@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/lonegunmanb/syrinx/ast"
 	"go/types"
+	"regexp"
+	"strings"
 )
 
 type productFieldInfoWrap struct {
@@ -22,9 +24,12 @@ const fieldAssignTemplate = `product.%s = %scontainer.Resolve("%s").(%s)`
 func (f *productFieldInfoWrap) AssembleCode() string {
 	fieldType := f.GetType()
 	key := fieldType.String()
-	//if f.GetTag() != "" {
-	//	key = f.GetTag()
-	//}
+	if f.GetTag() != "" {
+		tagKey := getKeyFromTag(f.GetTag())
+		if tagKey != "" {
+			key = tagKey
+		}
+	}
 	pkgPath := f.GetReferenceFrom().GetPkgPath()
 	declType := getDeclType(pkgPath, fieldType, func(p *types.Package) string {
 		return f.typeInfo.GetPkgNameFromPkgPath(p.Path())
@@ -56,4 +61,14 @@ func (f *productFieldInfoWrap) AssembleCode() string {
 	}
 
 	return fmt.Sprintf(fieldAssignTemplate, f.GetName(), star, key, declType)
+}
+
+var injectTagRegex = regexp.MustCompile("inject:\".*\"")
+
+func getKeyFromTag(tag string) string {
+	injectTag := injectTagRegex.FindString(tag)
+	if injectTag == "" {
+		return injectTag
+	}
+	return strings.TrimPrefix(strings.TrimSuffix(injectTag, "\""), "inject:\"")
 }

@@ -31,19 +31,27 @@ func TestGetDepPkgPathsWithPkgNameDuplicate(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	for _, path := range paths {
 		mockTypeInfo := NewMockTypeInfo(ctrl)
+		mockTypeInfo.EXPECT().GetPkgPath().Times(1).Return("ast")
 		mockTypeInfo.EXPECT().GetDepPkgPaths().Times(1).Return([]string{path})
 		typeInfos = append(typeInfos, mockTypeInfo)
 	}
 	sut := &depPkgPathInfo{
 		typeInfos: typeInfos,
 	}
+	expectedPaths := []string{
+		"ast",
+		"a",
+		"b/b",
+		"c/b",
+	}
 	pathsReceived := sut.GetDepPkgPaths()
-	assert.Equal(t, paths, pathsReceived)
+	assert.Equal(t, expectedPaths, pathsReceived)
 	assert.Equal(t, "a", sut.GetPkgNameFromPkgPath("a"))
 	assert.Equal(t, "p0", sut.GetPkgNameFromPkgPath("b/b"))
 	assert.Equal(t, "p1", sut.GetPkgNameFromPkgPath("c/b"))
 	imports := sut.GenImportDecls()
 	expected := []string{
+		`"ast"`,
 		`"a"`,
 		`p0 "b/b"`,
 		`p1 "c/b"`,
@@ -57,6 +65,7 @@ func TestGetDepPkgPathsWithPkgNameDuplicateAndConflictWithGeneratedPackageName(t
 		"a/b",
 		"b/b",
 	}, []string{
+		`"ast"`,
 		`"p0"`,
 		`p1 "a/b"`,
 		`p2 "b/b"`,
@@ -69,6 +78,7 @@ func testDuplicateAndConflictPackageName(t *testing.T, depPkgPaths []string, exp
 	defer ctrl.Finish()
 	for _, path := range depPkgPaths {
 		mockTypeInfo := NewMockTypeInfo(ctrl)
+		mockTypeInfo.EXPECT().GetPkgPath().Times(1).Return("ast")
 		mockTypeInfo.EXPECT().GetDepPkgPaths().Times(1).Return([]string{path})
 		typeInfos = append(typeInfos, mockTypeInfo)
 	}
