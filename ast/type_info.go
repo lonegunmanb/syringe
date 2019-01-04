@@ -11,6 +11,7 @@ type TypeInfo interface {
 	GetName() string
 	GetPkgPath() string
 	GetPkgName() string
+	GetPhysicalPath() string
 	GetFields() []FieldInfo
 	GetKind() reflect.Kind
 	GetType() types.Type
@@ -23,10 +24,15 @@ type typeInfo struct {
 	Name          string
 	PkgPath       string
 	PkgName       string
+	PhysicalPath  string
 	Fields        []FieldInfo
 	Kind          reflect.Kind
 	Type          types.Type
 	EmbeddedTypes []EmbeddedType
+}
+
+func (typeInfo *typeInfo) GetPhysicalPath() string {
+	return typeInfo.PhysicalPath
 }
 
 func (typeInfo *typeInfo) GetName() string {

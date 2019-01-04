@@ -78,3 +78,33 @@ func (s *SingleFunc) Call(f func(interface{}) error) *Action {
 		Err: err,
 	}
 }
+
+type BiFunc struct {
+	Err  error
+	Ret1 interface{}
+	Ret2 interface{}
+}
+
+func (s *SingleFunc) CallBiRet(f func(interface{}) (interface{}, interface{}, error)) *BiFunc {
+	if s.Err == nil {
+		ret1, ret2, err := f(s.Ret)
+		return &BiFunc{
+			Err:  err,
+			Ret1: ret1,
+			Ret2: ret2,
+		}
+	}
+	return &BiFunc{
+		Err: s.Err,
+	}
+}
+
+func (b *BiFunc) Call(f func(interface{}, interface{}) error) *Action {
+	var err error
+	if b.Err == nil {
+		err = f(b.Ret1, b.Ret2)
+	}
+	return &Action{
+		Err: err,
+	}
+}

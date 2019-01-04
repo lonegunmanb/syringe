@@ -5,12 +5,12 @@ import (
 	"testing"
 )
 
-const pkgPath = "github.com/lonegunmanb/syrinx/ast"
+const testPkgPath = "github.com/lonegunmanb/syrinx/ast"
 
 func parseCode(t *testing.T, sourceCode string) *typeWalker {
 	typeWalker := NewTypeWalker().(*typeWalker)
 
-	err := typeWalker.Parse(pkgPath, sourceCode)
+	err := typeWalker.Parse(testPkgPath, sourceCode)
 	assert.Nil(t, err)
 	return typeWalker
 }

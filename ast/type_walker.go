@@ -5,11 +5,13 @@ import (
 	"github.com/ahmetb/go-linq"
 	"github.com/golang-collections/collections/stack"
 	"github.com/lonegunmanb/johnnie"
+	"github.com/lonegunmanb/syrinx/util"
 	"go/ast"
 	"go/importer"
 	"go/parser"
 	"go/token"
 	"go/types"
+	"io/ioutil"
 	"reflect"
 )
 
@@ -22,16 +24,19 @@ type TypeWalker interface {
 	johnnie.Walker
 	GetTypes() []TypeInfo
 	Parse(pkgPath string, sourceCode string) error
+	ParseFile(path string, fileName string) error
 }
 
 type typeWalker struct {
 	johnnie.DefaultWalker
+	osEnv         GoPathEnv
 	types         []*typeInfo
 	typeInfoStack stack.Stack
 	opsStack      stack.Stack
 	typeInfo      types.Info
 	pkgPath       string
 	pkgName       string
+	physicalPath  string
 }
 
 func (walker *typeWalker) GetTypes() []TypeInfo {
@@ -43,19 +48,37 @@ func (walker *typeWalker) GetTypes() []TypeInfo {
 }
 
 func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
+	return walker.parse(pkgPath, "src.go", sourceCode)
+}
+
+func (walker *typeWalker) ParseFile(path string, fileName string) error {
+	walker.physicalPath = path
+	osEnv := walker.osEnv
+	filePath := osEnv.ConcatFileNameWithPath(path, fileName)
+	return util.CallSingleRet(func() (interface{}, error) {
+		return ioutil.ReadFile(filePath)
+	}).CallBiRet(func(buffer interface{}) (interface{}, interface{}, error) {
+		sourceCode := string(buffer.([]byte))
+		pkgPath, err := GetPkgPath(osEnv, path)
+		return sourceCode, pkgPath, err
+	}).Call(func(sourceCode interface{}, pkgPath interface{}) error {
+		return walker.parse(pkgPath.(string), fileName, sourceCode.(string))
+	}).Err
+}
+
+func (walker *typeWalker) parse(pkgPath string, fileName string, sourceCode string) error {
 	fileset := token.NewFileSet()
-	astFile, err := parser.ParseFile(fileset, "src.go", sourceCode, 0)
-	if err != nil {
-		return err
-	}
-	typeInfo, err := walker.parseTypeInfo(pkgPath, fileset, astFile)
-	if err != nil {
-		return err
-	}
-	walker.typeInfo = typeInfo
-	walker.pkgPath = pkgPath
-	johnnie.Visit(walker, astFile)
-	return nil
+	return util.CallSingleRet(func() (interface{}, error) {
+		return parser.ParseFile(fileset, fileName, sourceCode, 0)
+	}).CallBiRet(func(astFile interface{}) (interface{}, interface{}, error) {
+		typeInfo, err := walker.parseTypeInfo(pkgPath, fileset, astFile.(*ast.File))
+		return typeInfo, astFile, err
+	}).Call(func(typeInfo interface{}, astFile interface{}) error {
+		walker.typeInfo = typeInfo.(types.Info)
+		walker.pkgPath = pkgPath
+		johnnie.Visit(walker, astFile.(*ast.File))
+		return nil
+	}).Err
 }
 
 func (walker *typeWalker) Types() []*typeInfo {
@@ -76,7 +99,9 @@ func (walker *typeWalker) WalkField(field *ast.Field) {
 }
 
 func (walker *typeWalker) WalkStructType(structType *ast.StructType) {
-	walker.addTypeInfo(structType, reflect.Struct)
+	if walker.opsStack.Peek() == analyzingType {
+		walker.addTypeInfo(structType, reflect.Struct)
+	}
 }
 
 func (walker *typeWalker) EndWalkStructType(structType *ast.StructType) {
@@ -84,7 +109,9 @@ func (walker *typeWalker) EndWalkStructType(structType *ast.StructType) {
 }
 
 func (walker *typeWalker) WalkInterfaceType(interfaceType *ast.InterfaceType) {
-	walker.addTypeInfo(interfaceType, reflect.Interface)
+	if walker.opsStack.Peek() == analyzingType {
+		walker.addTypeInfo(interfaceType, reflect.Interface)
+	}
 }
 
 func (walker *typeWalker) EndWalkInterfaceType(interfaceType *ast.InterfaceType) {
@@ -109,28 +136,40 @@ func (walker *typeWalker) EndWalkFuncType(funcType *ast.FuncType) {
 }
 
 func NewTypeWalker() TypeWalker {
+	return newTypeWalkerWithPhysicalPath("")
+}
+
+func newTypeWalkerWithPhysicalPath(physicalPath string) TypeWalker {
 	return &typeWalker{
-		types: []*typeInfo{},
+		types:        []*typeInfo{},
+		osEnv:        &envImpl{},
+		physicalPath: physicalPath,
 	}
 }
 
 func (*typeWalker) parseTypeInfo(pkgPath string, fileSet *token.FileSet,
 	astFile *ast.File) (types.Info, error) {
 	typeInfo := types.Info{Types: make(map[ast.Expr]types.TypeAndValue)}
-	_, err := (&types.Config{ /*Importer: importer.Default()*/ Importer: importer.For("source", nil)}).
+	_, err := (&types.Config{Importer: importer.For("source", nil)}).
 		Check(pkgPath, fileSet, []*ast.File{astFile}, &typeInfo)
 	return typeInfo, err
 }
 
 func (walker *typeWalker) addTypeInfo(structTypeExpr ast.Expr, kind reflect.Kind) {
-	typeName := walker.typeInfoStack.Pop().(string)
+
+	item := walker.typeInfoStack.Pop()
+	typeName, ok := item.(string)
+	if !ok {
+		println(typeName)
+	}
 	structType := walker.typeInfo.Types[structTypeExpr].Type
 	typeInfo := &typeInfo{
-		Name:    typeName,
-		PkgPath: walker.pkgPath,
-		PkgName: walker.pkgName,
-		Type:    structType,
-		Kind:    kind,
+		Name:         typeName,
+		PkgPath:      walker.pkgPath,
+		PkgName:      walker.pkgName,
+		PhysicalPath: walker.physicalPath,
+		Type:         structType,
+		Kind:         kind,
 	}
 	walker.typeInfoStack.Push(typeInfo)
 	walker.types = append(walker.types, typeInfo)

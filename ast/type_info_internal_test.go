@@ -25,7 +25,7 @@ type Struct struct{
 `
 	walker := parseCode(t, sourceCode)
 	typeInfo := walker.Types()[0]
-	assert.Equal(t, pkgPath, typeInfo.PkgPath)
+	assert.Equal(t, testPkgPath, typeInfo.PkgPath)
 	assert.Equal(t, "ast", typeInfo.PkgName)
 }
 
@@ -37,7 +37,7 @@ type Struct struct{
 `
 	walker := parseCode(t, sourceCode)
 	typeInfo := walker.Types()[0]
-	assert.Equal(t, pkgPath, typeInfo.PkgPath)
+	assert.Equal(t, testPkgPath, typeInfo.PkgPath)
 	assert.Equal(t, "test", typeInfo.PkgName)
 }
 

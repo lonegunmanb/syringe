@@ -61,15 +61,6 @@ func TestGetDepPkgPathsWithPkgNameDuplicateAndConflictWithGeneratedPackageName(t
 		`p1 "a/b"`,
 		`p2 "b/b"`,
 	})
-	testDuplicateAndConflictPackageName(t, []string{
-		"a/b",
-		"b/b",
-		"p0",
-	}, []string{
-		`p0 "a/b"`,
-		`p1 "b/b"`,
-		`p2 "p0"`,
-	})
 }
 
 func testDuplicateAndConflictPackageName(t *testing.T, depPkgPaths []string, expected []string) {

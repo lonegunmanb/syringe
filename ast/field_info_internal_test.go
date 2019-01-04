@@ -139,7 +139,7 @@ type Struct struct {
 }
 `
 	walker := parseCode(t, sourceCode)
-	assertPkgPath(t, walker, pkgPath)
+	assertPkgPath(t, walker, testPkgPath)
 }
 
 func TestNestedInterfaceFieldPkgPath(t *testing.T) {
@@ -153,7 +153,7 @@ type Struct struct {
 }
 `
 	walker := parseCode(t, sourceCode)
-	assertPkgPath(t, walker, pkgPath)
+	assertPkgPath(t, walker, testPkgPath)
 }
 
 func TestBasicFieldPkgPath(t *testing.T) {

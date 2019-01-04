@@ -22,9 +22,9 @@ const fieldAssignTemplate = `product.%s = %scontainer.Resolve("%s").(%s)`
 func (f *productFieldInfoWrap) AssembleCode() string {
 	fieldType := f.GetType()
 	key := fieldType.String()
-	if f.GetTag() != "" {
-		key = f.GetTag()
-	}
+	//if f.GetTag() != "" {
+	//	key = f.GetTag()
+	//}
 	pkgPath := f.GetReferenceFrom().GetPkgPath()
 	declType := getDeclType(pkgPath, fieldType, func(p *types.Package) string {
 		return f.typeInfo.GetPkgNameFromPkgPath(p.Path())

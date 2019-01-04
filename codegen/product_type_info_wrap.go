@@ -53,7 +53,7 @@ func (t *typeInfoWrap) GetFieldAssigns() []Assembler {
 	fields := t.TypeInfo.GetFields()
 	results := make([]Assembler, 0, len(fields))
 	linq.From(fields).Select(func(fieldInfo interface{}) interface{} {
-		return &productFieldInfoWrap{FieldInfo: fieldInfo.(ast.FieldInfo)}
+		return &productFieldInfoWrap{FieldInfo: fieldInfo.(ast.FieldInfo), typeInfo: t}
 	}).ToSlice(&results)
 	return results
 }

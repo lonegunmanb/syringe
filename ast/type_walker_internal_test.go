@@ -8,6 +8,7 @@ import (
 	"testing"
 )
 
+//go:generate mockgen -package=ast -destination=./mock_type_walker.go github.com/lonegunmanb/syrinx/ast TypeWalker
 func TestFuncDecl(t *testing.T) {
 	sourceCode := `
 package ast
@@ -328,6 +329,19 @@ type Struct3 struct {
 	assertType(t, struct2, "*"+struct2.GetFullName(), EmbeddedByPointer, struct3.EmbeddedTypes[2])
 }
 
+func TestWalkerWithPhysicalPath(t *testing.T) {
+	sourceCode := `
+package ast
+type TestStruct struct {
+}
+`
+	expectedPhysicalPath := "expected"
+	typeWalker := newTypeWalkerWithPhysicalPath(expectedPhysicalPath).(*typeWalker)
+	err := typeWalker.Parse(testPkgPath, sourceCode)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedPhysicalPath, typeWalker.GetTypes()[0].GetPhysicalPath())
+}
+
 func assertType(t *testing.T, typeInfo *typeInfo, fullName string, expectedKind EmbeddedKind, embeddedType EmbeddedType) {
 	assert.Equal(t, fullName, embeddedType.GetFullName())
 	assert.Equal(t, typeInfo.PkgPath, embeddedType.GetPkgPath())
@@ -404,6 +418,6 @@ func TestSubStructsWithSameStructureAreIdentical(t *testing.T) {
 	assert.Equal(t, "1", s2.Field.Field3.Field2)
 }
 
-func returnField1(input interface{}) int {
-	return input.(Struct2).Field.Field2
+func returnField1(input interface{}) string {
+	return input.(Struct2).Field.Field1
 }

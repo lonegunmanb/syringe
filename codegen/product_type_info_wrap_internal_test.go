@@ -19,6 +19,7 @@ func TestProductTypeInfoWrap_GetFieldAssigns(t *testing.T) {
 	fieldWrap, ok := fields[0].(*productFieldInfoWrap)
 	assert.True(t, ok)
 	assert.Equal(t, mockFieldInfo, fieldWrap.FieldInfo)
+	assert.Equal(t, sut, fieldWrap.typeInfo)
 }
 
 func TestProductTypeInfoWrap_GetEmbeddedTypeAssigns(t *testing.T) {
@@ -33,6 +34,7 @@ func TestProductTypeInfoWrap_GetEmbeddedTypeAssigns(t *testing.T) {
 	embeddedTypeWrap, ok := embeddedTypesGot[0].(*productEmbeddedTypeWrap)
 	assert.True(t, ok)
 	assert.Equal(t, mockEmbeddedTypes, embeddedTypeWrap.EmbeddedType)
+	assert.Equal(t, sut, embeddedTypeWrap.typeInfoWrap)
 }
 
 func TestProductTypeInfoWrap_GetPkgName(t *testing.T) {
