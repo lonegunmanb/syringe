@@ -24,6 +24,16 @@ func TestGetBasicTypeDecl(t *testing.T) {
 	testTypeDecl(t, "", "int")
 }
 
+func TestAssembleCodeForBasicType(t *testing.T) {
+	field := getField(t, "", "int")
+	sut := &productFieldInfoWrap{
+		FieldInfo: field,
+		typeInfo:  NewTypeInfoWrap(field.GetReferenceFrom()),
+	}
+	code := sut.AssembleCode()
+	assert.Equal(t, "product.Field = container.Resolve(\"int\").(int)", code)
+}
+
 func TestGetNamedTypeDecl(t *testing.T) {
 	testTypeDecls(t, []funk.Tuple{
 		{"import \"go/ast\"", "ast.Node"},

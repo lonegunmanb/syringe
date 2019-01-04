@@ -94,9 +94,12 @@ func (c *depPkgPathInfo) GetTypeInfos() []ast.TypeInfo {
 
 func (c *depPkgPathInfo) initDepPkgPaths() []string {
 	paths := make([]string, len(c.typeInfos))
-	linq.From(c.typeInfos).SelectMany(func(typeInfo interface{}) linq.Query {
-		return linq.From(typeInfo.(ast.TypeInfo).GetDepPkgPaths())
-	}).Distinct().ToSlice(&paths)
+	linq.From(c.typeInfos).Select(func(typeInfo interface{}) interface{} {
+		return typeInfo.(ast.TypeInfo).GetPkgPath()
+	}).Concat(
+		linq.From(c.typeInfos).SelectMany(func(typeInfo interface{}) linq.Query {
+			return linq.From(typeInfo.(ast.TypeInfo).GetDepPkgPaths())
+		})).Distinct().ToSlice(&paths)
 	return paths
 }
 

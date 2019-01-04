@@ -31,6 +31,10 @@ func (f *productFieldInfoWrap) AssembleCode() string {
 	})
 	star := "*"
 	switch t := f.GetType().(type) {
+	case *types.Basic:
+		{
+			star = ""
+		}
 	case *types.Named:
 		{
 			switch t.Underlying().(type) {
