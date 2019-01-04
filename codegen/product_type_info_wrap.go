@@ -27,7 +27,7 @@ func (t *typeInfoWrap) RegisterCode() string {
 }
 
 func NewTypeInfoWrap(typeInfo ast.TypeInfo) TypeInfoWrap {
-	return NewTypeInfoWrapWithDepPkgPath(typeInfo, NewDepPkgPathInfo([]ast.TypeInfo{typeInfo}))
+	return NewTypeInfoWrapWithDepPkgPath(typeInfo, NewDepPkgPathInfo([]ast.TypeInfo{typeInfo}, typeInfo.GetPkgPath()))
 }
 
 func NewTypeInfoWrapWithDepPkgPath(typeInfo ast.TypeInfo, depPkgPathInfo DepPkgPathInfo) TypeInfoWrap {

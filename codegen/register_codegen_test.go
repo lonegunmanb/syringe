@@ -102,11 +102,12 @@ func (f *FancyDecoration) LookAndFeel() string {
 const expectedRegisterCode = `package test_code
 import (
     "github.com/lonegunmanb/syrinx/ioc"
-    "github.com/lonegunmanb/syrinx/test_code/engine"
-    "github.com/lonegunmanb/syrinx/test_code/car"
-    "github.com/lonegunmanb/syrinx/test_code/flyer"
     p0 "github.com/lonegunmanb/syrinx/test_code/check_package_name_duplicate_a/model"
     p1 "github.com/lonegunmanb/syrinx/test_code/check_package_name_duplicate_b/model"
+    "github.com/lonegunmanb/syrinx/test_code/car"
+    "github.com/lonegunmanb/syrinx/test_code/engine"
+    "github.com/lonegunmanb/syrinx/test_code/flyer"
+    "github.com/lonegunmanb/syrinx/test_code/fly_car"
 )
 func CreateIoc() ioc.Container {
     container := ioc.NewContainer()

@@ -42,7 +42,7 @@ func (c *registerCodegen) GetRegisters() []Register {
 //noinspection GoUnusedExportedFunction
 func NewRegisterCodegen(writer io.Writer, typeInfos []ast.TypeInfo, pkgName string, pkgPath string) RegisterCodegen {
 	var typeInfosWraps []Register
-	pkgPathInfo := NewDepPkgPathInfo(typeInfos)
+	pkgPathInfo := NewDepPkgPathInfo(typeInfos, pkgPath)
 	linq.From(typeInfos).Select(func(typeInfo interface{}) interface{} {
 		return NewTypeInfoWrapWithDepPkgPath(typeInfo.(ast.TypeInfo), pkgPathInfo)
 	}).ToSlice(&typeInfosWraps)

@@ -50,10 +50,11 @@ type depPkgPathInfo struct {
 	typeInfos            []ast.TypeInfo
 	depPkgPaths          []string
 	depPkgPathPkgNameMap map[string]string
+	pkgPath              string
 }
 
-func NewDepPkgPathInfo(typeInfos []ast.TypeInfo) DepPkgPathInfo {
-	return &depPkgPathInfo{typeInfos: typeInfos}
+func NewDepPkgPathInfo(typeInfos []ast.TypeInfo, pkgPath string) DepPkgPathInfo {
+	return &depPkgPathInfo{typeInfos: typeInfos, pkgPath: pkgPath}
 }
 
 func (c *depPkgPathInfo) GenImportDecls() []string {
@@ -99,7 +100,9 @@ func (c *depPkgPathInfo) initDepPkgPaths() []string {
 	}).Concat(
 		linq.From(c.typeInfos).SelectMany(func(typeInfo interface{}) linq.Query {
 			return linq.From(typeInfo.(ast.TypeInfo).GetDepPkgPaths())
-		})).Distinct().ToSlice(&paths)
+		})).Distinct().Where(func(path interface{}) bool {
+		return path.(string) != c.pkgPath
+	}).ToSlice(&paths)
 	return paths
 }
 
