@@ -1,7 +1,7 @@
 package test_code_test
 
 //func TestCreateFlyCarCarByManualSimulate(t *testing.T) {
-//	container := ioc_gen.CreateIoc()
+//	container := test_code.CreateIoc()
 //	e := engine.NewEngine(100)
 //	container.RegisterFactory((*engine.Engine)(nil), func(ioc ioc.Container) interface{} {
 //		return e

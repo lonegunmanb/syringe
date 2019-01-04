@@ -2,6 +2,7 @@ package codegen_test
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/lonegunmanb/syrinx/ast"
 	"github.com/lonegunmanb/syrinx/codegen"
 	"github.com/stretchr/testify/assert"
@@ -18,8 +19,8 @@ import (
 
 type FlyCar struct {
 	*car.Car
-	flyer.Plane
-	Decoration  Decoration
+	flyer.Plane %s
+	Decoration  Decoration %s
 }
 
 type Decoration interface {
@@ -47,10 +48,11 @@ func Register_FlyCar(container ioc.Container) {
 		return Create_FlyCar(ioc)
 	})
 }`
+const injectTag = "`inject:\"\"`"
 
 func TestGenerateCreateProductCode(t *testing.T) {
 	walker := ast.NewTypeWalker()
-	err := walker.Parse("github.com/lonegunmanb/syrinx/test_code/fly_car", flyCarCode)
+	err := walker.Parse("github.com/lonegunmanb/syrinx/test_code/fly_car", fmt.Sprintf(flyCarCode, injectTag, injectTag))
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
 	writer := &bytes.Buffer{}

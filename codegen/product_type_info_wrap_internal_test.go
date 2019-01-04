@@ -11,6 +11,7 @@ func TestProductTypeInfoWrap_GetFieldAssigns(t *testing.T) {
 	ctrl, typeInfo := prepareTypeInfoMock(t)
 	defer ctrl.Finish()
 	mockFieldInfo := NewMockFieldInfo(ctrl)
+	mockFieldInfo.EXPECT().GetTag().Times(1).Return("inject:\"\"")
 	fieldInfos := []ast.FieldInfo{mockFieldInfo}
 	typeInfo.EXPECT().GetFields().Times(1).Return(fieldInfos)
 	sut := &typeInfoWrap{TypeInfo: typeInfo}
@@ -20,6 +21,18 @@ func TestProductTypeInfoWrap_GetFieldAssigns(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, mockFieldInfo, fieldWrap.FieldInfo)
 	assert.Equal(t, sut, fieldWrap.typeInfo)
+}
+
+func TestProductTypeInfoWrap_FieldWithoutInjectTagShouldNotExport(t *testing.T) {
+	ctrl, typeInfo := prepareTypeInfoMock(t)
+	defer ctrl.Finish()
+	mockFieldInfo := NewMockFieldInfo(ctrl)
+	mockFieldInfo.EXPECT().GetTag().Times(1).Return("")
+	fieldInfos := []ast.FieldInfo{mockFieldInfo}
+	typeInfo.EXPECT().GetFields().Times(1).Return(fieldInfos)
+	sut := &typeInfoWrap{TypeInfo: typeInfo}
+	fields := sut.GetFieldAssigns()
+	assert.Equal(t, 0, len(fields))
 }
 
 func TestProductTypeInfoWrap_GetEmbeddedTypeAssigns(t *testing.T) {

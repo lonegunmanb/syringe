@@ -7,6 +7,7 @@ package codegen
 //go:generate mockgen -package=codegen -destination=./mock_type_codegen.go github.com/lonegunmanb/syrinx/codegen TypeInfoWrap
 import (
 	"bytes"
+	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/lonegunmanb/syrinx/ast"
 	"github.com/stretchr/testify/assert"
@@ -122,18 +123,20 @@ import (
 
 type FlyCar struct {
 	*car.Car
-	flyer.Plane
-	Decoration  Decoration
+	flyer.Plane %s
+	Decoration  Decoration %s
 }
 
 type Decoration interface {
 	LookAndFeel() string
 }
 `
+const injectTag = "`inject:\"\"`"
 
 func TestActualAssembleFuncDecl(t *testing.T) {
 	walker := ast.NewTypeWalker()
-	err := walker.Parse("github.com/lonegunmanb/syrinx/test_code/fly_car", actualFlyCarCode)
+
+	err := walker.Parse("github.com/lonegunmanb/syrinx/test_code/fly_car", fmt.Sprintf(actualFlyCarCode, injectTag, injectTag))
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
 	writer := &bytes.Buffer{}

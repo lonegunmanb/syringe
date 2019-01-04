@@ -54,6 +54,8 @@ func (t *typeInfoWrap) GetFieldAssigns() []Assembler {
 	results := make([]Assembler, 0, len(fields))
 	linq.From(fields).Select(func(fieldInfo interface{}) interface{} {
 		return &productFieldInfoWrap{FieldInfo: fieldInfo.(ast.FieldInfo), typeInfo: t}
+	}).Where(func(fieldInfo interface{}) bool {
+		return hasInjectTag(fieldInfo.(ast.FieldInfo).GetTag())
 	}).ToSlice(&results)
 	return results
 }

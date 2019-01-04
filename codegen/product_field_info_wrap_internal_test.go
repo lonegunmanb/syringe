@@ -174,7 +174,12 @@ func TestGenerateAssembleCode(t *testing.T) {
 }
 
 func TestGetInjectKeyFromTag(t *testing.T) {
-	assert.Equal(t, "expected", getKeyFromTag("`json:\"name\" xml:\"name\" inject:\"expected\"`"))
+	assert.Equal(t, "expected", getInjectKeyFromTag("`json:\"name\" xml:\"name\" inject:\"expected\"`"))
+}
+
+func TestHasInjectTag(t *testing.T) {
+	assert.True(t, hasInjectTag("`json:\"name\" xml:\"name\" inject:\"expected\"`"))
+	assert.False(t, hasInjectTag("`json:\"name\" xml:\"name\""))
 }
 
 func testTypeDecls(t *testing.T, args []funk.Tuple) {

@@ -25,7 +25,7 @@ func (f *productFieldInfoWrap) AssembleCode() string {
 	fieldType := f.GetType()
 	key := fieldType.String()
 	if f.GetTag() != "" {
-		tagKey := getKeyFromTag(f.GetTag())
+		tagKey := getInjectKeyFromTag(f.GetTag())
 		if tagKey != "" {
 			key = tagKey
 		}
@@ -65,7 +65,11 @@ func (f *productFieldInfoWrap) AssembleCode() string {
 
 var injectTagRegex = regexp.MustCompile("inject:\".*\"")
 
-func getKeyFromTag(tag string) string {
+func hasInjectTag(tag string) bool {
+	return injectTagRegex.MatchString(tag)
+}
+
+func getInjectKeyFromTag(tag string) string {
 	injectTag := injectTagRegex.FindString(tag)
 	if injectTag == "" {
 		return injectTag
