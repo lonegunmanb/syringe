@@ -48,7 +48,7 @@ func (*stubTypeCodegen) GetPkgName() string {
 	panic("implement me")
 }
 
-func (*stubTypeCodegen) GetDepPkgPaths() []string {
+func (*stubTypeCodegen) GetDepPkgPaths(fieldTagFilter string) []string {
 	panic("implement me")
 }
 

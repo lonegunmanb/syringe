@@ -68,7 +68,7 @@ type Struct struct {
 `
 	walker := parseCode(t, sourceCode)
 	structInfo := walker.Types()[0]
-	depPkgPaths := structInfo.GetDepPkgPaths()
+	depPkgPaths := structInfo.GetDepPkgPaths("")
 	assert.Equal(t, 2, len(depPkgPaths))
 	assert.True(t, linq.From(depPkgPaths).Contains("go/scanner"))
 	assert.True(t, linq.From(depPkgPaths).Contains("go/token"))

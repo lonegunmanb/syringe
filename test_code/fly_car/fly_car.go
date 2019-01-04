@@ -10,9 +10,9 @@ import (
 type FlyCar struct {
 	*car.Car    `inject:""`
 	flyer.Plane `inject:""`
-	Decoration  Decoration `inject:""`
-	R1          *model1.Request
-	R2          *model2.Request
+	Decoration  Decoration      `inject:""`
+	R1          *model1.Request `inject:""`
+	R2          *model2.Request `inject:""`
 }
 
 type Decoration interface {

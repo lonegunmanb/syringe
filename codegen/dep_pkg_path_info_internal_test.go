@@ -32,7 +32,7 @@ func TestGetDepPkgPathsWithPkgNameDuplicate(t *testing.T) {
 	for _, path := range paths {
 		mockTypeInfo := NewMockTypeInfo(ctrl)
 		mockTypeInfo.EXPECT().GetPkgPath().Times(1).Return("ast")
-		mockTypeInfo.EXPECT().GetDepPkgPaths().Times(1).Return([]string{path})
+		mockTypeInfo.EXPECT().GetDepPkgPaths("inject").Times(1).Return([]string{path})
 		typeInfos = append(typeInfos, mockTypeInfo)
 	}
 	sut := &depPkgPathInfo{
@@ -79,7 +79,7 @@ func testDuplicateAndConflictPackageName(t *testing.T, depPkgPaths []string, exp
 	for _, path := range depPkgPaths {
 		mockTypeInfo := NewMockTypeInfo(ctrl)
 		mockTypeInfo.EXPECT().GetPkgPath().Times(1).Return("ast")
-		mockTypeInfo.EXPECT().GetDepPkgPaths().Times(1).Return([]string{path})
+		mockTypeInfo.EXPECT().GetDepPkgPaths("inject").Times(1).Return([]string{path})
 		typeInfos = append(typeInfos, mockTypeInfo)
 	}
 	sut := &depPkgPathInfo{

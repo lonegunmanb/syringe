@@ -5,6 +5,7 @@ import (
 	"github.com/ahmetb/go-linq"
 	"go/types"
 	"reflect"
+	"regexp"
 )
 
 type TypeInfo interface {
@@ -17,7 +18,7 @@ type TypeInfo interface {
 	GetType() types.Type
 	GetEmbeddedTypes() []EmbeddedType
 	GetFullName() string
-	GetDepPkgPaths() []string
+	GetDepPkgPaths(fieldTagFilter string) []string
 }
 
 type typeInfo struct {
@@ -70,12 +71,21 @@ func (typeInfo *typeInfo) GetFullName() string {
 	return fmt.Sprintf("%s.%s", typeInfo.PkgPath, typeInfo.Name)
 }
 
-func (typeInfo *typeInfo) GetDepPkgPaths() []string {
+func (typeInfo *typeInfo) GetDepPkgPaths(fieldTagFilter string) []string {
+	var fieldFilter *regexp.Regexp
+	if fieldTagFilter != "" {
+		fieldFilter = regexp.MustCompile(fmt.Sprintf("%s:\".*\"", fieldTagFilter))
+	}
 	result := make([]string, 0)
 	linq.From(typeInfo.EmbeddedTypes).Select(
 		func(embeddedType interface{}) interface{} {
 			return embeddedType.(EmbeddedType).GetPkgPath()
-		}).Union(linq.From(typeInfo.Fields).SelectMany(
+		}).Union(linq.From(typeInfo.Fields).Where(func(fieldInfo interface{}) bool {
+		if fieldTagFilter != "" {
+			return fieldFilter.MatchString(fieldInfo.(FieldInfo).GetTag())
+		}
+		return true
+	}).SelectMany(
 		func(fieldInfo interface{}) linq.Query {
 			paths := fieldInfo.(FieldInfo).GetDepPkgPaths()
 			return linq.From(paths)

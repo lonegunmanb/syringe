@@ -99,7 +99,7 @@ func (c *depPkgPathInfo) initDepPkgPaths() []string {
 		return typeInfo.(ast.TypeInfo).GetPkgPath()
 	}).Concat(
 		linq.From(c.typeInfos).SelectMany(func(typeInfo interface{}) linq.Query {
-			return linq.From(typeInfo.(ast.TypeInfo).GetDepPkgPaths())
+			return linq.From(typeInfo.(ast.TypeInfo).GetDepPkgPaths("inject"))
 		})).Distinct().Where(func(path interface{}) bool {
 		return path.(string) != c.pkgPath
 	}).ToSlice(&paths)

@@ -9,7 +9,7 @@ import (
 type TypeInfoWrap interface {
 	GetName() string
 	GetPkgName() string
-	GetDepPkgPaths() []string
+	GetDepPkgPaths(fieldTagFilter string) []string
 	GetFieldAssigns() []Assembler
 	GetEmbeddedTypeAssigns() []Assembler
 	GetPkgNameFromPkgPath(pkgPath string) string
