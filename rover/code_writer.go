@@ -31,8 +31,23 @@ func GenerateCode(startingPath string, osEnv ast.GoPathEnv, writerFactory func(f
 		return err
 	}
 	for _, typeInfo := range typeInfos {
-		createFileName := fmt.Sprintf("gen_%s.go", typeInfo.GetName())
-		writer, err := writerFactory(osEnv.ConcatFileNameWithPath(typeInfo.GetPhysicalPath(), createFileName))
+		fileName := fmt.Sprintf("%s.go", strings.ToLower(typeInfo.GetName()))
+		createFileName := fmt.Sprintf("gen_%s", fileName)
+		filePath := osEnv.ConcatFileNameWithPath(typeInfo.GetPhysicalPath(), createFileName)
+		count := 1
+		for {
+			needRename, err := nonGeneratedFileExisted(filePath)
+			if err != nil {
+				return err
+			}
+			if !needRename {
+				break
+			}
+			createFileName = fmt.Sprintf("gen_%s_%d.go", strings.ToLower(typeInfo.GetName()), count)
+			filePath = osEnv.ConcatFileNameWithPath(typeInfo.GetPhysicalPath(), createFileName)
+			count++
+		}
+		writer, err := writerFactory(filePath)
 		if err != nil {
 			return err
 		}
@@ -112,4 +127,12 @@ func writeHead(writer io.Writer) error {
 func getPkgName(goPath string) string {
 	s := strings.Split(goPath, "/")
 	return s[len(s)-1]
+}
+
+func nonGeneratedFileExisted(filePath string) (bool, error) {
+	_, err := os.Stat("/path/to/whatever")
+	if !os.IsNotExist(err) {
+		return isGeneratedFile(filePath)
+	}
+	return false, nil
 }
