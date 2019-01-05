@@ -2,19 +2,19 @@ package codegen
 
 import (
 	"github.com/golang/mock/gomock"
-	"github.com/lonegunmanb/syrinx/ast"
+	"github.com/lonegunmanb/syringe/ast"
 	"github.com/stretchr/testify/assert"
 	"go-funk"
 	"sort"
 	"testing"
 )
 
-//go:generate mockgen -package=codegen -destination=./mock_dep_pkg_path_info.go github.com/lonegunmanb/syrinx/codegen DepPkgPathInfo
+//go:generate mockgen -package=codegen -destination=./mock_dep_pkg_path_info.go github.com/lonegunmanb/syringe/codegen DepPkgPathInfo
 func TestGetPkgNameFromPkgPath(t *testing.T) {
 	cases := []*funk.Tuple{
 		{"testing", "testing"},
 		{"go/ast", "ast"},
-		{"github.com/lonegunman/syrinx/codegen", "codegen"},
+		{"github.com/lonegunman/syringe/codegen", "codegen"},
 	}
 	for _, tuple := range cases {
 		assert.Equal(t, tuple.Element2.(string), retrievePkgNameFromPkgPath(tuple.Element1.(string)))

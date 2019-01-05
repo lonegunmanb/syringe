@@ -1,12 +1,12 @@
 package ioc
 
 import (
-	"github.com/lonegunmanb/syrinx/test_code/engine"
+	"github.com/lonegunmanb/syringe/test_code/engine"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-const engineInterfaceTypeName = "github.com/lonegunmanb/syrinx/test_code/engine.Engine"
+const engineInterfaceTypeName = "github.com/lonegunmanb/syringe/test_code/engine.Engine"
 
 var engineInterfaceType interface{} = (*engine.Engine)(nil)
 

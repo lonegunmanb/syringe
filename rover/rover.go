@@ -2,7 +2,7 @@ package rover
 
 import (
 	"github.com/ahmetb/go-linq"
-	"github.com/lonegunmanb/syrinx/ast"
+	"github.com/lonegunmanb/syringe/ast"
 	"os"
 	"reflect"
 	"strings"

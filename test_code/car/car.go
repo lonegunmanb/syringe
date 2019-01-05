@@ -1,6 +1,6 @@
 package car
 
-import "github.com/lonegunmanb/syrinx/test_code/engine"
+import "github.com/lonegunmanb/syringe/test_code/engine"
 
 type Car struct {
 	Engine engine.Engine `inject:""`

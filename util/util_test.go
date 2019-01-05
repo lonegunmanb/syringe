@@ -2,7 +2,7 @@ package util_test
 
 import (
 	"errors"
-	"github.com/lonegunmanb/syrinx/util"
+	"github.com/lonegunmanb/syringe/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"

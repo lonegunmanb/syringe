@@ -2,8 +2,8 @@ package codegen
 
 import (
 	"github.com/ahmetb/go-linq"
-	"github.com/lonegunmanb/syrinx/ast"
-	"github.com/lonegunmanb/syrinx/util"
+	"github.com/lonegunmanb/syringe/ast"
+	"github.com/lonegunmanb/syringe/util"
 	"io"
 	"text/template"
 )

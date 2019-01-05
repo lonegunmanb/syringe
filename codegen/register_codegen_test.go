@@ -3,8 +3,8 @@ package codegen_test
 import (
 	"bytes"
 	"github.com/ahmetb/go-linq"
-	"github.com/lonegunmanb/syrinx/ast"
-	"github.com/lonegunmanb/syrinx/codegen"
+	"github.com/lonegunmanb/syringe/ast"
+	"github.com/lonegunmanb/syringe/codegen"
 	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
@@ -45,7 +45,7 @@ func NewEngine(horsePower HorsePower) Engine {
 const carCode = `
 package car
 
-import "github.com/lonegunmanb/syrinx/test_code/engine"
+import "github.com/lonegunmanb/syringe/test_code/engine"
 
 type Car struct {
 	Engine engine.Engine
@@ -73,10 +73,10 @@ const fly_carCode = `
 package fly_car
 
 import (
-	"github.com/lonegunmanb/syrinx/test_code/car"
-	model1 "github.com/lonegunmanb/syrinx/test_code/check_package_name_duplicate_a/model"
-	model2 "github.com/lonegunmanb/syrinx/test_code/check_package_name_duplicate_b/model"
-	"github.com/lonegunmanb/syrinx/test_code/flyer"
+	"github.com/lonegunmanb/syringe/test_code/car"
+	model1 "github.com/lonegunmanb/syringe/test_code/check_package_name_duplicate_a/model"
+	model2 "github.com/lonegunmanb/syringe/test_code/check_package_name_duplicate_b/model"
+	"github.com/lonegunmanb/syringe/test_code/flyer"
 )
 
 type FlyCar struct {
@@ -101,13 +101,13 @@ func (f *FancyDecoration) LookAndFeel() string {
 
 const expectedRegisterCode = `package test_code
 import (
-    "github.com/lonegunmanb/syrinx/ioc"
-    p0 "github.com/lonegunmanb/syrinx/test_code/check_package_name_duplicate_a/model"
-    p1 "github.com/lonegunmanb/syrinx/test_code/check_package_name_duplicate_b/model"
-    "github.com/lonegunmanb/syrinx/test_code/car"
-    "github.com/lonegunmanb/syrinx/test_code/engine"
-    "github.com/lonegunmanb/syrinx/test_code/flyer"
-    "github.com/lonegunmanb/syrinx/test_code/fly_car"
+    "github.com/lonegunmanb/syringe/ioc"
+    p0 "github.com/lonegunmanb/syringe/test_code/check_package_name_duplicate_a/model"
+    p1 "github.com/lonegunmanb/syringe/test_code/check_package_name_duplicate_b/model"
+    "github.com/lonegunmanb/syringe/test_code/car"
+    "github.com/lonegunmanb/syringe/test_code/engine"
+    "github.com/lonegunmanb/syringe/test_code/flyer"
+    "github.com/lonegunmanb/syringe/test_code/fly_car"
 )
 func CreateIoc() ioc.Container {
     container := ioc.NewContainer()
@@ -123,18 +123,18 @@ func CreateIoc() ioc.Container {
 }`
 
 func TestGenRegisterCode(t *testing.T) {
-	typeInfos := parseTypeInfos(t, "github.com/lonegunmanb/syrinx/test_code/check_package_name_duplicate_a/model", modelACode)
-	typeInfos = append(typeInfos, parseTypeInfos(t, "github.com/lonegunmanb/syrinx/test_code/check_package_name_duplicate_b/model", modelBCode)...)
-	typeInfos = append(typeInfos, parseTypeInfos(t, "github.com/lonegunmanb/syrinx/test_code/car", carCode)...)
-	typeInfos = append(typeInfos, parseTypeInfos(t, "github.com/lonegunmanb/syrinx/test_code/engine", engineCode)...)
-	typeInfos = append(typeInfos, parseTypeInfos(t, "github.com/lonegunmanb/syrinx/test_code/flyer", flyerCode)...)
-	typeInfos = append(typeInfos, parseTypeInfos(t, "github.com/lonegunmanb/syrinx/test_code/fly_car", fly_carCode)...)
+	typeInfos := parseTypeInfos(t, "github.com/lonegunmanb/syringe/test_code/check_package_name_duplicate_a/model", modelACode)
+	typeInfos = append(typeInfos, parseTypeInfos(t, "github.com/lonegunmanb/syringe/test_code/check_package_name_duplicate_b/model", modelBCode)...)
+	typeInfos = append(typeInfos, parseTypeInfos(t, "github.com/lonegunmanb/syringe/test_code/car", carCode)...)
+	typeInfos = append(typeInfos, parseTypeInfos(t, "github.com/lonegunmanb/syringe/test_code/engine", engineCode)...)
+	typeInfos = append(typeInfos, parseTypeInfos(t, "github.com/lonegunmanb/syringe/test_code/flyer", flyerCode)...)
+	typeInfos = append(typeInfos, parseTypeInfos(t, "github.com/lonegunmanb/syringe/test_code/fly_car", fly_carCode)...)
 	var structTypes []ast.TypeInfo
 	linq.From(typeInfos).Where(func(t interface{}) bool {
 		return t.(ast.TypeInfo).GetKind() == reflect.Struct
 	}).ToSlice(&structTypes)
 	writer := &bytes.Buffer{}
-	sut := codegen.NewRegisterCodegen(writer, structTypes, "test_code", "github.com/lonegunmanb/syrinx/test_code")
+	sut := codegen.NewRegisterCodegen(writer, structTypes, "test_code", "github.com/lonegunmanb/syringe/test_code")
 	err := sut.GenerateCode()
 	assert.Nil(t, err)
 	actual := writer.String()

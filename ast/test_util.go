@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-const testPkgPath = "github.com/lonegunmanb/syrinx/ast"
+const testPkgPath = "github.com/lonegunmanb/syringe/ast"
 
 func parseCode(t *testing.T, sourceCode string) *typeWalker {
 	typeWalker := NewTypeWalker().(*typeWalker)

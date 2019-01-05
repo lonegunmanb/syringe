@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/ahmetb/go-linq"
 	"github.com/golang-collections/collections/set"
-	"github.com/lonegunmanb/syrinx/ast"
+	"github.com/lonegunmanb/syringe/ast"
 	"strings"
 )
 

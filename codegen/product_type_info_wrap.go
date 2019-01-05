@@ -3,7 +3,7 @@ package codegen
 import (
 	"fmt"
 	"github.com/ahmetb/go-linq"
-	"github.com/lonegunmanb/syrinx/ast"
+	"github.com/lonegunmanb/syringe/ast"
 )
 
 type TypeInfoWrap interface {

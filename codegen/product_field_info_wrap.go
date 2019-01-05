@@ -2,7 +2,7 @@ package codegen
 
 import (
 	"fmt"
-	"github.com/lonegunmanb/syrinx/ast"
+	"github.com/lonegunmanb/syringe/ast"
 	"go/types"
 	"regexp"
 	"strings"
@@ -14,11 +14,11 @@ type productFieldInfoWrap struct {
 }
 
 //  By Interface
-//	product.Decoration = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(Decoration)
+//	product.Decoration = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)
 //  By Struct
-//  product.Car = *container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(*car.Car)
+//  product.Car = *container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(*car.Car)
 //  By Pointer
-//  product.Car = container.Resolve("github.com/lonegunmanb/syrinx/test_code/fly_car.Decoration").(*car.Car)
+//  product.Car = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(*car.Car)
 const fieldAssignTemplate = `product.%s = %scontainer.Resolve("%s").(%s)`
 
 func (f *productFieldInfoWrap) AssembleCode() string {

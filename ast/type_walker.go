@@ -5,7 +5,7 @@ import (
 	"github.com/ahmetb/go-linq"
 	"github.com/golang-collections/collections/stack"
 	"github.com/lonegunmanb/johnnie"
-	"github.com/lonegunmanb/syrinx/util"
+	"github.com/lonegunmanb/syringe/util"
 	"go/ast"
 	"go/importer"
 	"go/parser"

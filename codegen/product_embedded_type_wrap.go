@@ -2,7 +2,7 @@ package codegen
 
 import (
 	"fmt"
-	"github.com/lonegunmanb/syrinx/ast"
+	"github.com/lonegunmanb/syringe/ast"
 	"go/types"
 )
 

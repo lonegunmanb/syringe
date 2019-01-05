@@ -20,14 +20,14 @@ Name() string
 `
 
 func TestEmbedded(t *testing.T) {
-	testEmbeddedType(t, "", "Struct2", "Struct2", "*", "github.com/lonegunmanb/syrinx/test.Struct2", "*Struct2")
-	testEmbeddedType(t, "", "*Struct2", "Struct2", "", "github.com/lonegunmanb/syrinx/test.Struct2", "*Struct2")
-	testEmbeddedType(t, "", "Interface", "Interface", "", "github.com/lonegunmanb/syrinx/test.Interface", "Interface")
-	importDecl := `import "github.com/lonegunmanb/syrinx/test_code/car"`
-	testEmbeddedType(t, importDecl, "car.Car", "Car", "*", "github.com/lonegunmanb/syrinx/test_code/car.Car", "*car.Car")
-	testEmbeddedType(t, importDecl, "*car.Car", "Car", "", "github.com/lonegunmanb/syrinx/test_code/car.Car", "*car.Car")
-	importDecl = `import "github.com/lonegunmanb/syrinx/test_code/engine"`
-	testEmbeddedType(t, importDecl, "engine.Engine", "Engine", "", "github.com/lonegunmanb/syrinx/test_code/engine.Engine", "engine.Engine")
+	testEmbeddedType(t, "", "Struct2", "Struct2", "*", "github.com/lonegunmanb/syringe/test.Struct2", "*Struct2")
+	testEmbeddedType(t, "", "*Struct2", "Struct2", "", "github.com/lonegunmanb/syringe/test.Struct2", "*Struct2")
+	testEmbeddedType(t, "", "Interface", "Interface", "", "github.com/lonegunmanb/syringe/test.Interface", "Interface")
+	importDecl := `import "github.com/lonegunmanb/syringe/test_code/car"`
+	testEmbeddedType(t, importDecl, "car.Car", "Car", "*", "github.com/lonegunmanb/syringe/test_code/car.Car", "*car.Car")
+	testEmbeddedType(t, importDecl, "*car.Car", "Car", "", "github.com/lonegunmanb/syringe/test_code/car.Car", "*car.Car")
+	importDecl = `import "github.com/lonegunmanb/syringe/test_code/engine"`
+	testEmbeddedType(t, importDecl, "engine.Engine", "Engine", "", "github.com/lonegunmanb/syringe/test_code/engine.Engine", "engine.Engine")
 }
 
 type stubTypeCodegen struct{}

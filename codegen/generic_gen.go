@@ -21,7 +21,7 @@ func genPkgDecl(writer io.Writer, data WithPackageName) error {
 
 const importDecl = `
 import (
-    "github.com/lonegunmanb/syrinx/ioc"
+    "github.com/lonegunmanb/syringe/ioc"
 {{with .GenImportDecls}}{{range .}}    {{.}}
 {{end}}{{end}})`
 

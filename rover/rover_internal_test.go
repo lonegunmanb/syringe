@@ -2,14 +2,14 @@ package rover
 
 import (
 	"github.com/golang/mock/gomock"
-	"github.com/lonegunmanb/syrinx/ast"
-	"github.com/lonegunmanb/syrinx/codegen"
+	"github.com/lonegunmanb/syringe/ast"
+	"github.com/lonegunmanb/syringe/codegen"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-//go:generate mockgen -package=rover -destination=./mock_file_retriever.go github.com/lonegunmanb/syrinx/rover FileRetriever
-//go:generate mockgen -package=rover -destination=./mock_file_info.go github.com/lonegunmanb/syrinx/rover FileInfo
+//go:generate mockgen -package=rover -destination=./mock_file_retriever.go github.com/lonegunmanb/syringe/rover FileRetriever
+//go:generate mockgen -package=rover -destination=./mock_file_info.go github.com/lonegunmanb/syringe/rover FileInfo
 
 func TestGetTypeInfos(t *testing.T) {
 	roverStartingPath := "./"
