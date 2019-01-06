@@ -100,8 +100,8 @@ func (s *SingleFunc) CallBiRet(f func(interface{}) (interface{}, interface{}, er
 }
 
 func (b *BiFunc) Call(f func(interface{}, interface{}) error) *Action {
-	var err error
-	if b.Err == nil {
+	err := b.Err
+	if err == nil {
 		err = f(b.Ret1, b.Ret2)
 	}
 	return &Action{
