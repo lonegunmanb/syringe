@@ -130,9 +130,10 @@ func getPkgName(goPath string) string {
 }
 
 func nonGeneratedFileExisted(filePath string) (bool, error) {
-	_, err := os.Stat("/path/to/whatever")
+	_, err := os.Stat(filePath)
 	if !os.IsNotExist(err) {
-		return isGeneratedFile(filePath)
+		isGenerated, err := isGeneratedFile(filePath)
+		return !isGenerated, err
 	}
 	return false, nil
 }
