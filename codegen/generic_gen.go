@@ -38,3 +38,5 @@ func gen(templateName string, text string, writer io.Writer, data interface{}) (
 	err = t.Execute(writer, data)
 	return
 }
+
+var ContainerIdentName = "container"

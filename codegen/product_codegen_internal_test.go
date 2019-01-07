@@ -73,14 +73,33 @@ import (
 )`)
 }
 
-const expectedFlyCarCreateCode = `
+func TestGenCreateFuncDecl(t *testing.T) {
+	const expectedFlyCarCreateCode = `
 func Create_FlyCar(container ioc.Container) *FlyCar {
 	product := new(FlyCar)
 	Assemble_FlyCar(product, container)
 	return product
 }`
+	testProductGen(t, func(typeInfo *MockTypeInfoWrap) {
+		typeInfo.EXPECT().GetName().Times(4).Return("FlyCar")
+	}, func(gen *productCodegen) error {
+		r := gen.genCreateFuncDecl()
+		return r
+	}, expectedFlyCarCreateCode)
+}
 
-func TestGenCreateFuncDecl(t *testing.T) {
+func TestGenCreateFuncDeclForCustomIdent(t *testing.T) {
+	const expectedFlyCarCreateCode = `
+func Create_FlyCar(c ioc.Container) *FlyCar {
+	product := new(FlyCar)
+	Assemble_FlyCar(product, c)
+	return product
+}`
+	originIdent := ContainerIdentName
+	ContainerIdentName = "c"
+	defer func() {
+		ContainerIdentName = originIdent
+	}()
 	testProductGen(t, func(typeInfo *MockTypeInfoWrap) {
 		typeInfo.EXPECT().GetName().Times(4).Return("FlyCar")
 	}, func(gen *productCodegen) error {
@@ -106,6 +125,28 @@ func TestGenAssembleFuncDecl(t *testing.T) {
 		typeInfo.EXPECT().GetEmbeddedTypeAssigns().Times(1).Return([]Assembler{embeddedCarMock, embeddedPlaneMock})
 		decorationMock := NewMockAssembler(typeInfo.ctrl)
 		decorationMock.EXPECT().AssembleCode().Times(1).Return(`product.Decoration = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)`)
+		typeInfo.EXPECT().GetFieldAssigns().Times(1).Return([]Assembler{decorationMock})
+	}, func(gen *productCodegen) error {
+		r := gen.genAssembleFuncDecl()
+		return r
+	}, expectedFlyCarAssembleCode)
+}
+
+func TestGenAssembleFuncDeclWithCustomIdent(t *testing.T) {
+	expectedFlyCarAssembleCode := `
+func Assemble_FlyCar(product *FlyCar, c ioc.Container) {
+	product.Decoration = c.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)
+}`
+	originIdent := ContainerIdentName
+	ContainerIdentName = "c"
+	defer func() {
+		ContainerIdentName = originIdent
+	}()
+	testProductGen(t, func(typeInfo *MockTypeInfoWrap) {
+		typeInfo.EXPECT().GetName().Times(2).Return("FlyCar")
+		typeInfo.EXPECT().GetEmbeddedTypeAssigns().Times(1).Return([]Assembler{})
+		decorationMock := NewMockAssembler(typeInfo.ctrl)
+		decorationMock.EXPECT().AssembleCode().Times(1).Return(`product.Decoration = c.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)`)
 		typeInfo.EXPECT().GetFieldAssigns().Times(1).Return([]Assembler{decorationMock})
 	}, func(gen *productCodegen) error {
 		r := gen.genAssembleFuncDecl()
@@ -149,12 +190,32 @@ func TestActualAssembleFuncDecl(t *testing.T) {
 
 const expectedRegisterFuncCode = `
 func Register_FlyCar(container ioc.Container) {
-	container.RegisterFactory((*FlyCar)(nil), func(ioc ioc.Container) interface{} {
-		return Create_FlyCar(ioc)
+	container.RegisterFactory((*FlyCar)(nil), func(container1 ioc.Container) interface{} {
+		return Create_FlyCar(container1)
 	})
 }`
 
 func TestRegisterFuncDecl(t *testing.T) {
+	testProductGen(t, func(typeInfo *MockTypeInfoWrap) {
+		typeInfo.EXPECT().GetName().Times(3).Return("FlyCar")
+	}, func(gen *productCodegen) error {
+		r := gen.genRegisterFuncDecl()
+		return r
+	}, expectedRegisterFuncCode)
+}
+
+func TestRegisterFuncDeclWithCustomIdent(t *testing.T) {
+	expectedRegisterFuncCode := `
+func Register_FlyCar(c ioc.Container) {
+	c.RegisterFactory((*FlyCar)(nil), func(c1 ioc.Container) interface{} {
+		return Create_FlyCar(c1)
+	})
+}`
+	originIdent := ContainerIdentName
+	ContainerIdentName = "c"
+	defer func() {
+		ContainerIdentName = originIdent
+	}()
 	testProductGen(t, func(typeInfo *MockTypeInfoWrap) {
 		typeInfo.EXPECT().GetName().Times(3).Return("FlyCar")
 	}, func(gen *productCodegen) error {

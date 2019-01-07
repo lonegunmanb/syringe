@@ -14,7 +14,7 @@ type register struct {
 func (r *register) RegisterCode() string {
 	pkgPath := r.typeInfo.GetPkgPath()
 	if !samePackage(pkgPath, r.registeringPath) {
-		return fmt.Sprintf("%s.Register_%s(container)", r.typeInfo.GetPkgNameFromPkgPath(r.typeInfo.GetPkgPath()), r.typeInfo.GetName())
+		return fmt.Sprintf("%s.Register_%s(%s)", r.typeInfo.GetPkgNameFromPkgPath(r.typeInfo.GetPkgPath()), r.typeInfo.GetName(), ContainerIdentName)
 	}
-	return fmt.Sprintf("Register_%s(container)", r.typeInfo.GetName())
+	return fmt.Sprintf("Register_%s(%s)", r.typeInfo.GetName(), ContainerIdentName)
 }

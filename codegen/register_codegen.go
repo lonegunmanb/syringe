@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"fmt"
 	"github.com/ahmetb/go-linq"
 	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/util"
@@ -12,7 +13,6 @@ type RegisterCodegen interface {
 	GenerateCode() error
 	GetPkgName() string
 	GetPkgPath() string
-	//GetPkgNameFromPkgPath(pkgPath string) string
 }
 
 type registerCodegen struct {
@@ -69,13 +69,13 @@ func (c *registerCodegen) genImportDecls() error {
 
 const createIocTemplate = `
 func CreateIoc() ioc.Container {
-    container := ioc.NewContainer()
+    %s := ioc.NewContainer()
 {{with .GetRegisters}}{{range .}}    {{.RegisterCode}}
-{{end}}{{end}}    return container
+{{end}}{{end}}    return %s
 }`
 
 func (c *registerCodegen) genRegister() error {
-	return gen("registerType", createIocTemplate, c.writer, c)
+	return gen("registerType", fmt.Sprintf(createIocTemplate, ContainerIdentName, ContainerIdentName), c.writer, c)
 }
 
 func (c *registerCodegen) GenerateCode() error {

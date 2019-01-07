@@ -34,6 +34,21 @@ func TestAssembleCodeForBasicType(t *testing.T) {
 	assert.Equal(t, "product.Field = container.Resolve(\"int\").(int)", code)
 }
 
+func TestAssembleCodeForCustomIdentName(t *testing.T) {
+	field := getField(t, "", "int")
+	sut := &productFieldInfoWrap{
+		FieldInfo: field,
+		typeInfo:  NewTypeInfoWrap(field.GetReferenceFrom()),
+	}
+	originIdent := ContainerIdentName
+	ContainerIdentName = "c"
+	defer func() {
+		ContainerIdentName = originIdent
+	}()
+	code := sut.AssembleCode()
+	assert.Equal(t, "product.Field = c.Resolve(\"int\").(int)", code)
+}
+
 func TestGetNamedTypeDecl(t *testing.T) {
 	testTypeDecls(t, []funk.Tuple{
 		{"import \"go/ast\"", "ast.Node"},

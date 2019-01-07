@@ -19,7 +19,7 @@ type productFieldInfoWrap struct {
 //  product.Car = *container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(*car.Car)
 //  By Pointer
 //  product.Car = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(*car.Car)
-const fieldAssignTemplate = `product.%s = %scontainer.Resolve("%s").(%s)`
+const fieldAssignTemplate = `product.%s = %s%s.Resolve("%s").(%s)`
 
 func (f *productFieldInfoWrap) AssembleCode() string {
 	fieldType := f.GetType()
@@ -60,7 +60,7 @@ func (f *productFieldInfoWrap) AssembleCode() string {
 		}
 	}
 
-	return fmt.Sprintf(fieldAssignTemplate, f.GetName(), star, key, declType)
+	return fmt.Sprintf(fieldAssignTemplate, f.GetName(), star, ContainerIdentName, key, declType)
 }
 
 var injectTagRegex = regexp.MustCompile("inject:\".*\"")

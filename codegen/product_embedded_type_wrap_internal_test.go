@@ -71,3 +71,24 @@ func testEmbeddedType(t *testing.T, importString string, typeDecl string, assign
 	expected := fmt.Sprintf(`product.%s = %scontainer.Resolve("%s").(%s)`, assignedField, star, key, convertType)
 	assert.Equal(t, expected, embeddedType.AssembleCode())
 }
+
+func TestEmbeddedTypeAssignWithCustomIdent(t *testing.T) {
+	code := `
+package test
+
+type Struct struct {
+Struct2
+}
+type Struct2 struct {
+}
+`
+	walker := parseCode(t, code)
+	embeddedType := &productEmbeddedTypeWrap{walker.GetTypes()[0].GetEmbeddedTypes()[0], &stubTypeCodegen{}}
+	expected := `product.Struct2 = *c.Resolve("github.com/lonegunmanb/syringe/test.Struct2").(*Struct2)`
+	originIdent := ContainerIdentName
+	ContainerIdentName = "c"
+	defer func() {
+		ContainerIdentName = originIdent
+	}()
+	assert.Equal(t, expected, embeddedType.AssembleCode())
+}

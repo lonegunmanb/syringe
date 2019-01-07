@@ -4,6 +4,7 @@
 package codegen
 
 import (
+	"fmt"
 	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/util"
 	"io"
@@ -78,35 +79,35 @@ func (c *productCodegen) genImportDecls() error {
 }
 
 const createFuncDecl = `
-func Create_{{.GetName}}(container ioc.Container) *{{.GetName}} {
+func Create_{{.GetName}}(%s ioc.Container) *{{.GetName}} {
 	product := new({{.GetName}})
-	Assemble_{{.GetName}}(product, container)
+	Assemble_{{.GetName}}(product, %s)
 	return product
 }`
 
 func (c *productCodegen) genCreateFuncDecl() error {
-	return c.gen("createFunc", createFuncDecl)
+	return c.gen("createFunc", fmt.Sprintf(createFuncDecl, ContainerIdentName, ContainerIdentName))
 }
 
 const assembleFuncDecl = `
-func Assemble_{{.GetName}}(product *{{.GetName}}, container ioc.Container) {
+func Assemble_{{.GetName}}(product *{{.GetName}}, %s ioc.Container) {
 {{with .GetEmbeddedTypeAssigns}}{{range .}}	{{.AssembleCode}}
 {{end}}{{end}}{{with .GetFieldAssigns}}{{range .}}	{{.AssembleCode}}
 {{end}}{{end}}}`
 
 func (c *productCodegen) genAssembleFuncDecl() error {
-	return c.gen("assembleFunc", assembleFuncDecl)
+	return c.gen("assembleFunc", fmt.Sprintf(assembleFuncDecl, ContainerIdentName))
 }
 
 const registerFuncDecl = `
-func Register_{{.GetName}}(container ioc.Container) {
-	container.RegisterFactory((*{{.GetName}})(nil), func(ioc ioc.Container) interface{} {
-		return Create_{{.GetName}}(ioc)
+func Register_{{.GetName}}(%s ioc.Container) {
+	%s.RegisterFactory((*{{.GetName}})(nil), func(%s1 ioc.Container) interface{} {
+		return Create_{{.GetName}}(%s1)
 	})
 }`
 
 func (c *productCodegen) genRegisterFuncDecl() (err error) {
-	return c.gen("registerFunc", registerFuncDecl)
+	return c.gen("registerFunc", fmt.Sprintf(registerFuncDecl, ContainerIdentName, ContainerIdentName, ContainerIdentName, ContainerIdentName))
 }
 
 func (c *productCodegen) gen(templateName string, text string) (err error) {

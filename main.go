@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/lonegunmanb/syringe/ast"
+	"github.com/lonegunmanb/syringe/codegen"
 	"github.com/lonegunmanb/syringe/rover"
 	"io"
 	"os"
@@ -10,8 +11,10 @@ import (
 
 func main() {
 	clean := flag.Bool("c", false, "clean generated code")
+	identName := flag.String("i", "container", "generated container identifier")
 	flag.Parse()
 	currentPath, err := os.Getwd()
+	codegen.ContainerIdentName = *identName
 	if err != nil {
 		println(err.Error())
 		return

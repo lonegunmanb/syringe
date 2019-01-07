@@ -44,8 +44,8 @@ func Assemble_FlyCar(product *FlyCar, container ioc.Container) {
 	product.Decoration = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)
 }
 func Register_FlyCar(container ioc.Container) {
-	container.RegisterFactory((*FlyCar)(nil), func(ioc ioc.Container) interface{} {
-		return Create_FlyCar(ioc)
+	container.RegisterFactory((*FlyCar)(nil), func(container1 ioc.Container) interface{} {
+		return Create_FlyCar(container1)
 	})
 }`
 const injectTag = "`inject:\"\"`"
