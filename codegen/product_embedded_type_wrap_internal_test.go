@@ -32,11 +32,7 @@ func TestEmbedded(t *testing.T) {
 
 type stubTypeCodegen struct{}
 
-func (*stubTypeCodegen) SetRegisteringPath(registeringPath string) {
-	panic("implement me")
-}
-
-func (*stubTypeCodegen) RegisterCode() string {
+func (*stubTypeCodegen) GetPkgPath() string {
 	panic("implement me")
 }
 

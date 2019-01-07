@@ -82,7 +82,7 @@ func TestProductTypeInfoWrap_GetPkgNameFromPkgPath(t *testing.T) {
 	assert.Equal(t, expected, imports)
 }
 
-func TestProductTypeInfoWrap_GenRegisterCode(t *testing.T) {
+func TestProductTypeInfoWrap_GenRegisterCode_DifferentPackage(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockDepPkgPathInfo := NewMockDepPkgPathInfo(ctrl)
@@ -91,9 +91,29 @@ func TestProductTypeInfoWrap_GenRegisterCode(t *testing.T) {
 	mockTypeInfo := NewMockTypeInfo(ctrl)
 	mockTypeInfo.EXPECT().GetPkgPath().Times(2).Return(pkgPath)
 	mockTypeInfo.EXPECT().GetName().Times(1).Return("Request")
-	sut := NewTypeInfoWrapWithDepPkgPath(mockTypeInfo, mockDepPkgPathInfo)
+	sut := &register{
+		typeInfo:        NewTypeInfoWrapWithDepPkgPath(mockTypeInfo, mockDepPkgPathInfo),
+		registeringPath: "github.com/lonegunmanb/test_code",
+	}
 	actual := sut.RegisterCode()
 	const expected = "p0.Register_Request(container)"
+	assert.Equal(t, expected, actual)
+}
+
+func TestProductTypeInfoWrap_GenRegisterCode_SamePackage(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockDepPkgPathInfo := NewMockDepPkgPathInfo(ctrl)
+	const pkgPath = "github.com/lonegunmanb/test_code/check_package_name_duplicate_a/model"
+	mockTypeInfo := NewMockTypeInfo(ctrl)
+	mockTypeInfo.EXPECT().GetPkgPath().Times(1).Return(pkgPath)
+	mockTypeInfo.EXPECT().GetName().Times(1).Return("Request")
+	sut := &register{
+		typeInfo:        NewTypeInfoWrapWithDepPkgPath(mockTypeInfo, mockDepPkgPathInfo),
+		registeringPath: pkgPath,
+	}
+	actual := sut.RegisterCode()
+	const expected = "Register_Request(container)"
 	assert.Equal(t, expected, actual)
 }
 

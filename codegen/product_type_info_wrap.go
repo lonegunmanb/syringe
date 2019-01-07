@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"fmt"
 	"github.com/ahmetb/go-linq"
 	"github.com/lonegunmanb/syringe/ast"
 )
@@ -9,31 +8,17 @@ import (
 type TypeInfoWrap interface {
 	GetName() string
 	GetPkgName() string
+	GetPkgPath() string
 	GetDepPkgPaths(fieldTagFilter string) []string
 	GetFieldAssigns() []Assembler
 	GetEmbeddedTypeAssigns() []Assembler
 	GetPkgNameFromPkgPath(pkgPath string) string
 	GenImportDecls() []string
-	RegisterCode() string
-	SetRegisteringPath(registeringPath string)
 }
 
 type typeInfoWrap struct {
 	ast.TypeInfo
-	depPkgPathInfo  DepPkgPathInfo
-	registeringPath string
-}
-
-func (t *typeInfoWrap) SetRegisteringPath(registeringPath string) {
-	t.registeringPath = registeringPath
-}
-
-func (t *typeInfoWrap) RegisterCode() string {
-	pkgPath := t.GetPkgPath()
-	if !samePackage(pkgPath, t.registeringPath) {
-		return fmt.Sprintf("%s.Register_%s(container)", t.depPkgPathInfo.GetPkgNameFromPkgPath(t.GetPkgPath()), t.GetName())
-	}
-	return fmt.Sprintf("Register_%s(container)", t.GetName())
+	depPkgPathInfo DepPkgPathInfo
 }
 
 func NewTypeInfoWrap(typeInfo ast.TypeInfo) TypeInfoWrap {
@@ -57,6 +42,10 @@ func (t *typeInfoWrap) GetPkgNameFromPkgPath(pkgPath string) string {
 
 func (t *typeInfoWrap) GetPkgName() string {
 	return t.TypeInfo.GetPkgName()
+}
+
+func (t *typeInfoWrap) GetPkgPath() string {
+	return t.TypeInfo.GetPkgPath()
 }
 
 func (t *typeInfoWrap) GetFieldAssigns() []Assembler {

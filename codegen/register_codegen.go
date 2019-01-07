@@ -45,8 +45,10 @@ func NewRegisterCodegen(writer io.Writer, typeInfos []ast.TypeInfo, pkgName stri
 	pkgPathInfo := newDepPkgPathInfo(typeInfos, pkgPath, RegisterCodegenMode)
 	linq.From(typeInfos).Select(func(typeInfo interface{}) interface{} {
 		typeInfoWrap := NewTypeInfoWrapWithDepPkgPath(typeInfo.(ast.TypeInfo), pkgPathInfo)
-		typeInfoWrap.SetRegisteringPath(pkgPath)
-		return typeInfoWrap
+		return &register{
+			typeInfo:        typeInfoWrap,
+			registeringPath: pkgPath,
+		}
 	}).ToSlice(&typeInfosWraps)
 	return &registerCodegen{
 		writer:         writer,

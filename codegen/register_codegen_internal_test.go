@@ -1,5 +1,6 @@
 package codegen
 
+//go:generate mockgen -package=codegen -destination=./mock_register.go github.com/lonegunmanb/syringe/codegen Register
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
@@ -33,10 +34,10 @@ func TestGenRegisterImportDecl(t *testing.T) {
 func TestGenRegisterCode(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockTypeInfoWrap := NewMockTypeInfoWrap(ctrl)
-	mockTypeInfoWrap.EXPECT().RegisterCode().Times(1).Return("a.Register_a(container)")
+	mockRegister := NewMockRegister(ctrl)
+	mockRegister.EXPECT().RegisterCode().Times(1).Return("a.Register_a(container)")
 	writer := &bytes.Buffer{}
-	sut := &registerCodegen{writer: writer, typeInfos: []Register{mockTypeInfoWrap}}
+	sut := &registerCodegen{writer: writer, typeInfos: []Register{mockRegister}}
 	err := sut.genRegister()
 	assert.Nil(t, err)
 	const expected = `
