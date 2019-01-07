@@ -89,7 +89,7 @@ func TestProductTypeInfoWrap_GenRegisterCode(t *testing.T) {
 	const pkgPath = "github.com/lonegunmanb/test_code/check_package_name_duplicate_a/model"
 	mockDepPkgPathInfo.EXPECT().GetPkgNameFromPkgPath(pkgPath).Times(1).Return("p0")
 	mockTypeInfo := NewMockTypeInfo(ctrl)
-	mockTypeInfo.EXPECT().GetPkgPath().Times(1).Return(pkgPath)
+	mockTypeInfo.EXPECT().GetPkgPath().Times(2).Return(pkgPath)
 	mockTypeInfo.EXPECT().GetName().Times(1).Return("Request")
 	sut := NewTypeInfoWrapWithDepPkgPath(mockTypeInfo, mockDepPkgPathInfo)
 	actual := sut.RegisterCode()
