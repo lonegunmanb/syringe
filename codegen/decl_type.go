@@ -19,9 +19,8 @@ func getDeclType(pkgPath string, t types.Type, qf func(p *types.Package) string)
 				panic(fmt.Sprintf("cannot find package name for %s", t.String()))
 			}
 			typeName := t.(*types.Named).Obj().Name()
-			pkgName := pkg.Name()
 			path := pkg.Path()
-			if samePackage(path, pkgPath, pkgName) {
+			if samePackage(path, pkgPath) {
 				return typeName
 			} else {
 				return types.TypeString(t, qf)
@@ -83,9 +82,6 @@ func getDeclType(pkgPath string, t types.Type, qf func(p *types.Package) string)
 	}
 }
 
-func samePackage(path string, pkgPath string, pkgName string) bool {
-	if pkgPath != "" {
-		return path == pkgPath
-	}
-	return path == pkgName
+func samePackage(path string, pkgPath string) bool {
+	return path == pkgPath
 }

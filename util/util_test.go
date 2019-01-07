@@ -1,5 +1,7 @@
 package util_test
 
+//go:generate mockgen -package=util -destination=./mock_file_info.go github.com/lonegunmanb/syringe/util FileInfo
+//go:generate mockgen -package=util -destination=./mock_file_retriever.go github.com/lonegunmanb/syringe/util FileRetriever
 import (
 	"errors"
 	"github.com/lonegunmanb/syringe/util"

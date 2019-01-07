@@ -15,16 +15,22 @@ type TypeInfoWrap interface {
 	GetPkgNameFromPkgPath(pkgPath string) string
 	GenImportDecls() []string
 	RegisterCode() string
+	SetRegisteringPath(registeringPath string)
 }
 
 type typeInfoWrap struct {
 	ast.TypeInfo
-	depPkgPathInfo DepPkgPathInfo
+	depPkgPathInfo  DepPkgPathInfo
+	registeringPath string
+}
+
+func (t *typeInfoWrap) SetRegisteringPath(registeringPath string) {
+	t.registeringPath = registeringPath
 }
 
 func (t *typeInfoWrap) RegisterCode() string {
 	pkgPath := t.GetPkgPath()
-	if pkgPath != "" {
+	if !samePackage(pkgPath, t.registeringPath) {
 		return fmt.Sprintf("%s.Register_%s(container)", t.depPkgPathInfo.GetPkgNameFromPkgPath(t.GetPkgPath()), t.GetName())
 	}
 	return fmt.Sprintf("Register_%s(container)", t.GetName())

@@ -29,6 +29,22 @@ type Struct struct{
 	assert.Equal(t, "ast", typeInfo.PkgName)
 }
 
+//TODO:
+//func TestDepSamePkg(t *testing.T) {
+//	sourceCode := `
+//package ast
+//type Struct struct {
+//s Struct2
+//}
+//type Struct2 struct {
+//
+//}
+//`
+//	walker := parseCode(t, sourceCode)
+//	typeInfo := walker.Types()[0]
+//	println(typeInfo.PkgPath)
+//}
+
 func TestPackageNameDifferentWithPkgPath(t *testing.T) {
 	sourceCode := `
 package test
@@ -72,4 +88,16 @@ type Struct struct {
 	assert.Equal(t, 2, len(depPkgPaths))
 	assert.True(t, linq.From(depPkgPaths).Contains("go/scanner"))
 	assert.True(t, linq.From(depPkgPaths).Contains("go/token"))
+}
+
+func TestIsNotTestFile(t *testing.T) {
+	assert.True(t, isTestFile("rover_test.go"))
+	assert.True(t, isTestFile("test.go"))
+	assert.False(t, isTestFile("rover.go"))
+}
+
+func TestIsGoFile(t *testing.T) {
+	assert.True(t, isGoSrcFile("src.go"))
+	assert.False(t, isGoSrcFile("src.cpp"))
+	assert.False(t, isGoSrcFile("go"))
 }

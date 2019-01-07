@@ -1,13 +1,5 @@
 package rover
 
-import (
-	"github.com/stretchr/testify/assert"
-	"testing"
-)
-
-//go:generate mockgen -package=rover -destination=./mock_file_retriever.go github.com/lonegunmanb/syringe/rover FileRetriever
-//go:generate mockgen -package=rover -destination=./mock_file_info.go github.com/lonegunmanb/syringe/rover FileInfo
-
 //TODO:fix it after proper refactor
 //func TestGetTypeInfos(t *testing.T) {
 //	roverStartingPath := "./"
@@ -34,15 +26,3 @@ import (
 //	assert.Equal(t, 1, len(typeInfos))
 //	assert.Equal(t, mockTypeInfo, typeInfos[0])
 //}
-
-func TestIsNotTestFile(t *testing.T) {
-	assert.True(t, isTestFile("rover_test.go"))
-	assert.True(t, isTestFile("test.go"))
-	assert.False(t, isTestFile("rover.go"))
-}
-
-func TestIsGoFile(t *testing.T) {
-	assert.True(t, isGoSrcFile("src.go"))
-	assert.False(t, isGoSrcFile("src.cpp"))
-	assert.False(t, isGoSrcFile("go"))
-}

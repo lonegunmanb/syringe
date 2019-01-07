@@ -1,4 +1,4 @@
-package rover
+package util
 
 import (
 	"os"
@@ -7,6 +7,10 @@ import (
 
 type FileRetriever interface {
 	GetFiles(startingPath string, predicate func(os.FileInfo) bool) ([]FileInfo, error)
+}
+
+func NewFileRetriever() FileRetriever {
+	return &fileRetriever{}
 }
 
 type fileRetriever struct {

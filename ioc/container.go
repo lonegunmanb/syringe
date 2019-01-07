@@ -8,6 +8,9 @@ import (
 type Container interface {
 	RegisterFactory(interfaceType interface{}, factory func(ioc Container) interface{})
 	Resolve(name string) interface{}
+	ResolveByType(interfaceType interface{}) interface{}
+	Has(interfaceType interface{}) bool
+	GetOrRegister(interfaceType interface{}, factory func(ioc Container) interface{}) interface{}
 }
 
 type container struct {
@@ -25,6 +28,22 @@ func (c *container) Resolve(s string) interface{} {
 		return factory(c)
 	}
 	return nil
+}
+
+func (c *container) GetOrRegister(interfaceType interface{}, factory func(ioc Container) interface{}) interface{} {
+	if !c.Has(interfaceType) {
+		c.RegisterFactory(interfaceType, factory)
+	}
+	return c.ResolveByType(interfaceType)
+}
+
+func (c *container) ResolveByType(interfaceType interface{}) interface{} {
+	return c.Resolve(getTypeName(interfaceType))
+}
+
+func (c *container) Has(interfaceType interface{}) bool {
+	_, ok := c.factories[getTypeName(interfaceType)]
+	return ok
 }
 
 func getTypeName(interfaceType interface{}) string {

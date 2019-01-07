@@ -22,6 +22,7 @@ func main() {
 	} else {
 		create(currentPath)
 	}
+	//create("/Users/byers/go/src/github.com/lonegunmanb/blender")
 }
 
 func create(startingPath string) {

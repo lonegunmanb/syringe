@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/codegen"
+	"github.com/lonegunmanb/syringe/ioc"
+	"github.com/lonegunmanb/syringe/util"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+var codeWriterContainer = ioc.NewContainer()
 
 func GenerateCode(startingPath string, osEnv ast.GoPathEnv, writerFactory func(filePath string) (io.Writer, error)) error {
 	if !filepath.IsAbs(startingPath) {
@@ -80,7 +84,14 @@ func GenerateCode(startingPath string, osEnv ast.GoPathEnv, writerFactory func(f
 
 func CleanGeneratedCodeFiles(startingPath string, osEnv ast.GoPathEnv) error {
 	r := newCodeRover(startingPath)
-	files, err := r.fileRetriever.GetFiles(r.roverStartingPath, isGoFile)
+	fileRetrieverKey := (*util.FileRetriever)(nil)
+	if !codeWriterContainer.Has(fileRetrieverKey) {
+		codeWriterContainer.RegisterFactory(fileRetrieverKey, func(ioc ioc.Container) interface{} {
+			return util.NewFileRetriever()
+		})
+	}
+	fileRetriever := codeWriterContainer.ResolveByType(fileRetrieverKey).(util.FileRetriever)
+	files, err := fileRetriever.GetFiles(r.roverStartingPath, isGoSrcFile)
 	if err != nil {
 		return err
 	}
@@ -136,4 +147,8 @@ func nonGeneratedFileExisted(filePath string) (bool, error) {
 		return !isGenerated, err
 	}
 	return false, nil
+}
+
+func isGoSrcFile(info os.FileInfo) bool {
+	return strings.HasSuffix(info.Name(), ".go")
 }

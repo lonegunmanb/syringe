@@ -5,14 +5,16 @@ import (
 	"github.com/ahmetb/go-linq"
 	"github.com/golang-collections/collections/stack"
 	"github.com/lonegunmanb/johnnie"
+	"github.com/lonegunmanb/syringe/ioc"
 	"github.com/lonegunmanb/syringe/util"
 	"go/ast"
 	"go/importer"
 	"go/parser"
 	"go/token"
 	"go/types"
-	"io/ioutil"
+	"os"
 	"reflect"
+	"strings"
 )
 
 type opsKind string
@@ -20,13 +22,16 @@ type opsKind string
 var analyzingType opsKind = "isAnalyzingType"
 var analyzingFunc opsKind = "analyzingFunc"
 
+var iocContainer = ioc.NewContainer()
+
 type TypeWalker interface {
 	johnnie.Walker
 	GetTypes() []TypeInfo
 	Parse(pkgPath string, sourceCode string) error
-	ParseFile(path string, fileName string) error
+	ParseDir(dirPath string) error
 	SetTypeInfo(i *types.Info)
 	SetPhysicalPath(p string)
+	ParseAst(path string, fileAst *ast.File) error
 }
 
 type typeWalker struct {
@@ -61,19 +66,55 @@ func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
 	return walker.parse(pkgPath, "src.go", sourceCode)
 }
 
-func (walker *typeWalker) ParseFile(path string, fileName string) error {
-	walker.physicalPath = path
-	osEnv := walker.osEnv
-	filePath := osEnv.ConcatFileNameWithPath(path, fileName)
-	return util.CallSingleRet(func() (interface{}, error) {
-		return ioutil.ReadFile(filePath)
-	}).CallBiRet(func(buffer interface{}) (interface{}, interface{}, error) {
-		sourceCode := string(buffer.([]byte))
-		pkgPath, err := GetPkgPath(osEnv, path)
-		return sourceCode, pkgPath, err
-	}).Call(func(sourceCode interface{}, pkgPath interface{}) error {
-		return walker.parse(pkgPath.(string), fileName, sourceCode.(string))
-	}).Err
+func (walker *typeWalker) ParseDir(dirPath string) error {
+	fileRetrieverKey := (*util.FileRetriever)(nil)
+	fileRetriever := iocContainer.GetOrRegister(fileRetrieverKey, func(ioc ioc.Container) interface{} {
+		return util.NewFileRetriever()
+	}).(util.FileRetriever)
+	files, err := fileRetriever.GetFiles(dirPath, isGoFile)
+	if err != nil {
+		return err
+	}
+	fileMap := make(map[string][]*ast.File)
+	fset := token.NewFileSet()
+	osEnv := iocContainer.GetOrRegister((*GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
+		return NewGoPathEnv()
+	}).(GoPathEnv)
+	for _, file := range files {
+		fileAst, err := parser.ParseFile(fset, osEnv.ConcatFileNameWithPath(file.Path(), file.Name()), nil, 0)
+		if err != nil {
+			return err
+		}
+		fileMap[file.Path()] = append(fileMap[file.Path()], fileAst)
+	}
+	info := &types.Info{
+		Types: make(map[ast.Expr]types.TypeAndValue),
+		//Defs:  make(map[*ast.Ident]types.Object),
+		//Uses:  make(map[*ast.Ident]types.Object),
+	}
+	for path, fileAsts := range fileMap {
+		var conf = &types.Config{Importer: importer.For("source", nil)}
+		goPath, err := GetPkgPath(osEnv, path)
+		if err != nil {
+			return err
+		}
+		_, err = conf.Check(goPath, fset, fileAsts, info)
+		if err != nil {
+			return err
+		}
+	}
+
+	for path, fileAsts := range fileMap {
+		walker.SetPhysicalPath(path)
+		walker.SetTypeInfo(info)
+		for _, fileAst := range fileAsts {
+			err := walker.ParseAst(path, fileAst)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (walker *typeWalker) parse(pkgPath string, fileName string, sourceCode string) error {
@@ -92,6 +133,18 @@ func (walker *typeWalker) parse(pkgPath string, fileName string, sourceCode stri
 		walker.typeInfo = typeInfo
 	}
 
+	return walker.parseAst(pkgPath, astFile)
+}
+
+func (walker *typeWalker) ParseAst(path string, fileAst *ast.File) error {
+	pkgPath, err := GetPkgPath(walker.osEnv, path)
+	if err != nil {
+		return err
+	}
+	return walker.parseAst(pkgPath, fileAst)
+}
+
+func (walker *typeWalker) parseAst(pkgPath string, astFile *ast.File) error {
 	walker.pkgPath = pkgPath
 	johnnie.Visit(walker, astFile)
 	return nil
@@ -284,4 +337,21 @@ func isStructType(t types.Type) bool {
 
 func isEmbeddedField(field *ast.Field) bool {
 	return field.Names == nil
+}
+
+func isGoFile(info os.FileInfo) bool {
+	return !info.IsDir() && isGoSrcFile(info.Name()) && !isTestFile(info.Name())
+}
+
+func isTestFile(fileName string) bool {
+	return strings.HasSuffix(strings.TrimSuffix(fileName, ".go"), "test")
+}
+
+func isGoSrcFile(fileName string) bool {
+	return strings.HasSuffix(fileName, ".go")
+}
+
+func getPkgName(goPath string) string {
+	s := strings.Split(goPath, "/")
+	return s[len(s)-1]
 }
