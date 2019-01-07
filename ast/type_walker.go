@@ -25,6 +25,8 @@ type TypeWalker interface {
 	GetTypes() []TypeInfo
 	Parse(pkgPath string, sourceCode string) error
 	ParseFile(path string, fileName string) error
+	SetTypeInfo(i *types.Info)
+	SetPhysicalPath(p string)
 }
 
 type typeWalker struct {
@@ -33,10 +35,18 @@ type typeWalker struct {
 	types         []*typeInfo
 	typeInfoStack stack.Stack
 	opsStack      stack.Stack
-	typeInfo      types.Info
+	typeInfo      *types.Info
 	pkgPath       string
 	pkgName       string
 	physicalPath  string
+}
+
+func (walker *typeWalker) SetPhysicalPath(p string) {
+	walker.physicalPath = p
+}
+
+func (walker *typeWalker) SetTypeInfo(i *types.Info) {
+	walker.typeInfo = i
 }
 
 func (walker *typeWalker) GetTypes() []TypeInfo {
@@ -68,17 +78,23 @@ func (walker *typeWalker) ParseFile(path string, fileName string) error {
 
 func (walker *typeWalker) parse(pkgPath string, fileName string, sourceCode string) error {
 	fileset := token.NewFileSet()
-	return util.CallSingleRet(func() (interface{}, error) {
-		return parser.ParseFile(fileset, fileName, sourceCode, 0)
-	}).CallBiRet(func(astFile interface{}) (interface{}, interface{}, error) {
-		typeInfo, err := walker.parseTypeInfo(pkgPath, fileset, astFile.(*ast.File))
-		return typeInfo, astFile, err
-	}).Call(func(typeInfo interface{}, astFile interface{}) error {
-		walker.typeInfo = typeInfo.(types.Info)
-		walker.pkgPath = pkgPath
-		johnnie.Visit(walker, astFile.(*ast.File))
-		return nil
-	}).Err
+
+	astFile, err := parser.ParseFile(fileset, fileName, sourceCode, 0)
+	if err != nil {
+		return err
+	}
+
+	if walker.typeInfo == nil {
+		typeInfo, err := walker.parseTypeInfo(pkgPath, fileset, astFile)
+		if err != nil {
+			return err
+		}
+		walker.typeInfo = typeInfo
+	}
+
+	walker.pkgPath = pkgPath
+	johnnie.Visit(walker, astFile)
+	return nil
 }
 
 func (walker *typeWalker) Types() []*typeInfo {
@@ -92,7 +108,8 @@ func (walker *typeWalker) WalkFile(f *ast.File) {
 func (walker *typeWalker) WalkField(field *ast.Field) {
 	if walker.isAnalyzingType() {
 		typeInfo := walker.typeInfoStack.Peek().(*typeInfo)
-		fieldType := walker.typeInfo.Types[field.Type].Type
+		t := walker.typeInfo.Types[field.Type]
+		fieldType := t.Type
 		emitTypeNameIfFiledIsNestedType(walker, fieldType)
 		typeInfo.processField(field, fieldType)
 	}
@@ -148,10 +165,10 @@ func newTypeWalkerWithPhysicalPath(physicalPath string) TypeWalker {
 }
 
 func (*typeWalker) parseTypeInfo(pkgPath string, fileSet *token.FileSet,
-	astFile *ast.File) (types.Info, error) {
-	typeInfo := types.Info{Types: make(map[ast.Expr]types.TypeAndValue)}
+	astFile *ast.File) (*types.Info, error) {
+	typeInfo := &types.Info{Types: make(map[ast.Expr]types.TypeAndValue)}
 	_, err := (&types.Config{Importer: importer.For("source", nil)}).
-		Check(pkgPath, fileSet, []*ast.File{astFile}, &typeInfo)
+		Check(pkgPath, fileSet, []*ast.File{astFile}, typeInfo)
 	return typeInfo, err
 }
 

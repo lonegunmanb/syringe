@@ -8,10 +8,14 @@ import (
 	"strings"
 )
 
+type DepMode = string
+
+var ProductCodegenMode DepMode = "ProductCodegen"
+var RegisterCodegenMode DepMode = "RegisterCodegen"
+
 type DepPkgPathInfo interface {
 	GetDepPkgPaths() []string
 	GenImportDecls() []string
-	//GetTypeInfos() []ast.TypeInfo
 	GetPkgNameFromPkgPath(pkgPath string) string
 }
 
@@ -51,10 +55,11 @@ type depPkgPathInfo struct {
 	depPkgPaths          []string
 	depPkgPathPkgNameMap map[string]string
 	pkgPath              string
+	mode                 DepMode
 }
 
-func NewDepPkgPathInfo(typeInfos []ast.TypeInfo, pkgPath string) DepPkgPathInfo {
-	return &depPkgPathInfo{typeInfos: typeInfos, pkgPath: pkgPath}
+func newDepPkgPathInfo(typeInfos []ast.TypeInfo, pkgPath string, mode DepMode) DepPkgPathInfo {
+	return &depPkgPathInfo{typeInfos: typeInfos, pkgPath: pkgPath, mode: mode}
 }
 
 func (c *depPkgPathInfo) GenImportDecls() []string {
@@ -62,6 +67,9 @@ func (c *depPkgPathInfo) GenImportDecls() []string {
 	results := make([]string, 0, len(c.depPkgPathPkgNameMap))
 	//we iterate paths so generated import decls' order is as same as fields' order
 	for _, pkgPath := range paths {
+		if pkgPath == "" {
+			continue
+		}
 		pkgName := c.depPkgPathPkgNameMap[pkgPath]
 		if pkgName != retrievePkgNameFromPkgPath(pkgPath) {
 			results = append(results, fmt.Sprintf(`%s "%s"`, pkgName, pkgPath))
@@ -95,12 +103,16 @@ func (c *depPkgPathInfo) GetTypeInfos() []ast.TypeInfo {
 
 func (c *depPkgPathInfo) initDepPkgPaths() []string {
 	paths := make([]string, len(c.typeInfos))
-	linq.From(c.typeInfos).Select(func(typeInfo interface{}) interface{} {
+	query := linq.From(c.typeInfos).Select(func(typeInfo interface{}) interface{} {
 		return typeInfo.(ast.TypeInfo).GetPkgPath()
-	}).Concat(
-		linq.From(c.typeInfos).SelectMany(func(typeInfo interface{}) linq.Query {
-			return linq.From(typeInfo.(ast.TypeInfo).GetDepPkgPaths("inject"))
-		})).Distinct().Where(func(path interface{}) bool {
+	})
+	if c.mode == ProductCodegenMode {
+		query = query.Concat(
+			linq.From(c.typeInfos).SelectMany(func(typeInfo interface{}) linq.Query {
+				return linq.From(typeInfo.(ast.TypeInfo).GetDepPkgPaths("inject"))
+			}))
+	}
+	query.Distinct().Where(func(path interface{}) bool {
 		return path.(string) != c.pkgPath
 	}).ToSlice(&paths)
 	return paths

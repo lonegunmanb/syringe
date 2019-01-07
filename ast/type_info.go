@@ -90,7 +90,11 @@ func (typeInfo *typeInfo) GetDepPkgPaths(fieldTagFilter string) []string {
 			paths := fieldInfo.(FieldInfo).GetDepPkgPaths()
 			return linq.From(paths)
 		})).Distinct().Where(func(path interface{}) bool {
-		return path.(string) != typeInfo.PkgPath
+		p := path.(string)
+		if typeInfo.GetPkgPath() == "" {
+			return p != typeInfo.GetPkgName()
+		}
+		return p != typeInfo.GetPkgPath()
 	}).ToSlice(&result)
 	return result
 }

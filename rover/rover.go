@@ -2,7 +2,13 @@ package rover
 
 import (
 	"github.com/ahmetb/go-linq"
+	"github.com/lonegunmanb/johnnie"
 	"github.com/lonegunmanb/syringe/ast"
+	goast "go/ast"
+	"go/importer"
+	"go/parser"
+	"go/token"
+	"go/types"
 	"os"
 	"reflect"
 	"strings"
@@ -29,12 +35,12 @@ func newCodeRover(roverStartingPath string) *codeRover {
 }
 
 func (r *codeRover) getStructTypes() ([]ast.TypeInfo, error) {
-	types, err := r.getTypeInfos()
+	typeInfos, err := r.getTypeInfos()
 	if err != nil {
 		return nil, err
 	}
 	var results []ast.TypeInfo
-	linq.From(types).Where(func(t interface{}) bool {
+	linq.From(typeInfos).Where(func(t interface{}) bool {
 		return t.(ast.TypeInfo).GetKind() == reflect.Struct
 	}).Where(func(t interface{}) bool {
 		return t.(ast.TypeInfo).GetPkgName() != "main"
@@ -51,18 +57,50 @@ func (r *codeRover) getTypeInfos() ([]ast.TypeInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	types := make([]ast.TypeInfo, 0, len(files))
+	fileMap := make(map[string][]*goast.File)
+	fset := token.NewFileSet()
+	osEnv := ast.NewGoPathEnv()
 	for _, file := range files {
-		walker := r.walkerFactory()
-		err := walker.ParseFile(file.Path(), file.Name())
+		fileAst, err := parser.ParseFile(fset, osEnv.ConcatFileNameWithPath(file.Path(), file.Name()), nil, 0)
 		if err != nil {
 			return nil, err
 		}
-		for _, typeInfo := range walker.GetTypes() {
-			types = append(types, typeInfo)
+		fileMap[file.Path()] = append(fileMap[file.Path()], fileAst)
+	}
+	info := &types.Info{
+		Types: make(map[goast.Expr]types.TypeAndValue),
+		Defs:  make(map[*goast.Ident]types.Object),
+		Uses:  make(map[*goast.Ident]types.Object),
+	}
+	for path, fileAsts := range fileMap {
+		var conf = &types.Config{Importer: importer.For("source", nil)}
+		goPath, err := ast.GetPkgPath(osEnv, path)
+		if err != nil {
+			return nil, err
+		}
+		_, err = conf.Check(getPkgName(goPath), fset, fileAsts, info)
+		if err != nil {
+			return nil, err
 		}
 	}
-	return types, nil
+	typeInfos := make([]ast.TypeInfo, 0, len(files))
+	for path, fileAsts := range fileMap {
+		for _, fileAst := range fileAsts {
+			walker := r.walkerFactory()
+			walker.SetPhysicalPath(path)
+			walker.SetTypeInfo(info)
+			//err := walker.ParseFile(file.Path(), file.Name())
+			johnnie.Visit(walker, fileAst)
+			if err != nil {
+				return nil, err
+			}
+			for _, typeInfo := range walker.GetTypes() {
+				typeInfo.GetPhysicalPath()
+				typeInfos = append(typeInfos, typeInfo)
+			}
+		}
+	}
+	return typeInfos, nil
 }
 
 func isTestFile(fileName string) bool {

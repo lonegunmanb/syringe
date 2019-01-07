@@ -23,11 +23,15 @@ type typeInfoWrap struct {
 }
 
 func (t *typeInfoWrap) RegisterCode() string {
-	return fmt.Sprintf("%s.Register_%s(container)", t.depPkgPathInfo.GetPkgNameFromPkgPath(t.GetPkgPath()), t.GetName())
+	pkgPath := t.GetPkgPath()
+	if pkgPath != "" {
+		return fmt.Sprintf("%s.Register_%s(container)", t.depPkgPathInfo.GetPkgNameFromPkgPath(t.GetPkgPath()), t.GetName())
+	}
+	return fmt.Sprintf("Register_%s(container)", t.GetName())
 }
 
 func NewTypeInfoWrap(typeInfo ast.TypeInfo) TypeInfoWrap {
-	return NewTypeInfoWrapWithDepPkgPath(typeInfo, NewDepPkgPathInfo([]ast.TypeInfo{typeInfo}, typeInfo.GetPkgPath()))
+	return NewTypeInfoWrapWithDepPkgPath(typeInfo, newDepPkgPathInfo([]ast.TypeInfo{typeInfo}, typeInfo.GetPkgPath(), ProductCodegenMode))
 }
 
 func NewTypeInfoWrapWithDepPkgPath(typeInfo ast.TypeInfo, depPkgPathInfo DepPkgPathInfo) TypeInfoWrap {
