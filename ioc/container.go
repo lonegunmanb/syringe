@@ -7,6 +7,7 @@ import (
 
 type Container interface {
 	RegisterFactory(interfaceType interface{}, factory func(ioc Container) interface{})
+	RegisterFactoryByName(name string, factory func(ioc Container) interface{})
 	RegisterTwoTypes(toType interface{}, fromType interface{})
 	Resolve(name string) interface{}
 	ResolveByType(interfaceType interface{}) interface{}
@@ -35,7 +36,11 @@ func (c *container) UnRegisterByType(interfaceType interface{}) {
 
 func (c *container) RegisterFactory(interfaceType interface{}, factory func(ioc Container) interface{}) {
 	typeName := getTypeName(interfaceType)
-	c.factories[typeName] = factory
+	c.RegisterFactoryByName(typeName, factory)
+}
+
+func (c *container) RegisterFactoryByName(name string, factory func(ioc Container) interface{}) {
+	c.factories[name] = factory
 }
 
 func (c *container) RegisterTwoTypes(toType interface{}, fromType interface{}) {
