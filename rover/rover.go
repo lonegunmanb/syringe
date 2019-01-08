@@ -3,6 +3,7 @@ package rover
 import (
 	"github.com/ahmetb/go-linq"
 	"github.com/lonegunmanb/syringe/ast"
+	"github.com/lonegunmanb/syringe/ioc"
 	"github.com/lonegunmanb/syringe/util"
 	"reflect"
 )
@@ -13,17 +14,19 @@ type codeRover struct {
 	packageName       string
 	goPathEnv         util.GoPathEnv
 	ignorePatten      string
-	walkerFactory     func() ast.TypeWalker
 }
 
 func newCodeRover(roverStartingPath string) *codeRover {
 	return &codeRover{
 		roverStartingPath: roverStartingPath,
 		goPathEnv:         util.NewGoPathEnv(),
-		walkerFactory: func() ast.TypeWalker {
-			return ast.NewTypeWalker()
-		},
 	}
+}
+
+func getTypeWalker() ast.TypeWalker {
+	return roverContainer.GetOrRegister((*ast.TypeWalker)(nil), func(ioc ioc.Container) interface{} {
+		return ast.NewTypeWalker()
+	}).(ast.TypeWalker)
 }
 
 func (r *codeRover) getStructTypes() ([]ast.TypeInfo, error) {
@@ -41,7 +44,7 @@ func (r *codeRover) getStructTypes() ([]ast.TypeInfo, error) {
 }
 
 func (r *codeRover) getTypeInfos() ([]ast.TypeInfo, error) {
-	walker := r.walkerFactory()
+	walker := getTypeWalker()
 	err := walker.ParseDir(r.roverStartingPath, r.ignorePatten)
 	if err != nil {
 		return nil, err

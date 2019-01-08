@@ -11,8 +11,6 @@ import (
 	"strings"
 )
 
-var codeWriterContainer = ioc.NewContainer()
-
 func GenerateCode(startingPath string, ignorePatten string) error {
 	if !filepath.IsAbs(startingPath) {
 		absPath, err := filepath.Abs(startingPath)
@@ -121,7 +119,7 @@ func CleanGeneratedCodeFiles(startingPath string) error {
 var osEnvKey = (*util.GoPathEnv)(nil)
 
 func getOsEnv() util.GoPathEnv {
-	return codeWriterContainer.GetOrRegister(osEnvKey, func(ioc ioc.Container) interface{} {
+	return roverContainer.GetOrRegister(osEnvKey, func(ioc ioc.Container) interface{} {
 		return util.NewGoPathEnv()
 	}).(util.GoPathEnv)
 }
@@ -129,7 +127,7 @@ func getOsEnv() util.GoPathEnv {
 var fileRetrieverKey = (*util.FileRetriever)(nil)
 
 func getFileRetriever() util.FileRetriever {
-	return codeWriterContainer.GetOrRegister(fileRetrieverKey, func(ioc ioc.Container) interface{} {
+	return roverContainer.GetOrRegister(fileRetrieverKey, func(ioc ioc.Container) interface{} {
 		return util.NewFileRetriever()
 	}).(util.FileRetriever)
 }
@@ -137,7 +135,7 @@ func getFileRetriever() util.FileRetriever {
 var fileOperatorKey = (*util.FileOperator)(nil)
 
 func getFileOperator() util.FileOperator {
-	return codeWriterContainer.GetOrRegister(fileOperatorKey, func(ioc ioc.Container) interface{} {
+	return roverContainer.GetOrRegister(fileOperatorKey, func(ioc ioc.Container) interface{} {
 		return &util.OsFileOperator{}
 	}).(util.FileOperator)
 }

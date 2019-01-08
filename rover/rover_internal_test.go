@@ -4,6 +4,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/codegen"
+	"github.com/lonegunmanb/syringe/ioc"
 	"github.com/lonegunmanb/syringe/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -24,10 +25,10 @@ func TestGetTypeInfos(t *testing.T) {
 	mockTypeWalker := ast.NewMockTypeWalker(ctrl)
 	mockTypeWalker.EXPECT().ParseDir(gomock.Eq(roverStartingPath), gomock.Eq("")).Times(1).Return(nil)
 	mockTypeWalker.EXPECT().GetTypes().Times(1).Return([]ast.TypeInfo{mockTypeInfo})
-	mockTypeWalkerFactory := func() ast.TypeWalker {
+	defer roverContainer.Clear()
+	roverContainer.RegisterFactory((*ast.TypeWalker)(nil), func(ioc ioc.Container) interface{} {
 		return mockTypeWalker
-	}
-	rover.walkerFactory = mockTypeWalkerFactory
+	})
 	typeInfos, err := rover.getTypeInfos()
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(typeInfos))

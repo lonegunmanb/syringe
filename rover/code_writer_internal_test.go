@@ -12,7 +12,7 @@ func TestCleanGeneratedCodeFiles(t *testing.T) {
 	startingPath := "path"
 	fileName := "gen_src.go"
 	filePath := "path/gen_src.go"
-	defer codeWriterContainer.Clear()
+	defer roverContainer.Clear()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockFileRetriever := util.NewMockFileRetriever(ctrl)
@@ -21,18 +21,18 @@ func TestCleanGeneratedCodeFiles(t *testing.T) {
 	mockFileInfo.EXPECT().Name().AnyTimes().Return(fileName)
 	fileInfos := []util.FileInfo{mockFileInfo}
 	mockFileRetriever.EXPECT().GetFiles(startingPath).Times(1).Return(fileInfos, nil)
-	codeWriterContainer.RegisterFactory((*util.FileRetriever)(nil), func(ioc ioc.Container) interface{} {
+	roverContainer.RegisterFactory((*util.FileRetriever)(nil), func(ioc ioc.Container) interface{} {
 		return mockFileRetriever
 	})
 	mockOsEnv := util.NewMockGoPathEnv(ctrl)
 	mockOsEnv.EXPECT().ConcatFileNameWithPath(startingPath, fileName).Times(1).Return(filePath)
-	codeWriterContainer.RegisterFactory((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
+	roverContainer.RegisterFactory((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
 		return mockOsEnv
 	})
 	mockFileOperator := util.NewMockFileOperator(ctrl)
 	mockFileOperator.EXPECT().FirstLine(filePath).Times(1).Return(commentHead, nil)
 	mockFileOperator.EXPECT().Del(filePath).Times(1).Return(nil)
-	codeWriterContainer.RegisterFactory((*util.FileOperator)(nil), func(ioc ioc.Container) interface{} {
+	roverContainer.RegisterFactory((*util.FileOperator)(nil), func(ioc ioc.Container) interface{} {
 		return mockFileOperator
 	})
 	err := CleanGeneratedCodeFiles(startingPath)
@@ -45,7 +45,7 @@ func TestCleanGeneratedCodeFilesWillNotTouchNonGeneratedSrcFile(t *testing.T) {
 }
 
 func testNotTouchNonGeneratedFile(t *testing.T, startingPath string, fileName string, filePath string, firstLine string) {
-	defer codeWriterContainer.Clear()
+	defer roverContainer.Clear()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockFileRetriever := util.NewMockFileRetriever(ctrl)
@@ -54,18 +54,18 @@ func testNotTouchNonGeneratedFile(t *testing.T, startingPath string, fileName st
 	mockFileInfo.EXPECT().Name().AnyTimes().Return(fileName)
 	fileInfos := []util.FileInfo{mockFileInfo}
 	mockFileRetriever.EXPECT().GetFiles(startingPath).Times(1).Return(fileInfos, nil)
-	codeWriterContainer.RegisterFactory((*util.FileRetriever)(nil), func(ioc ioc.Container) interface{} {
+	roverContainer.RegisterFactory((*util.FileRetriever)(nil), func(ioc ioc.Container) interface{} {
 		return mockFileRetriever
 	})
 	mockOsEnv := util.NewMockGoPathEnv(ctrl)
 	mockOsEnv.EXPECT().ConcatFileNameWithPath(startingPath, fileName).AnyTimes().Return(filePath)
-	codeWriterContainer.RegisterFactory((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
+	roverContainer.RegisterFactory((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
 		return mockOsEnv
 	})
 	mockFileOperator := util.NewMockFileOperator(ctrl)
 	mockFileOperator.EXPECT().FirstLine(filePath).AnyTimes().Return(firstLine, nil)
 	mockFileOperator.EXPECT().Del(filePath).Times(0).Return(nil)
-	codeWriterContainer.RegisterFactory((*util.FileOperator)(nil), func(ioc ioc.Container) interface{} {
+	roverContainer.RegisterFactory((*util.FileOperator)(nil), func(ioc ioc.Container) interface{} {
 		return mockFileOperator
 	})
 	err := CleanGeneratedCodeFiles(startingPath)
