@@ -43,8 +43,11 @@ func TestGenRegisterCode(t *testing.T) {
 	const expected = `
 func CreateIoc() ioc.Container {
     container := ioc.NewContainer()
-    a.Register_a(container)
+    Register(container)
     return container
+}
+func Register(container ioc.Container) {
+    a.Register_a(container)
 }`
 	assert.Equal(t, expected, writer.String())
 }

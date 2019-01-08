@@ -111,6 +111,10 @@ import (
 )
 func CreateIoc() ioc.Container {
     container := ioc.NewContainer()
+    Register(container)
+    return container
+}
+func Register(container ioc.Container) {
     p0.Register_Request(container)
     p1.Register_Request(container)
     car.Register_Car(container)
@@ -119,7 +123,6 @@ func CreateIoc() ioc.Container {
     flyer.Register_Plane(container)
     fly_car.Register_FlyCar(container)
     fly_car.Register_FancyDecoration(container)
-    return container
 }`
 
 func TestGenRegisterCode(t *testing.T) {

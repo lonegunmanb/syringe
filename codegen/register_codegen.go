@@ -70,12 +70,15 @@ func (c *registerCodegen) genImportDecls() error {
 const createIocTemplate = `
 func CreateIoc() ioc.Container {
     %s := ioc.NewContainer()
+    Register(%s)
+    return %s
+}
+func Register(%s ioc.Container) {
 {{with .GetRegisters}}{{range .}}    {{.RegisterCode}}
-{{end}}{{end}}    return %s
-}`
+{{end}}{{end}}}`
 
 func (c *registerCodegen) genRegister() error {
-	return gen("registerType", fmt.Sprintf(createIocTemplate, ContainerIdentName, ContainerIdentName), c.writer, c)
+	return gen("registerType", fmt.Sprintf(createIocTemplate, ContainerIdentName, ContainerIdentName, ContainerIdentName, ContainerIdentName), c.writer, c)
 }
 
 func (c *registerCodegen) GenerateCode() error {
