@@ -29,21 +29,20 @@ type Struct struct{
 	assert.Equal(t, "ast", typeInfo.PkgName)
 }
 
-//TODO:
-//func TestDepSamePkg(t *testing.T) {
-//	sourceCode := `
-//package ast
-//type Struct struct {
-//s Struct2
-//}
-//type Struct2 struct {
-//
-//}
-//`
-//	walker := parseCode(t, sourceCode)
-//	typeInfo := walker.Types()[0]
-//	println(typeInfo.PkgPath)
-//}
+func TestDepSamePkg(t *testing.T) {
+	sourceCode := `
+package ast
+type Struct struct {
+s Struct2
+}
+type Struct2 struct {
+
+}
+`
+	walker := parseCode(t, sourceCode)
+	typeInfo := walker.Types()[0]
+	assert.Equal(t, testPkgPath, typeInfo.PkgPath)
+}
 
 func TestPackageNameDifferentWithPkgPath(t *testing.T) {
 	sourceCode := `

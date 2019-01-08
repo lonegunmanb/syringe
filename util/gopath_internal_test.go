@@ -2,6 +2,7 @@ package util
 
 //go:generate mockgen -package=util -destination=./mock_gopathenv.go github.com/lonegunmanb/syringe/util GoPathEnv
 import (
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -23,16 +24,15 @@ func TestGetPkgPathFromSystemPathUsingGoPath(t *testing.T) {
 		expectedPkgName)
 }
 
-//TODO
-//func TestGetPkgPathInWindows(t *testing.T) {
-//	ctrl := gomock.NewController(t)
-//	mockEnv := NewMockGoPathEnv(ctrl)
-//	mockEnv.EXPECT().IsWindows().Times(2).Return(true)
-//	mockEnv.EXPECT().GetGoPath().Times(1).Return("c:\\go")
-//	pkgPath, err := GetPkgPath(mockEnv, "c:\\go\\src\\github.com\\lonegunmanb\\syringe")
-//	assert.Nil(t, err)
-//	assert.Equal(t, expectedPkgName, pkgPath)
-//}
+func TestGetPkgPathInWindows(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockEnv := NewMockGoPathEnv(ctrl)
+	mockEnv.EXPECT().IsWindows().AnyTimes().Return(true)
+	mockEnv.EXPECT().GetGoPath().AnyTimes().Return("c:\\go")
+	pkgPath, err := GetPkgPath(mockEnv, "c:\\go\\src\\github.com\\lonegunmanb\\syringe")
+	assert.Nil(t, err)
+	assert.Equal(t, expectedPkgName, pkgPath)
+}
 
 func TestConcatFileNameWithPath(t *testing.T) {
 	path := concatFileNameWithPath(false, "/Users/user/go", "file")
