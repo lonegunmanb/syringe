@@ -10,11 +10,13 @@ import (
 
 func main() {
 	clean := flag.Bool("c", false, "clean generated code")
-	identName := flag.String("cident", "container", "generated container identifier")
+	containerIdentName := flag.String("cident", "container", "generated container identifier")
+	productIdentName := flag.String("pident", "product", "generated product identifier")
 	ignorePatten := flag.String("ignore", "", "ignore file patten")
 	flag.Parse()
 	currentPath, err := os.Getwd()
-	codegen.ContainerIdentName = *identName
+	codegen.ContainerIdentName = *containerIdentName
+	codegen.ProductIdentName = *productIdentName
 	if err != nil {
 		println(err.Error())
 		return

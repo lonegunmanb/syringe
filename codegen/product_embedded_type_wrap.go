@@ -11,7 +11,7 @@ type productEmbeddedTypeWrap struct {
 	typeInfoWrap TypeInfoWrap
 }
 
-const embeddedTypeInitTemplate = `product.%s = %s%s.Resolve("%s").(%s)`
+const embeddedTypeInitTemplate = `%s.%s = %s%s.Resolve("%s").(%s)`
 
 func (f *productEmbeddedTypeWrap) AssembleCode() string {
 	pkgPath := f.GetReferenceFrom().GetPkgPath()
@@ -37,5 +37,5 @@ func (f *productEmbeddedTypeWrap) AssembleCode() string {
 		star = "*"
 		typeDecl = fmt.Sprintf("*%s", typeDecl)
 	}
-	return fmt.Sprintf(embeddedTypeInitTemplate, name, star, ContainerIdentName, embeddedType.String(), typeDecl)
+	return fmt.Sprintf(embeddedTypeInitTemplate, ProductIdentName, name, star, ContainerIdentName, embeddedType.String(), typeDecl)
 }

@@ -80,23 +80,23 @@ func (c *productCodegen) genImportDecls() error {
 
 const createFuncDecl = `
 func Create_{{.GetName}}(%s ioc.Container) *{{.GetName}} {
-	product := new({{.GetName}})
-	Assemble_{{.GetName}}(product, %s)
-	return product
+	%s := new({{.GetName}})
+	Assemble_{{.GetName}}(%s, %s)
+	return %s
 }`
 
 func (c *productCodegen) genCreateFuncDecl() error {
-	return c.gen("createFunc", fmt.Sprintf(createFuncDecl, ContainerIdentName, ContainerIdentName))
+	return c.gen("createFunc", fmt.Sprintf(createFuncDecl, ContainerIdentName, ProductIdentName, ProductIdentName, ContainerIdentName, ProductIdentName))
 }
 
 const assembleFuncDecl = `
-func Assemble_{{.GetName}}(product *{{.GetName}}, %s ioc.Container) {
+func Assemble_{{.GetName}}(%s *{{.GetName}}, %s ioc.Container) {
 {{with .GetEmbeddedTypeAssigns}}{{range .}}	{{.AssembleCode}}
 {{end}}{{end}}{{with .GetFieldAssigns}}{{range .}}	{{.AssembleCode}}
 {{end}}{{end}}}`
 
 func (c *productCodegen) genAssembleFuncDecl() error {
-	return c.gen("assembleFunc", fmt.Sprintf(assembleFuncDecl, ContainerIdentName))
+	return c.gen("assembleFunc", fmt.Sprintf(assembleFuncDecl, ProductIdentName, ContainerIdentName))
 }
 
 const registerFuncDecl = `

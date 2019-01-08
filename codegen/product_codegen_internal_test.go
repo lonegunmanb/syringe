@@ -91,14 +91,17 @@ func Create_FlyCar(container ioc.Container) *FlyCar {
 func TestGenCreateFuncDeclForCustomIdent(t *testing.T) {
 	const expectedFlyCarCreateCode = `
 func Create_FlyCar(c ioc.Container) *FlyCar {
-	product := new(FlyCar)
-	Assemble_FlyCar(product, c)
-	return product
+	p := new(FlyCar)
+	Assemble_FlyCar(p, c)
+	return p
 }`
-	originIdent := ContainerIdentName
+	originContainerIdent := ContainerIdentName
 	ContainerIdentName = "c"
+	originProductIdent := ProductIdentName
+	ProductIdentName = "p"
 	defer func() {
-		ContainerIdentName = originIdent
+		ContainerIdentName = originContainerIdent
+		ProductIdentName = originProductIdent
 	}()
 	testProductGen(t, func(typeInfo *MockTypeInfoWrap) {
 		typeInfo.EXPECT().GetName().Times(4).Return("FlyCar")
@@ -134,19 +137,22 @@ func TestGenAssembleFuncDecl(t *testing.T) {
 
 func TestGenAssembleFuncDeclWithCustomIdent(t *testing.T) {
 	expectedFlyCarAssembleCode := `
-func Assemble_FlyCar(product *FlyCar, c ioc.Container) {
-	product.Decoration = c.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)
+func Assemble_FlyCar(p *FlyCar, c ioc.Container) {
+	p.Decoration = c.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)
 }`
-	originIdent := ContainerIdentName
+	originContainerIdent := ContainerIdentName
+	originProductIdent := ProductIdentName
 	ContainerIdentName = "c"
+	ProductIdentName = "p"
 	defer func() {
-		ContainerIdentName = originIdent
+		ContainerIdentName = originContainerIdent
+		ProductIdentName = originProductIdent
 	}()
 	testProductGen(t, func(typeInfo *MockTypeInfoWrap) {
 		typeInfo.EXPECT().GetName().Times(2).Return("FlyCar")
 		typeInfo.EXPECT().GetEmbeddedTypeAssigns().Times(1).Return([]Assembler{})
 		decorationMock := NewMockAssembler(typeInfo.ctrl)
-		decorationMock.EXPECT().AssembleCode().Times(1).Return(`product.Decoration = c.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)`)
+		decorationMock.EXPECT().AssembleCode().Times(1).Return(`p.Decoration = c.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)`)
 		typeInfo.EXPECT().GetFieldAssigns().Times(1).Return([]Assembler{decorationMock})
 	}, func(gen *productCodegen) error {
 		r := gen.genAssembleFuncDecl()

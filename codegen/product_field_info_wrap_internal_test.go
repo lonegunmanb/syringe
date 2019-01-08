@@ -40,13 +40,16 @@ func TestAssembleCodeForCustomIdentName(t *testing.T) {
 		FieldInfo: field,
 		typeInfo:  NewTypeInfoWrap(field.GetReferenceFrom()),
 	}
-	originIdent := ContainerIdentName
+	originContainerIdent := ContainerIdentName
+	originProductIdent := ProductIdentName
 	ContainerIdentName = "c"
+	ProductIdentName = "p"
 	defer func() {
-		ContainerIdentName = originIdent
+		ContainerIdentName = originContainerIdent
+		ProductIdentName = originProductIdent
 	}()
 	code := sut.AssembleCode()
-	assert.Equal(t, "product.Field = c.Resolve(\"int\").(int)", code)
+	assert.Equal(t, "p.Field = c.Resolve(\"int\").(int)", code)
 }
 
 func TestGetNamedTypeDecl(t *testing.T) {

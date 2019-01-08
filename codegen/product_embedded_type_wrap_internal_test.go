@@ -84,11 +84,14 @@ type Struct2 struct {
 `
 	walker := parseCode(t, code)
 	embeddedType := &productEmbeddedTypeWrap{walker.GetTypes()[0].GetEmbeddedTypes()[0], &stubTypeCodegen{}}
-	expected := `product.Struct2 = *c.Resolve("github.com/lonegunmanb/syringe/test.Struct2").(*Struct2)`
-	originIdent := ContainerIdentName
+	expected := `p.Struct2 = *c.Resolve("github.com/lonegunmanb/syringe/test.Struct2").(*Struct2)`
+	originContainerIdent := ContainerIdentName
+	originProductIdent := ProductIdentName
 	ContainerIdentName = "c"
+	ProductIdentName = "p"
 	defer func() {
-		ContainerIdentName = originIdent
+		ContainerIdentName = originContainerIdent
+		ProductIdentName = originProductIdent
 	}()
 	assert.Equal(t, expected, embeddedType.AssembleCode())
 }

@@ -40,3 +40,4 @@ func gen(templateName string, text string, writer io.Writer, data interface{}) (
 }
 
 var ContainerIdentName = "container"
+var ProductIdentName = "product"
