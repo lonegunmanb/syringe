@@ -14,6 +14,7 @@ import (
 	"go/types"
 	"os"
 	"reflect"
+	"regexp"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ type TypeWalker interface {
 	johnnie.Walker
 	GetTypes() []TypeInfo
 	Parse(pkgPath string, sourceCode string) error
-	ParseDir(dirPath string) error
+	ParseDir(dirPath string, ignorePatten string) error
 	SetTypeInfo(i *types.Info)
 	SetPhysicalPath(p string)
 	ParseAst(path string, fileAst *ast.File) error
@@ -66,12 +67,8 @@ func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
 	return walker.parse(pkgPath, "src.go", sourceCode)
 }
 
-func (walker *typeWalker) ParseDir(dirPath string) error {
-	fileRetrieverKey := (*util.FileRetriever)(nil)
-	fileRetriever := iocContainer.GetOrRegister(fileRetrieverKey, func(ioc ioc.Container) interface{} {
-		return util.NewFileRetriever()
-	}).(util.FileRetriever)
-	files, err := fileRetriever.GetFiles(dirPath, isGoFile)
+func (walker *typeWalker) ParseDir(dirPath string, ignorePatten string) error {
+	files, err := walker.getFiles(dirPath, ignorePatten)
 	if err != nil {
 		return err
 	}
@@ -115,6 +112,37 @@ func (walker *typeWalker) ParseDir(dirPath string) error {
 		}
 	}
 	return nil
+}
+
+func (walker *typeWalker) getFiles(dirPath string, ignorePatten string) ([]util.FileInfo, error) {
+	fileRetrieverKey := (*util.FileRetriever)(nil)
+	fileRetriever := iocContainer.GetOrRegister(fileRetrieverKey, func(ioc ioc.Container) interface{} {
+		return util.NewFileRetriever()
+	}).(util.FileRetriever)
+	var regex *regexp.Regexp
+	if ignorePatten != "" {
+		reg, err := regexp.Compile(ignorePatten)
+		if err != nil {
+			return nil, err
+		}
+		regex = reg
+	}
+
+	filter := func(info util.FileInfo) bool {
+		if regex != nil {
+			return isGoFile(info) && !regex.MatchString(info.Name())
+		}
+		return isGoFile(info)
+	}
+	files, err := fileRetriever.GetFiles(dirPath)
+	if err != nil {
+		return nil, err
+	}
+	filteredFiles := make([]util.FileInfo, 0)
+	linq.From(files).Where(func(fileInfo interface{}) bool {
+		return filter(fileInfo.(util.FileInfo))
+	}).ToSlice(&filteredFiles)
+	return filteredFiles, nil
 }
 
 func (walker *typeWalker) parse(pkgPath string, fileName string, sourceCode string) error {
@@ -349,9 +377,4 @@ func isTestFile(fileName string) bool {
 
 func isGoSrcFile(fileName string) bool {
 	return strings.HasSuffix(fileName, ".go")
-}
-
-func getPkgName(goPath string) string {
-	s := strings.Split(goPath, "/")
-	return s[len(s)-1]
 }

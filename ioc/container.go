@@ -11,10 +11,25 @@ type Container interface {
 	ResolveByType(interfaceType interface{}) interface{}
 	Has(interfaceType interface{}) bool
 	GetOrRegister(interfaceType interface{}, factory func(ioc Container) interface{}) interface{}
+	UnRegister(name string)
+	UnRegisterByType(interfaceType interface{})
+	Clear()
 }
 
 type container struct {
 	factories map[string]func(ioc Container) interface{}
+}
+
+func (c *container) Clear() {
+	c.factories = make(map[string]func(Container) interface{})
+}
+
+func (c *container) UnRegister(name string) {
+	delete(c.factories, name)
+}
+
+func (c *container) UnRegisterByType(interfaceType interface{}) {
+	c.UnRegister(getTypeName(interfaceType))
 }
 
 func (c *container) RegisterFactory(interfaceType interface{}, factory func(ioc Container) interface{}) {

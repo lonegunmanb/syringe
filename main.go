@@ -5,13 +5,13 @@ import (
 	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/codegen"
 	"github.com/lonegunmanb/syringe/rover"
-	"io"
 	"os"
 )
 
 func main() {
 	clean := flag.Bool("c", false, "clean generated code")
-	identName := flag.String("i", "container", "generated container identifier")
+	identName := flag.String("cident", "container", "generated container identifier")
+	ignorePatten := flag.String("ignore", "", "ignore file patten")
 	flag.Parse()
 	currentPath, err := os.Getwd()
 	codegen.ContainerIdentName = *identName
@@ -23,22 +23,19 @@ func main() {
 	if *clean {
 		remove(currentPath)
 	} else {
-		create(currentPath)
+		create(currentPath, *ignorePatten)
 	}
-	//create("/Users/byers/go/src/github.com/lonegunmanb/blender")
 }
 
-func create(startingPath string) {
-	err := rover.GenerateCode(startingPath, ast.NewGoPathEnv(), func(filePath string) (io.Writer, error) {
-		return os.Create(filePath)
-	})
+func create(startingPath string, ignorePatten string) {
+	err := rover.GenerateCode(startingPath, ignorePatten, ast.NewGoPathEnv())
 	if err != nil {
 		println(err.Error())
 	}
 }
 
 func remove(startingPath string) {
-	err := rover.CleanGeneratedCodeFiles(startingPath, ast.NewGoPathEnv())
+	err := rover.CleanGeneratedCodeFiles(startingPath)
 	if err != nil {
 		println(err.Error())
 	}

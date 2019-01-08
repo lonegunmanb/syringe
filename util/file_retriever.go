@@ -6,7 +6,7 @@ import (
 )
 
 type FileRetriever interface {
-	GetFiles(startingPath string, predicate func(os.FileInfo) bool) ([]FileInfo, error)
+	GetFiles(startingPath string) ([]FileInfo, error)
 }
 
 func NewFileRetriever() FileRetriever {
@@ -16,15 +16,13 @@ func NewFileRetriever() FileRetriever {
 type fileRetriever struct {
 }
 
-func (r *fileRetriever) GetFiles(startingPath string, predicate func(os.FileInfo) bool) ([]FileInfo, error) {
+func (r *fileRetriever) GetFiles(startingPath string) ([]FileInfo, error) {
 	var files []FileInfo
 	err := filepath.Walk(startingPath, func(path string, info os.FileInfo, err error) error {
-		if predicate(info) {
-			files = append(files, &fileInfo{
-				FileInfo: info,
-				filePath: filepath.Dir(path),
-			})
-		}
+		files = append(files, &fileInfo{
+			FileInfo: info,
+			filePath: filepath.Dir(path),
+		})
 		return nil
 	})
 	return files, err

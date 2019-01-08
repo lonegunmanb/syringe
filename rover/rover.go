@@ -11,15 +11,14 @@ type codeRover struct {
 	destinationPath   string
 	packageName       string
 	goPathEnv         ast.GoPathEnv
-	//fileRetriever     util.FileRetriever
-	walkerFactory func() ast.TypeWalker
+	ignorePatten      string
+	walkerFactory     func() ast.TypeWalker
 }
 
 func newCodeRover(roverStartingPath string) *codeRover {
 	return &codeRover{
 		roverStartingPath: roverStartingPath,
 		goPathEnv:         ast.NewGoPathEnv(),
-		//fileRetriever:     &fileRetriever{},
 		walkerFactory: func() ast.TypeWalker {
 			return ast.NewTypeWalker()
 		},
@@ -42,7 +41,7 @@ func (r *codeRover) getStructTypes() ([]ast.TypeInfo, error) {
 
 func (r *codeRover) getTypeInfos() ([]ast.TypeInfo, error) {
 	walker := r.walkerFactory()
-	err := walker.ParseDir(r.roverStartingPath)
+	err := walker.ParseDir(r.roverStartingPath, r.ignorePatten)
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go/types"
 	"reflect"
+	"regexp"
 	"testing"
 )
 
@@ -416,6 +417,12 @@ func TestSubStructsWithSameStructureAreIdentical(t *testing.T) {
 	s2.Field = s1.Field
 	assert.Equal(t, 1, s2.Field.Field3.Field1)
 	assert.Equal(t, "1", s2.Field.Field3.Field2)
+}
+
+func TestIgnorePatten(t *testing.T) {
+	regex, err := regexp.Compile("mock_.*\\.go")
+	assert.Nil(t, err)
+	assert.True(t, regex.MatchString("mock_abc.go"))
 }
 
 func returnField1(input interface{}) string {
