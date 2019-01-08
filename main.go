@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/codegen"
 	"github.com/lonegunmanb/syringe/rover"
 	"os"
@@ -30,7 +29,7 @@ func main() {
 }
 
 func create(startingPath string, ignorePatten string) {
-	err := rover.GenerateCode(startingPath, ignorePatten, ast.NewGoPathEnv())
+	err := rover.GenerateCode(startingPath, ignorePatten)
 	if err != nil {
 		println(err.Error())
 	}

@@ -37,7 +37,7 @@ type TypeWalker interface {
 
 type typeWalker struct {
 	johnnie.DefaultWalker
-	osEnv         GoPathEnv
+	osEnv         util.GoPathEnv
 	types         []*typeInfo
 	typeInfoStack stack.Stack
 	opsStack      stack.Stack
@@ -74,9 +74,9 @@ func (walker *typeWalker) ParseDir(dirPath string, ignorePatten string) error {
 	}
 	fileMap := make(map[string][]*ast.File)
 	fset := token.NewFileSet()
-	osEnv := iocContainer.GetOrRegister((*GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
-		return NewGoPathEnv()
-	}).(GoPathEnv)
+	osEnv := iocContainer.GetOrRegister((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
+		return util.NewGoPathEnv()
+	}).(util.GoPathEnv)
 	for _, file := range files {
 		fileAst, err := parser.ParseFile(fset, osEnv.ConcatFileNameWithPath(file.Path(), file.Name()), nil, 0)
 		if err != nil {
@@ -91,7 +91,7 @@ func (walker *typeWalker) ParseDir(dirPath string, ignorePatten string) error {
 	}
 	for path, fileAsts := range fileMap {
 		var conf = &types.Config{Importer: importer.For("source", nil)}
-		goPath, err := GetPkgPath(osEnv, path)
+		goPath, err := util.GetPkgPath(osEnv, path)
 		if err != nil {
 			return err
 		}
@@ -165,7 +165,7 @@ func (walker *typeWalker) parse(pkgPath string, fileName string, sourceCode stri
 }
 
 func (walker *typeWalker) ParseAst(path string, fileAst *ast.File) error {
-	pkgPath, err := GetPkgPath(walker.osEnv, path)
+	pkgPath, err := util.GetPkgPath(walker.osEnv, path)
 	if err != nil {
 		return err
 	}
@@ -240,7 +240,7 @@ func NewTypeWalker() TypeWalker {
 func newTypeWalkerWithPhysicalPath(physicalPath string) TypeWalker {
 	return &typeWalker{
 		types:        []*typeInfo{},
-		osEnv:        &envImpl{},
+		osEnv:        util.NewGoPathEnv(),
 		physicalPath: physicalPath,
 	}
 }

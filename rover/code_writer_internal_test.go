@@ -2,7 +2,6 @@ package rover
 
 import (
 	"github.com/golang/mock/gomock"
-	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/ioc"
 	"github.com/lonegunmanb/syringe/util"
 	"github.com/stretchr/testify/assert"
@@ -25,9 +24,9 @@ func TestCleanGeneratedCodeFiles(t *testing.T) {
 	codeWriterContainer.RegisterFactory((*util.FileRetriever)(nil), func(ioc ioc.Container) interface{} {
 		return mockFileRetriever
 	})
-	mockOsEnv := ast.NewMockGoPathEnv(ctrl)
+	mockOsEnv := util.NewMockGoPathEnv(ctrl)
 	mockOsEnv.EXPECT().ConcatFileNameWithPath(startingPath, fileName).Times(1).Return(filePath)
-	codeWriterContainer.RegisterFactory((*ast.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
+	codeWriterContainer.RegisterFactory((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
 		return mockOsEnv
 	})
 	mockFileOperator := util.NewMockFileOperator(ctrl)
@@ -58,9 +57,9 @@ func testNotTouchNonGeneratedFile(t *testing.T, startingPath string, fileName st
 	codeWriterContainer.RegisterFactory((*util.FileRetriever)(nil), func(ioc ioc.Container) interface{} {
 		return mockFileRetriever
 	})
-	mockOsEnv := ast.NewMockGoPathEnv(ctrl)
+	mockOsEnv := util.NewMockGoPathEnv(ctrl)
 	mockOsEnv.EXPECT().ConcatFileNameWithPath(startingPath, fileName).AnyTimes().Return(filePath)
-	codeWriterContainer.RegisterFactory((*ast.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
+	codeWriterContainer.RegisterFactory((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
 		return mockOsEnv
 	})
 	mockFileOperator := util.NewMockFileOperator(ctrl)

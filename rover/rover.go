@@ -3,6 +3,7 @@ package rover
 import (
 	"github.com/ahmetb/go-linq"
 	"github.com/lonegunmanb/syringe/ast"
+	"github.com/lonegunmanb/syringe/util"
 	"reflect"
 )
 
@@ -10,7 +11,7 @@ type codeRover struct {
 	roverStartingPath string
 	destinationPath   string
 	packageName       string
-	goPathEnv         ast.GoPathEnv
+	goPathEnv         util.GoPathEnv
 	ignorePatten      string
 	walkerFactory     func() ast.TypeWalker
 }
@@ -18,7 +19,7 @@ type codeRover struct {
 func newCodeRover(roverStartingPath string) *codeRover {
 	return &codeRover{
 		roverStartingPath: roverStartingPath,
-		goPathEnv:         ast.NewGoPathEnv(),
+		goPathEnv:         util.NewGoPathEnv(),
 		walkerFactory: func() ast.TypeWalker {
 			return ast.NewTypeWalker()
 		},

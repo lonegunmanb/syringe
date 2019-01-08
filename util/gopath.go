@@ -1,4 +1,4 @@
-package ast
+package util
 
 import (
 	"errors"
