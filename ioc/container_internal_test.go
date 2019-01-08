@@ -21,3 +21,21 @@ func TestRegisterFactory(t *testing.T) {
 	assert.NotNil(t, resolvedFactory)
 	assert.Equal(t, e, resolvedFactory(c))
 }
+
+type stubEngine struct {
+}
+
+func (stubEngine) OutputPower() engine.HorsePower {
+	panic("implement me")
+}
+
+func TestContainer_RegisterTwoTypes(t *testing.T) {
+	c := newContainer()
+	e := &stubEngine{}
+	c.RegisterFactory((*stubEngine)(nil), func(ioc Container) interface{} {
+		return e
+	})
+	c.RegisterTwoTypes((*engine.Engine)(nil), (*stubEngine)(nil))
+	resolvedEngine := c.ResolveByType((*engine.Engine)(nil))
+	assert.Equal(t, e, resolvedEngine)
+}
