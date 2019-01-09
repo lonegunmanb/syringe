@@ -64,6 +64,8 @@ func (t *typeInfoWrap) GetEmbeddedTypeAssigns() []Assembler {
 	results := make([]Assembler, 0, len(embeddedTypes))
 	linq.From(embeddedTypes).Select(func(embeddedType interface{}) interface{} {
 		return &productEmbeddedTypeWrap{EmbeddedType: embeddedType.(ast.EmbeddedType), typeInfoWrap: t}
+	}).Where(func(embeddedType interface{}) bool {
+		return hasInjectTag(embeddedType.(ast.EmbeddedType).GetTag())
 	}).ToSlice(&results)
 	return results
 }

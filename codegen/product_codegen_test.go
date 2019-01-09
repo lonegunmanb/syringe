@@ -18,7 +18,7 @@ import (
 )
 
 type FlyCar struct {
-	*car.Car
+	*car.Car %s
 	flyer.Plane %s
 	Decoration  Decoration %s
 }
@@ -52,7 +52,7 @@ const injectTag = "`inject:\"\"`"
 
 func TestGenerateCreateProductCode(t *testing.T) {
 	walker := ast.NewTypeWalker()
-	err := walker.Parse("github.com/lonegunmanb/syringe/test_code/fly_car", fmt.Sprintf(flyCarCode, injectTag, injectTag))
+	err := walker.Parse("github.com/lonegunmanb/syringe/test_code/fly_car", fmt.Sprintf(flyCarCode, injectTag, injectTag, injectTag))
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
 	writer := &bytes.Buffer{}

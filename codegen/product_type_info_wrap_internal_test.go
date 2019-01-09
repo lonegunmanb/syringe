@@ -39,6 +39,7 @@ func TestProductTypeInfoWrap_GetEmbeddedTypeAssigns(t *testing.T) {
 	ctrl, typeInfo := prepareTypeInfoMock(t)
 	defer ctrl.Finish()
 	mockEmbeddedTypes := NewMockEmbeddedType(ctrl)
+	mockEmbeddedTypes.EXPECT().GetTag().Times(1).Return("inject:\"\"")
 	embeddedTypes := []ast.EmbeddedType{mockEmbeddedTypes}
 	typeInfo.EXPECT().GetEmbeddedTypes().Times(1).Return(embeddedTypes)
 	sut := &typeInfoWrap{TypeInfo: typeInfo}

@@ -111,14 +111,13 @@ func Create_FlyCar(c ioc.Container) *FlyCar {
 	}, expectedFlyCarCreateCode)
 }
 
-const expectedFlyCarAssembleCode = `
+func TestGenAssembleFuncDecl(t *testing.T) {
+	const expectedFlyCarAssembleCode = `
 func Assemble_FlyCar(product *FlyCar, container ioc.Container) {
 	product.Car = container.Resolve("github.com/lonegunmanb/syringe/test_code/car.Car").(*car.Car)
 	product.Plane = *container.Resolve("github.com/lonegunmanb/syringe/test_code/flyer.Plane").(*flyer.Plane)
 	product.Decoration = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)
 }`
-
-func TestGenAssembleFuncDecl(t *testing.T) {
 	testProductGen(t, func(typeInfo *MockTypeInfoWrap) {
 		embeddedCarMock := NewMockAssembler(typeInfo.ctrl)
 		embeddedCarMock.EXPECT().AssembleCode().Times(1).Return(`product.Car = container.Resolve("github.com/lonegunmanb/syringe/test_code/car.Car").(*car.Car)`)
@@ -181,8 +180,12 @@ type Decoration interface {
 const injectTag = "`inject:\"\"`"
 
 func TestActualAssembleFuncDecl(t *testing.T) {
+	const expectedFlyCarAssembleCode = `
+func Assemble_FlyCar(product *FlyCar, container ioc.Container) {
+	product.Plane = *container.Resolve("github.com/lonegunmanb/syringe/test_code/flyer.Plane").(*flyer.Plane)
+	product.Decoration = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)
+}`
 	walker := ast.NewTypeWalker()
-
 	err := walker.Parse("github.com/lonegunmanb/syringe/test_code/fly_car", fmt.Sprintf(actualFlyCarCode, injectTag, injectTag))
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
