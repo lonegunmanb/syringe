@@ -3,7 +3,7 @@ package codegen
 import (
 	"fmt"
 	"github.com/golang/mock/gomock"
-	"github.com/lonegunmanb/syringe/ast"
+	"github.com/lonegunmanb/varys/ast"
 	"github.com/stretchr/testify/assert"
 	"go-funk"
 	"go/types"

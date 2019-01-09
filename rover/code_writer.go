@@ -2,10 +2,10 @@ package rover
 
 import (
 	"fmt"
-	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/codegen"
 	"github.com/lonegunmanb/syringe/ioc"
 	"github.com/lonegunmanb/syringe/util"
+	"github.com/lonegunmanb/varys/ast"
 	"io"
 	"os"
 	"path/filepath"

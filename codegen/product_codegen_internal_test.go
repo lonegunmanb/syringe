@@ -1,15 +1,15 @@
 package codegen
 
-//go:generate mockgen -package=codegen -destination=./mock_type_info.go github.com/lonegunmanb/syringe/ast TypeInfo
-//go:generate mockgen -package=codegen -destination=./mock_field_info.go github.com/lonegunmanb/syringe/ast FieldInfo
-//go:generate mockgen -package=codegen -destination=./mock_embedded_type.go github.com/lonegunmanb/syringe/ast EmbeddedType
+//go:generate mockgen -package=codegen -destination=./mock_type_info.go github.com/lonegunmanb/varys/ast TypeInfo
+//go:generate mockgen -package=codegen -destination=./mock_field_info.go github.com/lonegunmanb/varys/ast FieldInfo
+//go:generate mockgen -package=codegen -destination=./mock_embedded_type.go github.com/lonegunmanb/varys/ast EmbeddedType
 //go:generate mockgen -package=codegen -destination=./mock_assembler.go github.com/lonegunmanb/syringe/codegen Assembler
 //go:generate mockgen -package=codegen -destination=./mock_type_codegen.go github.com/lonegunmanb/syringe/codegen TypeInfoWrap
 import (
 	"bytes"
 	"fmt"
 	"github.com/golang/mock/gomock"
-	"github.com/lonegunmanb/syringe/ast"
+	"github.com/lonegunmanb/varys/ast"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

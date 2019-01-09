@@ -2,16 +2,16 @@ package rover
 
 import (
 	"github.com/golang/mock/gomock"
-	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/ioc"
 	"github.com/lonegunmanb/syringe/util"
+	"github.com/lonegunmanb/varys/ast"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-//go:generate mockgen -package=rover -destination=./mock_gopathenv.go github.com/lonegunmanb/syringe/ast GoPathEnv
-//go:generate mockgen -package=rover -destination=./mock_file_retriever.go github.com/lonegunmanb/syringe/ast FileRetriever
-
+//go:generate mockgen -package=rover -destination=./mock_gopathenv.go github.com/lonegunmanb/varys/ast GoPathEnv
+//go:generate mockgen -package=rover -destination=./mock_file_retriever.go github.com/lonegunmanb/varys/ast FileRetriever
+//go:generate mockgen -package=rover -destination=./mock_file_info.go github.com/lonegunmanb/varys/ast FileInfo
 func TestCleanGeneratedCodeFiles(t *testing.T) {
 	startingPath := "path"
 	fileName := "gen_src.go"
@@ -20,7 +20,7 @@ func TestCleanGeneratedCodeFiles(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockFileRetriever := NewMockFileRetriever(ctrl)
-	mockFileInfo := util.NewMockFileInfo(ctrl)
+	mockFileInfo := NewMockFileInfo(ctrl)
 	mockFileInfo.EXPECT().Path().AnyTimes().Return(startingPath)
 	mockFileInfo.EXPECT().Name().AnyTimes().Return(fileName)
 	fileInfos := []ast.FileInfo{mockFileInfo}
@@ -53,7 +53,7 @@ func testNotTouchNonGeneratedFile(t *testing.T, startingPath string, fileName st
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockFileRetriever := NewMockFileRetriever(ctrl)
-	mockFileInfo := util.NewMockFileInfo(ctrl)
+	mockFileInfo := NewMockFileInfo(ctrl)
 	mockFileInfo.EXPECT().Path().AnyTimes().Return(startingPath)
 	mockFileInfo.EXPECT().Name().AnyTimes().Return(fileName)
 	fileInfos := []ast.FileInfo{mockFileInfo}

@@ -3,8 +3,8 @@ package codegen_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/codegen"
+	"github.com/lonegunmanb/varys/ast"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

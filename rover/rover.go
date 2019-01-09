@@ -2,8 +2,8 @@ package rover
 
 import (
 	"github.com/ahmetb/go-linq"
-	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/ioc"
+	"github.com/lonegunmanb/varys/ast"
 	"reflect"
 )
 

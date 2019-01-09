@@ -3,8 +3,8 @@ package codegen
 import (
 	"fmt"
 	"github.com/ahmetb/go-linq"
-	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/util"
+	"github.com/lonegunmanb/varys/ast"
 	"io"
 	"text/template"
 )

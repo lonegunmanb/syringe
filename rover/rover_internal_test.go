@@ -2,10 +2,9 @@ package rover
 
 import (
 	"github.com/golang/mock/gomock"
-	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/codegen"
 	"github.com/lonegunmanb/syringe/ioc"
-	"github.com/lonegunmanb/syringe/util"
+	"github.com/lonegunmanb/varys/ast"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -16,7 +15,7 @@ func TestGetTypeInfos(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	filePath := "filePath"
 	fileName := "fileName"
-	mockFileInfo := util.NewMockFileInfo(ctrl)
+	mockFileInfo := NewMockFileInfo(ctrl)
 	mockFileInfo.EXPECT().Path().AnyTimes().Return(filePath)
 	mockFileInfo.EXPECT().Name().AnyTimes().Return(fileName)
 	mockFileRetriever := NewMockFileRetriever(ctrl)

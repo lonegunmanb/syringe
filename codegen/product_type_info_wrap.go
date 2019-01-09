@@ -2,7 +2,7 @@ package codegen
 
 import (
 	"github.com/ahmetb/go-linq"
-	"github.com/lonegunmanb/syringe/ast"
+	"github.com/lonegunmanb/varys/ast"
 )
 
 type TypeInfoWrap interface {

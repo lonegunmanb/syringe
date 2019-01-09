@@ -2,7 +2,7 @@ package codegen
 
 import (
 	"github.com/golang/mock/gomock"
-	"github.com/lonegunmanb/syringe/ast"
+	"github.com/lonegunmanb/varys/ast"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
