@@ -1,7 +1,6 @@
 package ast
 
 import (
-	"fmt"
 	"github.com/ahmetb/go-linq"
 	"github.com/golang-collections/collections/stack"
 	"github.com/lonegunmanb/johnnie"
@@ -68,100 +67,17 @@ func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
 }
 
 func (walker *typeWalker) ParseDir(dirPath string, ignorePatten string) error {
-	files, err := walker.getFiles(dirPath, ignorePatten)
+	fSet := token.NewFileSet()
+	osEnv := getOsEnv()
+	fileAstMap, err := walker.parseFileAsts(dirPath, ignorePatten, fSet, osEnv)
 	if err != nil {
 		return err
 	}
-	fileMap := make(map[string][]*ast.File)
-	fset := token.NewFileSet()
-	osEnv := iocContainer.GetOrRegister((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
-		return util.NewGoPathEnv()
-	}).(util.GoPathEnv)
-	for _, file := range files {
-		fileAst, err := parser.ParseFile(fset, osEnv.ConcatFileNameWithPath(file.Path(), file.Name()), nil, 0)
-		if err != nil {
-			return err
-		}
-		fileMap[file.Path()] = append(fileMap[file.Path()], fileAst)
-	}
-	info := &types.Info{
-		Types: make(map[ast.Expr]types.TypeAndValue),
-		//Defs:  make(map[*ast.Ident]types.Object),
-		//Uses:  make(map[*ast.Ident]types.Object),
-	}
-	for path, fileAsts := range fileMap {
-		var conf = &types.Config{Importer: importer.For("source", nil)}
-		goPath, err := util.GetPkgPath(osEnv, path)
-		if err != nil {
-			return err
-		}
-		_, err = conf.Check(goPath, fset, fileAsts, info)
-		if err != nil {
-			return err
-		}
-	}
-
-	for path, fileAsts := range fileMap {
-		walker.SetPhysicalPath(path)
-		walker.SetTypeInfo(info)
-		for _, fileAst := range fileAsts {
-			err := walker.ParseAst(path, fileAst)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (walker *typeWalker) getFiles(dirPath string, ignorePatten string) ([]util.FileInfo, error) {
-	fileRetrieverKey := (*util.FileRetriever)(nil)
-	fileRetriever := iocContainer.GetOrRegister(fileRetrieverKey, func(ioc ioc.Container) interface{} {
-		return util.NewFileRetriever()
-	}).(util.FileRetriever)
-	var regex *regexp.Regexp
-	if ignorePatten != "" {
-		reg, err := regexp.Compile(ignorePatten)
-		if err != nil {
-			return nil, err
-		}
-		regex = reg
-	}
-
-	filter := func(info util.FileInfo) bool {
-		if regex != nil {
-			return isGoFile(info) && !regex.MatchString(info.Name())
-		}
-		return isGoFile(info)
-	}
-	files, err := fileRetriever.GetFiles(dirPath)
-	if err != nil {
-		return nil, err
-	}
-	filteredFiles := make([]util.FileInfo, 0)
-	linq.From(files).Where(func(fileInfo interface{}) bool {
-		return filter(fileInfo.(util.FileInfo))
-	}).ToSlice(&filteredFiles)
-	return filteredFiles, nil
-}
-
-func (walker *typeWalker) parse(pkgPath string, fileName string, sourceCode string) error {
-	fileset := token.NewFileSet()
-
-	astFile, err := parser.ParseFile(fileset, fileName, sourceCode, 0)
+	info, err := parseTypes(fileAstMap, fSet, osEnv)
 	if err != nil {
 		return err
 	}
-
-	if walker.typeInfo == nil {
-		typeInfo, err := walker.parseTypeInfo(pkgPath, fileset, astFile)
-		if err != nil {
-			return err
-		}
-		walker.typeInfo = typeInfo
-	}
-
-	return walker.parseAst(pkgPath, astFile)
+	return walker.walkAsts(fileAstMap, info)
 }
 
 func (walker *typeWalker) ParseAst(path string, fileAst *ast.File) error {
@@ -170,12 +86,6 @@ func (walker *typeWalker) ParseAst(path string, fileAst *ast.File) error {
 		return err
 	}
 	return walker.parseAst(pkgPath, fileAst)
-}
-
-func (walker *typeWalker) parseAst(pkgPath string, astFile *ast.File) error {
-	walker.pkgPath = pkgPath
-	johnnie.Visit(walker, astFile)
-	return nil
 }
 
 func (walker *typeWalker) Types() []*typeInfo {
@@ -294,68 +204,88 @@ func emitTypeNameIfFiledIsNestedType(walker *typeWalker, fieldType types.Type) {
 	}
 }
 
-func getTag(field *ast.Field) string {
-	if field.Tag == nil {
-		return ""
-	}
-	return field.Tag.Value
+func (walker *typeWalker) parseAst(pkgPath string, astFile *ast.File) error {
+	walker.pkgPath = pkgPath
+	johnnie.Visit(walker, astFile)
+	return nil
 }
 
-func (typeInfo *typeInfo) processField(field *ast.Field, fieldType types.Type) {
-	if isEmbeddedField(field) {
-		typeInfo.addInheritance(field, fieldType)
-	} else {
-		typeInfo.addFieldInfos(field, fieldType)
-	}
-}
+func (walker *typeWalker) getFiles(dirPath string, ignorePatten string) ([]util.FileInfo, error) {
+	fileRetrieverKey := (*util.FileRetriever)(nil)
+	fileRetriever := iocContainer.GetOrRegister(fileRetrieverKey, func(ioc ioc.Container) interface{} {
+		return util.NewFileRetriever()
+	}).(util.FileRetriever)
 
-func (typeInfo *typeInfo) addFieldInfos(field *ast.Field, fieldType types.Type) {
-	names := field.Names
-	for _, fieldName := range names {
-		typeInfo.Fields = append(typeInfo.Fields, &fieldInfo{
-			Name:          fieldName.Name,
-			Type:          fieldType,
-			Tag:           getTag(field),
-			ReferenceFrom: typeInfo,
-		})
+	ignoreRegex, err := parseIgnorePatten(ignorePatten)
+	if err != nil {
+		return nil, err
 	}
-}
 
-func (typeInfo *typeInfo) addInheritance(field *ast.Field, fieldType types.Type) {
-	var kind EmbeddedKind
-	var packagePath string
-	switch t := fieldType.(type) {
-	case *types.Named:
-		{
-			if isStructType(t) {
-				kind = EmbeddedByStruct
-			} else {
-				kind = EmbeddedByInterface
-			}
-			packagePath = GetNamedTypePkg(t).Path()
+	filter := func(info util.FileInfo) bool {
+		if ignoreRegex != nil {
+			return isGoFile(info) && !ignoreRegex.MatchString(info.Name())
 		}
-	case *types.Pointer:
-		{
-			elemType, ok := t.Elem().(*types.Named)
-			if !ok {
-				panic(fmt.Sprintf("unknown embedded type %s", fieldType.String()))
-			}
-			kind = EmbeddedByPointer
-			packagePath = GetNamedTypePkg(elemType).Path()
-		}
-	default:
-		panic(fmt.Sprintf("unknown embedded type %s", t.String()))
+		return isGoFile(info)
+	}
+	files, err := fileRetriever.GetFiles(dirPath)
+	if err != nil {
+		return nil, err
+	}
+	filteredFiles := make([]util.FileInfo, 0)
+	linq.From(files).Where(func(fileInfo interface{}) bool {
+		return filter(fileInfo.(util.FileInfo))
+	}).ToSlice(&filteredFiles)
+	return filteredFiles, nil
+}
+
+func (walker *typeWalker) parse(pkgPath string, fileName string, sourceCode string) error {
+	fileset := token.NewFileSet()
+
+	astFile, err := parser.ParseFile(fileset, fileName, sourceCode, 0)
+	if err != nil {
+		return err
 	}
 
-	embeddedType := &embeddedType{
-		Kind:          kind,
-		FullName:      fieldType.String(),
-		PkgPath:       packagePath,
-		Tag:           getTag(field),
-		Type:          fieldType,
-		ReferenceFrom: typeInfo,
+	if walker.typeInfo == nil {
+		typeInfo, err := walker.parseTypeInfo(pkgPath, fileset, astFile)
+		if err != nil {
+			return err
+		}
+		walker.typeInfo = typeInfo
 	}
-	typeInfo.EmbeddedTypes = append(typeInfo.EmbeddedTypes, embeddedType)
+
+	return walker.parseAst(pkgPath, astFile)
+}
+
+func (walker *typeWalker) walkAsts(fileMap map[string][]*ast.File, info *types.Info) error {
+	for path, fileAsts := range fileMap {
+		walker.SetPhysicalPath(path)
+		walker.SetTypeInfo(info)
+		for _, fileAst := range fileAsts {
+			err := walker.ParseAst(path, fileAst)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (walker *typeWalker) parseFileAsts(dirPath string, ignorePatten string, fSet *token.FileSet,
+	osEnv util.GoPathEnv) (map[string][]*ast.File, error) {
+	files, err := walker.getFiles(dirPath, ignorePatten)
+	if err != nil {
+		return nil, err
+	}
+	fileMap := make(map[string][]*ast.File)
+	for _, file := range files {
+		fileAst, err := parser.ParseFile(fSet, osEnv.ConcatFileNameWithPath(file.Path(), file.Name()), nil, 0)
+		if err != nil {
+			return nil, err
+		}
+		fileMap[file.Path()] = append(fileMap[file.Path()], fileAst)
+	}
+	return fileMap, nil
 }
 
 func isStructType(t types.Type) bool {
@@ -365,6 +295,13 @@ func isStructType(t types.Type) bool {
 
 func isEmbeddedField(field *ast.Field) bool {
 	return field.Names == nil
+}
+
+func getTag(field *ast.Field) string {
+	if field.Tag == nil {
+		return ""
+	}
+	return field.Tag.Value
 }
 
 func isGoFile(info os.FileInfo) bool {
@@ -377,4 +314,40 @@ func isTestFile(fileName string) bool {
 
 func isGoSrcFile(fileName string) bool {
 	return strings.HasSuffix(fileName, ".go")
+}
+
+func parseIgnorePatten(ignorePatten string) (*regexp.Regexp, error) {
+	var regex *regexp.Regexp
+	if ignorePatten != "" {
+		reg, err := regexp.Compile(ignorePatten)
+		if err != nil {
+			return nil, err
+		}
+		regex = reg
+	}
+	return regex, nil
+}
+
+func getOsEnv() util.GoPathEnv {
+	return iocContainer.GetOrRegister((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
+		return util.NewGoPathEnv()
+	}).(util.GoPathEnv)
+}
+
+func parseTypes(fileMap map[string][]*ast.File, fSet *token.FileSet, osEnv util.GoPathEnv) (*types.Info, error) {
+	info := &types.Info{
+		Types: make(map[ast.Expr]types.TypeAndValue),
+	}
+	for path, fileAsts := range fileMap {
+		var conf = &types.Config{Importer: importer.For("source", nil)}
+		goPath, err := util.GetPkgPath(osEnv, path)
+		if err != nil {
+			return nil, err
+		}
+		_, err = conf.Check(goPath, fSet, fileAsts, info)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return info, nil
 }

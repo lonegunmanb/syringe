@@ -3,6 +3,7 @@ package ast
 import (
 	"fmt"
 	"github.com/ahmetb/go-linq"
+	"go/ast"
 	"go/types"
 	"reflect"
 	"regexp"
@@ -97,4 +98,61 @@ func (typeInfo *typeInfo) GetDepPkgPaths(fieldTagFilter string) []string {
 		return p != typeInfo.GetPkgPath()
 	}).ToSlice(&result)
 	return result
+}
+
+func (typeInfo *typeInfo) processField(field *ast.Field, fieldType types.Type) {
+	if isEmbeddedField(field) {
+		typeInfo.addInheritance(field, fieldType)
+	} else {
+		typeInfo.addFieldInfos(field, fieldType)
+	}
+}
+
+func (typeInfo *typeInfo) addFieldInfos(field *ast.Field, fieldType types.Type) {
+	names := field.Names
+	for _, fieldName := range names {
+		typeInfo.Fields = append(typeInfo.Fields, &fieldInfo{
+			Name:          fieldName.Name,
+			Type:          fieldType,
+			Tag:           getTag(field),
+			ReferenceFrom: typeInfo,
+		})
+	}
+}
+
+func (typeInfo *typeInfo) addInheritance(field *ast.Field, fieldType types.Type) {
+	var kind EmbeddedKind
+	var packagePath string
+	switch t := fieldType.(type) {
+	case *types.Named:
+		{
+			if isStructType(t) {
+				kind = EmbeddedByStruct
+			} else {
+				kind = EmbeddedByInterface
+			}
+			packagePath = GetNamedTypePkg(t).Path()
+		}
+	case *types.Pointer:
+		{
+			elemType, ok := t.Elem().(*types.Named)
+			if !ok {
+				panic(fmt.Sprintf("unknown embedded type %s", fieldType.String()))
+			}
+			kind = EmbeddedByPointer
+			packagePath = GetNamedTypePkg(elemType).Path()
+		}
+	default:
+		panic(fmt.Sprintf("unknown embedded type %s", t.String()))
+	}
+
+	embeddedType := &embeddedType{
+		Kind:          kind,
+		FullName:      fieldType.String(),
+		PkgPath:       packagePath,
+		Tag:           getTag(field),
+		Type:          fieldType,
+		ReferenceFrom: typeInfo,
+	}
+	typeInfo.EmbeddedTypes = append(typeInfo.EmbeddedTypes, embeddedType)
 }
