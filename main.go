@@ -11,7 +11,7 @@ func main() {
 	clean := flag.Bool("c", false, "clean generated code")
 	containerIdentName := flag.String("cident", "container", "generated container identifier")
 	productIdentName := flag.String("pident", "product", "generated product identifier")
-	ignorePatten := flag.String("ignore", "", "ignore file patten")
+	ignorePattern := flag.String("ignore", "", "ignore file pattern")
 	flag.Parse()
 	currentPath, err := os.Getwd()
 	codegen.ContainerIdentName = *containerIdentName
@@ -24,12 +24,12 @@ func main() {
 	if *clean {
 		remove(currentPath)
 	} else {
-		create(currentPath, *ignorePatten)
+		create(currentPath, *ignorePattern)
 	}
 }
 
-func create(startingPath string, ignorePatten string) {
-	err := rover.GenerateCode(startingPath, ignorePatten)
+func create(startingPath string, ignorePattern string) {
+	err := rover.GenerateCode(startingPath, ignorePattern)
 	if err != nil {
 		println(err.Error())
 	}

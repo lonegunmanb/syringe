@@ -1,6 +1,6 @@
-package util
+package ast
 
-//go:generate mockgen -package=util -destination=./mock_gopathenv.go github.com/lonegunmanb/syringe/util GoPathEnv
+//go:generate mockgen -package=ast -destination=./mock_gopathenv.go github.com/lonegunmanb/syringe/ast GoPathEnv
 import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

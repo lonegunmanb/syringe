@@ -4,7 +4,6 @@ import (
 	"github.com/ahmetb/go-linq"
 	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/ioc"
-	"github.com/lonegunmanb/syringe/util"
 	"reflect"
 )
 
@@ -12,14 +11,14 @@ type codeRover struct {
 	roverStartingPath string
 	destinationPath   string
 	packageName       string
-	goPathEnv         util.GoPathEnv
-	ignorePatten      string
+	goPathEnv         ast.GoPathEnv
+	ignorePattern     string
 }
 
 func newCodeRover(roverStartingPath string) *codeRover {
 	return &codeRover{
 		roverStartingPath: roverStartingPath,
-		goPathEnv:         util.NewGoPathEnv(),
+		goPathEnv:         ast.NewGoPathEnv(),
 	}
 }
 
@@ -45,7 +44,7 @@ func (r *codeRover) getStructTypes() ([]ast.TypeInfo, error) {
 
 func (r *codeRover) getTypeInfos() ([]ast.TypeInfo, error) {
 	walker := getTypeWalker()
-	err := walker.ParseDir(r.roverStartingPath, r.ignorePatten)
+	err := walker.ParseDir(r.roverStartingPath, r.ignorePattern)
 	if err != nil {
 		return nil, err
 	}

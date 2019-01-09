@@ -1,7 +1,5 @@
 package util_test
 
-//go:generate mockgen -package=util -destination=./mock_file_info.go github.com/lonegunmanb/syringe/util FileInfo
-//go:generate mockgen -package=util -destination=./mock_file_retriever.go github.com/lonegunmanb/syringe/util FileRetriever
 //go:generate mockgen -package=util -destination=./mock_file_operator.go github.com/lonegunmanb/syringe/util FileOperator
 import (
 	"errors"
@@ -31,7 +29,6 @@ func TestCallEachTest(t *testing.T) {
 	err := errors.New("expected")
 	mockInvoke2.On("Invoke").Times(1).Return(err)
 	mockInvoke3 := new(mockInvoke)
-	//mockInvoke3.On("Invoke").Times(0).Return(err)
 	invokes := []invokeInterface{mockInvoke1, mockInvoke2, mockInvoke3}
 
 	e := util.CallEach(invokes, func(i interface{}) error {

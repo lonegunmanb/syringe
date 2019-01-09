@@ -2,11 +2,15 @@ package rover
 
 import (
 	"github.com/golang/mock/gomock"
+	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/ioc"
 	"github.com/lonegunmanb/syringe/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
+
+//go:generate mockgen -package=rover -destination=./mock_gopathenv.go github.com/lonegunmanb/syringe/ast GoPathEnv
+//go:generate mockgen -package=rover -destination=./mock_file_retriever.go github.com/lonegunmanb/syringe/ast FileRetriever
 
 func TestCleanGeneratedCodeFiles(t *testing.T) {
 	startingPath := "path"
@@ -15,18 +19,18 @@ func TestCleanGeneratedCodeFiles(t *testing.T) {
 	defer roverContainer.Clear()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockFileRetriever := util.NewMockFileRetriever(ctrl)
+	mockFileRetriever := NewMockFileRetriever(ctrl)
 	mockFileInfo := util.NewMockFileInfo(ctrl)
 	mockFileInfo.EXPECT().Path().AnyTimes().Return(startingPath)
 	mockFileInfo.EXPECT().Name().AnyTimes().Return(fileName)
-	fileInfos := []util.FileInfo{mockFileInfo}
+	fileInfos := []ast.FileInfo{mockFileInfo}
 	mockFileRetriever.EXPECT().GetFiles(startingPath).Times(1).Return(fileInfos, nil)
-	roverContainer.RegisterFactory((*util.FileRetriever)(nil), func(ioc ioc.Container) interface{} {
+	roverContainer.RegisterFactory((*ast.FileRetriever)(nil), func(ioc ioc.Container) interface{} {
 		return mockFileRetriever
 	})
-	mockOsEnv := util.NewMockGoPathEnv(ctrl)
+	mockOsEnv := NewMockGoPathEnv(ctrl)
 	mockOsEnv.EXPECT().ConcatFileNameWithPath(startingPath, fileName).Times(1).Return(filePath)
-	roverContainer.RegisterFactory((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
+	roverContainer.RegisterFactory((*ast.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
 		return mockOsEnv
 	})
 	mockFileOperator := util.NewMockFileOperator(ctrl)
@@ -48,18 +52,18 @@ func testNotTouchNonGeneratedFile(t *testing.T, startingPath string, fileName st
 	defer roverContainer.Clear()
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockFileRetriever := util.NewMockFileRetriever(ctrl)
+	mockFileRetriever := NewMockFileRetriever(ctrl)
 	mockFileInfo := util.NewMockFileInfo(ctrl)
 	mockFileInfo.EXPECT().Path().AnyTimes().Return(startingPath)
 	mockFileInfo.EXPECT().Name().AnyTimes().Return(fileName)
-	fileInfos := []util.FileInfo{mockFileInfo}
+	fileInfos := []ast.FileInfo{mockFileInfo}
 	mockFileRetriever.EXPECT().GetFiles(startingPath).Times(1).Return(fileInfos, nil)
-	roverContainer.RegisterFactory((*util.FileRetriever)(nil), func(ioc ioc.Container) interface{} {
+	roverContainer.RegisterFactory((*ast.FileRetriever)(nil), func(ioc ioc.Container) interface{} {
 		return mockFileRetriever
 	})
-	mockOsEnv := util.NewMockGoPathEnv(ctrl)
+	mockOsEnv := NewMockGoPathEnv(ctrl)
 	mockOsEnv.EXPECT().ConcatFileNameWithPath(startingPath, fileName).AnyTimes().Return(filePath)
-	roverContainer.RegisterFactory((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
+	roverContainer.RegisterFactory((*ast.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
 		return mockOsEnv
 	})
 	mockFileOperator := util.NewMockFileOperator(ctrl)

@@ -419,7 +419,7 @@ func TestSubStructsWithSameStructureAreIdentical(t *testing.T) {
 	assert.Equal(t, "1", s2.Field.Field3.Field2)
 }
 
-func TestIgnorePatten(t *testing.T) {
+func TestIgnorePattern(t *testing.T) {
 	regex, err := regexp.Compile("mock_.*\\.go")
 	assert.Nil(t, err)
 	assert.True(t, regex.MatchString("mock_abc.go"))

@@ -10,30 +10,6 @@ import (
 	"io"
 )
 
-//`
-//package {{.PkgName}}
-//
-//import (
-//	"github.com/lonegunmanb/syringe/ioc"
-//	"github.com/lonegunmanb/syringe/test_code/engine"
-//)
-//func Create_FlyCar(container ioc.Container) *FlyCar {
-//	product := new(FlyCar)
-//	Assemble_FlyCar(product, container)
-//	return product
-//}
-//func Assemble_FlyCar(product *FlyCar, container ioc.Container) {
-//	product.Car = container.Resolve("github.com/lonegunmanb/syringe/test_code/car.Car").(*car.Car)
-//	product.Plane = *container.Resolve("github.com/lonegunmanb/syringe/test_code/flyer.Plane").(*flyer.Plane)
-//	product.Decoration = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)
-//}
-//func Register_FlyCar(container ioc.Container) {
-//	container.RegisterFactory((*FlyCar)(nil), func(ioc ioc.Container) interface{} {
-//		return Create_FlyCar(ioc)
-//	})
-//}
-//`
-
 type ProductCodegen interface {
 	GenerateCode() error
 	Writer() io.Writer

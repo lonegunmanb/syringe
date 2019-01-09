@@ -4,8 +4,6 @@ import (
 	"github.com/ahmetb/go-linq"
 	"github.com/golang-collections/collections/stack"
 	"github.com/lonegunmanb/johnnie"
-	"github.com/lonegunmanb/syringe/ioc"
-	"github.com/lonegunmanb/syringe/util"
 	"go/ast"
 	"go/importer"
 	"go/parser"
@@ -22,13 +20,11 @@ type opsKind string
 var analyzingType opsKind = "isAnalyzingType"
 var analyzingFunc opsKind = "analyzingFunc"
 
-var iocContainer = ioc.NewContainer()
-
 type TypeWalker interface {
 	johnnie.Walker
 	GetTypes() []TypeInfo
 	Parse(pkgPath string, sourceCode string) error
-	ParseDir(dirPath string, ignorePatten string) error
+	ParseDir(dirPath string, ignorePattern string) error
 	SetTypeInfo(i *types.Info)
 	SetPhysicalPath(p string)
 	ParseAst(path string, fileAst *ast.File) error
@@ -36,7 +32,7 @@ type TypeWalker interface {
 
 type typeWalker struct {
 	johnnie.DefaultWalker
-	osEnv         util.GoPathEnv
+	osEnv         GoPathEnv
 	types         []*typeInfo
 	typeInfoStack stack.Stack
 	opsStack      stack.Stack
@@ -66,10 +62,10 @@ func (walker *typeWalker) Parse(pkgPath string, sourceCode string) error {
 	return walker.parse(pkgPath, "src.go", sourceCode)
 }
 
-func (walker *typeWalker) ParseDir(dirPath string, ignorePatten string) error {
+func (walker *typeWalker) ParseDir(dirPath string, ignorePattern string) error {
 	fSet := token.NewFileSet()
 	osEnv := getOsEnv()
-	fileAstMap, err := walker.parseFileAsts(dirPath, ignorePatten, fSet, osEnv)
+	fileAstMap, err := walker.parseFileAsts(dirPath, ignorePattern, fSet, osEnv)
 	if err != nil {
 		return err
 	}
@@ -81,7 +77,7 @@ func (walker *typeWalker) ParseDir(dirPath string, ignorePatten string) error {
 }
 
 func (walker *typeWalker) ParseAst(path string, fileAst *ast.File) error {
-	pkgPath, err := util.GetPkgPath(walker.osEnv, path)
+	pkgPath, err := GetPkgPath(walker.osEnv, path)
 	if err != nil {
 		return err
 	}
@@ -150,7 +146,7 @@ func NewTypeWalker() TypeWalker {
 func newTypeWalkerWithPhysicalPath(physicalPath string) TypeWalker {
 	return &typeWalker{
 		types:        []*typeInfo{},
-		osEnv:        util.NewGoPathEnv(),
+		osEnv:        NewGoPathEnv(),
 		physicalPath: physicalPath,
 	}
 }
@@ -210,30 +206,27 @@ func (walker *typeWalker) parseAst(pkgPath string, astFile *ast.File) error {
 	return nil
 }
 
-func (walker *typeWalker) getFiles(dirPath string, ignorePatten string) ([]util.FileInfo, error) {
-	fileRetrieverKey := (*util.FileRetriever)(nil)
-	fileRetriever := iocContainer.GetOrRegister(fileRetrieverKey, func(ioc ioc.Container) interface{} {
-		return util.NewFileRetriever()
-	}).(util.FileRetriever)
+func (walker *typeWalker) getFiles(dirPath string, ignorePattern string) ([]FileInfo, error) {
+	fileRetrieverKey := (*FileRetriever)(nil)
+	fileRetriever := getOrRegister(fileRetrieverKey, func() interface{} {
+		return NewFileRetriever()
+	}).(FileRetriever)
 
-	ignoreRegex, err := parseIgnorePatten(ignorePatten)
+	ignoreRegex, err := parseIgnorePattern(ignorePattern)
 	if err != nil {
 		return nil, err
-	}
-
-	filter := func(info util.FileInfo) bool {
-		if ignoreRegex != nil {
-			return isGoFile(info) && !ignoreRegex.MatchString(info.Name())
-		}
-		return isGoFile(info)
 	}
 	files, err := fileRetriever.GetFiles(dirPath)
 	if err != nil {
 		return nil, err
 	}
-	filteredFiles := make([]util.FileInfo, 0)
+	filteredFiles := make([]FileInfo, 0)
 	linq.From(files).Where(func(fileInfo interface{}) bool {
-		return filter(fileInfo.(util.FileInfo))
+		info := fileInfo.(FileInfo)
+		if ignoreRegex != nil {
+			return isGoFile(info) && !ignoreRegex.MatchString(info.Name())
+		}
+		return isGoFile(info)
 	}).ToSlice(&filteredFiles)
 	return filteredFiles, nil
 }
@@ -271,9 +264,9 @@ func (walker *typeWalker) walkAsts(fileMap map[string][]*ast.File, info *types.I
 	return nil
 }
 
-func (walker *typeWalker) parseFileAsts(dirPath string, ignorePatten string, fSet *token.FileSet,
-	osEnv util.GoPathEnv) (map[string][]*ast.File, error) {
-	files, err := walker.getFiles(dirPath, ignorePatten)
+func (walker *typeWalker) parseFileAsts(dirPath string, ignorePattern string, fSet *token.FileSet,
+	osEnv GoPathEnv) (map[string][]*ast.File, error) {
+	files, err := walker.getFiles(dirPath, ignorePattern)
 	if err != nil {
 		return nil, err
 	}
@@ -316,10 +309,10 @@ func isGoSrcFile(fileName string) bool {
 	return strings.HasSuffix(fileName, ".go")
 }
 
-func parseIgnorePatten(ignorePatten string) (*regexp.Regexp, error) {
+func parseIgnorePattern(ignorePattern string) (*regexp.Regexp, error) {
 	var regex *regexp.Regexp
-	if ignorePatten != "" {
-		reg, err := regexp.Compile(ignorePatten)
+	if ignorePattern != "" {
+		reg, err := regexp.Compile(ignorePattern)
 		if err != nil {
 			return nil, err
 		}
@@ -328,19 +321,19 @@ func parseIgnorePatten(ignorePatten string) (*regexp.Regexp, error) {
 	return regex, nil
 }
 
-func getOsEnv() util.GoPathEnv {
-	return iocContainer.GetOrRegister((*util.GoPathEnv)(nil), func(ioc ioc.Container) interface{} {
-		return util.NewGoPathEnv()
-	}).(util.GoPathEnv)
+func getOsEnv() GoPathEnv {
+	return getOrRegister((*GoPathEnv)(nil), func() interface{} {
+		return NewGoPathEnv()
+	}).(GoPathEnv)
 }
 
-func parseTypes(fileMap map[string][]*ast.File, fSet *token.FileSet, osEnv util.GoPathEnv) (*types.Info, error) {
+func parseTypes(fileMap map[string][]*ast.File, fSet *token.FileSet, osEnv GoPathEnv) (*types.Info, error) {
 	info := &types.Info{
 		Types: make(map[ast.Expr]types.TypeAndValue),
 	}
 	for path, fileAsts := range fileMap {
 		var conf = &types.Config{Importer: importer.For("source", nil)}
-		goPath, err := util.GetPkgPath(osEnv, path)
+		goPath, err := GetPkgPath(osEnv, path)
 		if err != nil {
 			return nil, err
 		}

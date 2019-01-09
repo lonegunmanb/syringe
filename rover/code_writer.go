@@ -2,6 +2,7 @@ package rover
 
 import (
 	"fmt"
+	"github.com/lonegunmanb/syringe/ast"
 	"github.com/lonegunmanb/syringe/codegen"
 	"github.com/lonegunmanb/syringe/ioc"
 	"github.com/lonegunmanb/syringe/util"
@@ -11,7 +12,7 @@ import (
 	"strings"
 )
 
-func GenerateCode(startingPath string, ignorePatten string) error {
+func GenerateCode(startingPath string, ignorePattern string) error {
 	if !filepath.IsAbs(startingPath) {
 		absPath, err := filepath.Abs(startingPath)
 		if err != nil {
@@ -20,14 +21,14 @@ func GenerateCode(startingPath string, ignorePatten string) error {
 		startingPath = absPath
 	}
 	osEnv := getOsEnv()
-	pkgPath, err := util.GetPkgPath(osEnv, startingPath)
+	pkgPath, err := ast.GetPkgPath(osEnv, startingPath)
 	pkgName := getPkgName(pkgPath)
 
 	if err != nil {
 		return err
 	}
 	rover := newCodeRover(startingPath)
-	rover.ignorePatten = ignorePatten
+	rover.ignorePattern = ignorePattern
 	typeInfos, err := rover.getStructTypes()
 	if err != nil {
 		return err
@@ -116,20 +117,20 @@ func CleanGeneratedCodeFiles(startingPath string) error {
 	return nil
 }
 
-var osEnvKey = (*util.GoPathEnv)(nil)
+var osEnvKey = (*ast.GoPathEnv)(nil)
 
-func getOsEnv() util.GoPathEnv {
+func getOsEnv() ast.GoPathEnv {
 	return roverContainer.GetOrRegister(osEnvKey, func(ioc ioc.Container) interface{} {
-		return util.NewGoPathEnv()
-	}).(util.GoPathEnv)
+		return ast.NewGoPathEnv()
+	}).(ast.GoPathEnv)
 }
 
-var fileRetrieverKey = (*util.FileRetriever)(nil)
+var fileRetrieverKey = (*ast.FileRetriever)(nil)
 
-func getFileRetriever() util.FileRetriever {
+func getFileRetriever() ast.FileRetriever {
 	return roverContainer.GetOrRegister(fileRetrieverKey, func(ioc ioc.Container) interface{} {
-		return util.NewFileRetriever()
-	}).(util.FileRetriever)
+		return ast.NewFileRetriever()
+	}).(ast.FileRetriever)
 }
 
 var fileOperatorKey = (*util.FileOperator)(nil)
