@@ -145,7 +145,7 @@ func TestGenRegisterCode(t *testing.T) {
 }
 
 func parseTypeInfos(t *testing.T, pkgPath string, code string) []ast.TypeInfo {
-	typeWalker := ast.NewTypeWalker()
+	typeWalker := createTypeWalker(t, pkgPath)
 	err := typeWalker.Parse(pkgPath, code)
 	assert.Nil(t, err)
 	return typeWalker.GetTypes()

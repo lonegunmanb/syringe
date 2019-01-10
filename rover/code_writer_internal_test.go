@@ -21,7 +21,7 @@ func TestCleanGeneratedCodeFiles(t *testing.T) {
 	defer ctrl.Finish()
 	mockFileRetriever := NewMockFileRetriever(ctrl)
 	mockFileInfo := NewMockFileInfo(ctrl)
-	mockFileInfo.EXPECT().Path().AnyTimes().Return(startingPath)
+	mockFileInfo.EXPECT().Dir().AnyTimes().Return(startingPath)
 	mockFileInfo.EXPECT().Name().AnyTimes().Return(fileName)
 	fileInfos := []ast.FileInfo{mockFileInfo}
 	mockFileRetriever.EXPECT().GetFiles(startingPath).Times(1).Return(fileInfos, nil)
@@ -54,7 +54,7 @@ func testNotTouchNonGeneratedFile(t *testing.T, startingPath string, fileName st
 	defer ctrl.Finish()
 	mockFileRetriever := NewMockFileRetriever(ctrl)
 	mockFileInfo := NewMockFileInfo(ctrl)
-	mockFileInfo.EXPECT().Path().AnyTimes().Return(startingPath)
+	mockFileInfo.EXPECT().Dir().AnyTimes().Return(startingPath)
 	mockFileInfo.EXPECT().Name().AnyTimes().Return(fileName)
 	fileInfos := []ast.FileInfo{mockFileInfo}
 	mockFileRetriever.EXPECT().GetFiles(startingPath).Times(1).Return(fileInfos, nil)

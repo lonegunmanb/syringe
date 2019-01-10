@@ -173,11 +173,12 @@ type Decoration interface {
 func TestGenerateAssembleCode(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockTypeCodegen := NewMockTypeInfoWrap(ctrl)
+	pkgPath := "github.com/lonegunmanb/syringe/test_code/fly_car"
 	mockTypeCodegen.EXPECT().GetPkgNameFromPkgPath("github.com/lonegunmanb/syringe/test_code/fly_car").Return("fly_car")
 	mockTypeCodegen.EXPECT().GetPkgNameFromPkgPath("github.com/lonegunmanb/syringe/test_code/car").Return("car")
 	mockTypeCodegen.EXPECT().GetPkgNameFromPkgPath("github.com/lonegunmanb/syringe/test_code/flyer").Return("flyer")
-	walker := ast.NewTypeWalker()
-	err := walker.Parse("github.com/lonegunmanb/syringe/test_code/fly_car", flyCarCode)
+	walker := createTypeWalker(t, pkgPath)
+	err := walker.Parse(pkgPath, flyCarCode)
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
 	decorationField := &productFieldInfoWrap{flyCar.GetFields()[0], mockTypeCodegen}

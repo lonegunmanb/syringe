@@ -21,7 +21,7 @@ func GenerateCode(startingPath string, ignorePattern string) error {
 		startingPath = absPath
 	}
 	osEnv := getOsEnv()
-	pkgPath, err := ast.GetPkgPath(osEnv, startingPath)
+	pkgPath, err := osEnv.GetPkgPath(startingPath)
 	pkgName := getPkgName(pkgPath)
 
 	if err != nil {
@@ -102,7 +102,7 @@ func CleanGeneratedCodeFiles(startingPath string) error {
 		if !isGoSrcFile(fileInfo) {
 			continue
 		}
-		filePath := osEnv.ConcatFileNameWithPath(fileInfo.Path(), fileInfo.Name())
+		filePath := osEnv.ConcatFileNameWithPath(fileInfo.Dir(), fileInfo.Name())
 		isGeneratedFile, err := isGeneratedFile(filePath, fileOperator)
 		if err != nil {
 			return err

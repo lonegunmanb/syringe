@@ -5,6 +5,7 @@ package codegen
 //go:generate mockgen -package=codegen -destination=./mock_embedded_type.go github.com/lonegunmanb/varys/ast EmbeddedType
 //go:generate mockgen -package=codegen -destination=./mock_assembler.go github.com/lonegunmanb/syringe/codegen Assembler
 //go:generate mockgen -package=codegen -destination=./mock_type_codegen.go github.com/lonegunmanb/syringe/codegen TypeInfoWrap
+//go:generate mockgen -package=codegen -destination=./mock_gopathenv.go github.com/lonegunmanb/varys/ast GoPathEnv
 import (
 	"bytes"
 	"fmt"
@@ -185,8 +186,10 @@ func Assemble_FlyCar(product *FlyCar, container ioc.Container) {
 	product.Plane = *container.Resolve("github.com/lonegunmanb/syringe/test_code/flyer.Plane").(*flyer.Plane)
 	product.Decoration = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)
 }`
-	walker := ast.NewTypeWalker()
-	err := walker.Parse("github.com/lonegunmanb/syringe/test_code/fly_car", fmt.Sprintf(actualFlyCarCode, injectTag, injectTag))
+	pkgPath := "github.com/lonegunmanb/syringe/test_code/fly_car"
+	walker := createTypeWalker(t, pkgPath)
+	defer ast.ClearTypeRegister()
+	err := walker.Parse(pkgPath, fmt.Sprintf(actualFlyCarCode, injectTag, injectTag))
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
 	writer := &bytes.Buffer{}

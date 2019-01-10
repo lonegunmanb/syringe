@@ -3,6 +3,7 @@ package codegen_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/golang/mock/gomock"
 	"github.com/lonegunmanb/syringe/codegen"
 	"github.com/lonegunmanb/varys/ast"
 	"github.com/stretchr/testify/assert"
@@ -51,8 +52,9 @@ func Register_FlyCar(container ioc.Container) {
 const injectTag = "`inject:\"\"`"
 
 func TestGenerateCreateProductCode(t *testing.T) {
-	walker := ast.NewTypeWalker()
-	err := walker.Parse("github.com/lonegunmanb/syringe/test_code/fly_car", fmt.Sprintf(flyCarCode, injectTag, injectTag, injectTag))
+	pkgPath := "github.com/lonegunmanb/syringe/test_code/fly_car"
+	walker := createTypeWalker(t, pkgPath)
+	err := walker.Parse(pkgPath, fmt.Sprintf(flyCarCode, injectTag, injectTag, injectTag))
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
 	writer := &bytes.Buffer{}
@@ -61,4 +63,15 @@ func TestGenerateCreateProductCode(t *testing.T) {
 	assert.Nil(t, err)
 	code := writer.String()
 	assert.Equal(t, expected, code)
+}
+
+func createTypeWalker(t *testing.T, pkgPath string) ast.TypeWalker {
+	ctrl := gomock.NewController(t)
+	mockOsEnv := codegen.NewMockGoPathEnv(ctrl)
+	mockOsEnv.EXPECT().GetPkgPath(gomock.Any()).Times(1).Return(pkgPath, nil)
+	ast.RegisterType((*ast.GoPathEnv)(nil), func() interface{} {
+		return mockOsEnv
+	})
+	walker := ast.NewTypeWalker()
+	return walker
 }

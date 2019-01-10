@@ -1,5 +1,7 @@
 package rover
 
+//go:generate mockgen -package=rover -destination=./mock_type_walker.go github.com/lonegunmanb/varys/ast TypeWalker
+
 import (
 	"github.com/golang/mock/gomock"
 	"github.com/lonegunmanb/syringe/codegen"
@@ -16,12 +18,12 @@ func TestGetTypeInfos(t *testing.T) {
 	filePath := "filePath"
 	fileName := "fileName"
 	mockFileInfo := NewMockFileInfo(ctrl)
-	mockFileInfo.EXPECT().Path().AnyTimes().Return(filePath)
+	mockFileInfo.EXPECT().Dir().AnyTimes().Return(filePath)
 	mockFileInfo.EXPECT().Name().AnyTimes().Return(fileName)
 	mockFileRetriever := NewMockFileRetriever(ctrl)
 	mockFileRetriever.EXPECT().GetFiles(gomock.Eq(roverStartingPath)).Return([]ast.FileInfo{mockFileInfo}, nil)
 	mockTypeInfo := codegen.NewMockTypeInfo(ctrl)
-	mockTypeWalker := ast.NewMockTypeWalker(ctrl)
+	mockTypeWalker := NewMockTypeWalker(ctrl)
 	mockTypeWalker.EXPECT().ParseDir(gomock.Eq(roverStartingPath), gomock.Eq("")).Times(1).Return(nil)
 	mockTypeWalker.EXPECT().GetTypes().Times(1).Return([]ast.TypeInfo{mockTypeInfo})
 	defer roverContainer.Clear()
