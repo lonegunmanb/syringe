@@ -18,26 +18,26 @@ type TypeInfoWrap interface {
 
 type typeInfoWrap struct {
 	ast.TypeInfo
-	depPkgPathInfo DepPkgPathInfo
+	pkgNameArbitrator PkgNameArbitrator
 }
 
 func NewTypeInfoWrap(typeInfo ast.TypeInfo) TypeInfoWrap {
-	return NewTypeInfoWrapWithDepPkgPath(typeInfo, newDepPkgPathInfo([]ast.TypeInfo{typeInfo}, typeInfo.GetPkgPath(), ProductCodegenMode))
+	return NewTypeInfoWrapWithDepPkgPath(typeInfo, newPkgNameArbitrator([]ast.TypeInfo{typeInfo}, typeInfo.GetPkgPath(), ProductCodegenMode))
 }
 
-func NewTypeInfoWrapWithDepPkgPath(typeInfo ast.TypeInfo, depPkgPathInfo DepPkgPathInfo) TypeInfoWrap {
+func NewTypeInfoWrapWithDepPkgPath(typeInfo ast.TypeInfo, pkgNameArbitrator PkgNameArbitrator) TypeInfoWrap {
 	return &typeInfoWrap{
-		TypeInfo:       typeInfo,
-		depPkgPathInfo: depPkgPathInfo,
+		TypeInfo:          typeInfo,
+		pkgNameArbitrator: pkgNameArbitrator,
 	}
 }
 
 func (t *typeInfoWrap) GenImportDecls() []string {
-	return t.depPkgPathInfo.GenImportDecls()
+	return t.pkgNameArbitrator.GenImportDecls()
 }
 
 func (t *typeInfoWrap) GetPkgNameFromPkgPath(pkgPath string) string {
-	return t.depPkgPathInfo.GetPkgNameFromPkgPath(pkgPath)
+	return t.pkgNameArbitrator.GetPkgNameFromPkgPath(pkgPath)
 }
 
 func (t *typeInfoWrap) GetPkgName() string {

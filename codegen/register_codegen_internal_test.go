@@ -1,6 +1,6 @@
 package codegen
 
-//go:generate mockgen -package=codegen -destination=./mock_register.go github.com/lonegunmanb/syringe/codegen Register
+//go:generate mockgen -package=codegen -destination=./mock_register.go github.com/lonegunmanb/syringe/codegen RegisterCodeWriter
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
@@ -19,13 +19,13 @@ func TestGenRegisterPackageDecl(t *testing.T) {
 func TestGenRegisterImportDecl(t *testing.T) {
 	writer := &bytes.Buffer{}
 	ctrl := gomock.NewController(t)
-	mockDepPkgPathInfo := NewMockDepPkgPathInfo(ctrl)
-	mockDepPkgPathInfo.EXPECT().GenImportDecls().Times(1).Return([]string{
+	mockPkgNameArbitrator := NewMockPkgNameArbitrator(ctrl)
+	mockPkgNameArbitrator.EXPECT().GenImportDecls().Times(1).Return([]string{
 		`"go/ast"`,
 		`"go/token"`,
 		`"go/types"`,
 	})
-	sut := &registerCodegen{writer: writer, depPkgPathInfo: mockDepPkgPathInfo}
+	sut := &registerCodegen{writer: writer, pkgNameArbitrator: mockPkgNameArbitrator}
 	err := sut.genImportDecls()
 	assert.Nil(t, err)
 	assert.Equal(t, expectedImportDecl, writer.String())
@@ -34,19 +34,19 @@ func TestGenRegisterImportDecl(t *testing.T) {
 func TestGenRegisterCode(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockRegister := NewMockRegister(ctrl)
-	mockRegister.EXPECT().RegisterCode().Times(1).Return("a.Register_a(container)")
+	mockRegisterCodeWriter := NewMockRegisterCodeWriter(ctrl)
+	mockRegisterCodeWriter.EXPECT().RegisterCode().Times(1).Return("a.Register_a(container)")
 	writer := &bytes.Buffer{}
-	sut := &registerCodegen{writer: writer, typeInfos: []Register{mockRegister}}
+	sut := &registerCodegen{writer: writer, registerCodeWriters: []RegisterCodeWriter{mockRegisterCodeWriter}}
 	err := sut.genRegister()
 	assert.Nil(t, err)
 	const expected = `
 func CreateIoc() ioc.Container {
     container := ioc.NewContainer()
-    Register(container)
+    RegisterCodeWriter(container)
     return container
 }
-func Register(container ioc.Container) {
+func RegisterCodeWriter(container ioc.Container) {
     a.Register_a(container)
 }`
 	assert.Equal(t, expected, writer.String())

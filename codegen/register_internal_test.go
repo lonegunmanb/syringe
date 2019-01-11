@@ -13,9 +13,9 @@ func TestCustomContainerName(t *testing.T) {
 	mockTypeInfo := NewMockTypeInfoWrap(ctrl)
 	mockTypeInfo.EXPECT().GetPkgPath().Times(1).Return(path)
 	mockTypeInfo.EXPECT().GetName().Times(1).Return(name)
-	sut := &register{
-		registeringPath: path,
-		typeInfo:        mockTypeInfo,
+	sut := &registerCodeWriter{
+		workingPkgPath: path,
+		typeInfo:       mockTypeInfo,
 	}
 	originIdent := ContainerIdentName
 	ContainerIdentName = "c"

@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-//go:generate mockgen -package=codegen -destination=./mock_dep_pkg_path_info.go github.com/lonegunmanb/syringe/codegen DepPkgPathInfo
+//go:generate mockgen -package=codegen -destination=./mock_pkg_name_arbitrator.go github.com/lonegunmanb/syringe/codegen PkgNameArbitrator
 func TestGetPkgNameFromPkgPath(t *testing.T) {
 	cases := []*funk.Tuple{
 		{"testing", "testing"},
@@ -34,7 +34,7 @@ func TestGetDepPkgPathsWithPkgNameDuplicate(t *testing.T) {
 		mockTypeInfo.EXPECT().GetDepPkgPaths("inject").Times(1).Return([]string{path})
 		typeInfos = append(typeInfos, mockTypeInfo)
 	}
-	sut := &depPkgPathInfo{
+	sut := &pkgNameArbitrator{
 		typeInfos: typeInfos,
 		mode:      ProductCodegenMode,
 	}
@@ -44,7 +44,7 @@ func TestGetDepPkgPathsWithPkgNameDuplicate(t *testing.T) {
 		"b/b",
 		"c/b",
 	}
-	pathsReceived := sut.GetDepPkgPaths()
+	pathsReceived := sut.getDepPkgPaths()
 	assert.Equal(t, expectedPaths, pathsReceived)
 	assert.Equal(t, "a", sut.GetPkgNameFromPkgPath("a"))
 	assert.Equal(t, "p0", sut.GetPkgNameFromPkgPath("b/b"))
@@ -73,14 +73,14 @@ func TestGetDepPkgPathsForRegister(t *testing.T) {
 		mockTypeInfo.EXPECT().GetDepPkgPaths("inject").Times(1).Return([]string{path})
 		typeInfos = append(typeInfos, mockTypeInfo)
 	}
-	sut := &depPkgPathInfo{
+	sut := &pkgNameArbitrator{
 		typeInfos: typeInfos,
 		mode:      RegisterCodegenMode,
 	}
 	expectedPaths := []string{
 		"ast",
 	}
-	pathsReceived := sut.GetDepPkgPaths()
+	pathsReceived := sut.getDepPkgPaths()
 	assert.Equal(t, expectedPaths, pathsReceived)
 }
 
@@ -99,17 +99,17 @@ func TestGetDepPkgPathsForRegister(t *testing.T) {
 //}
 
 //func testDuplicateAndConflictPackageName(t *testing.T, depPkgPaths []string, expected []string) {
-//	typeInfos := []ast.TypeInfo{}
+//	registerCodeWriters := []ast.TypeInfo{}
 //	ctrl := gomock.NewController(t)
 //	defer ctrl.Finish()
 //	for _, path := range depPkgPaths {
 //		mockTypeInfo := NewMockTypeInfo(ctrl)
 //		mockTypeInfo.EXPECT().GetPkgPath().Times(1).Return("ast")
-//		mockTypeInfo.EXPECT().GetDepPkgPaths("inject").Times(1).Return([]string{path})
-//		typeInfos = append(typeInfos, mockTypeInfo)
+//		mockTypeInfo.EXPECT().getDepPkgPaths("inject").Times(1).Return([]string{path})
+//		registerCodeWriters = append(registerCodeWriters, mockTypeInfo)
 //	}
-//	sut := &depPkgPathInfo{
-//		typeInfos: typeInfos,
+//	sut := &pkgNameArbitrator{
+//		registerCodeWriters: registerCodeWriters,
 //		mode:      ProductCodegenMode,
 //	}
 //	imports := sut.GenImportDecls()

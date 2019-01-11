@@ -65,9 +65,9 @@ func TestProductTypeInfoWrap_GetImportDecls(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	expected := []string{"a"}
-	mockDepPkgPathInfo := NewMockDepPkgPathInfo(ctrl)
-	mockDepPkgPathInfo.EXPECT().GenImportDecls().Times(1).Return(expected)
-	sut := &typeInfoWrap{depPkgPathInfo: mockDepPkgPathInfo}
+	mockPkgNameArbitrator := NewMockPkgNameArbitrator(ctrl)
+	mockPkgNameArbitrator.EXPECT().GenImportDecls().Times(1).Return(expected)
+	sut := &typeInfoWrap{pkgNameArbitrator: mockPkgNameArbitrator}
 	imports := sut.GenImportDecls()
 	assert.Equal(t, expected, imports)
 }
@@ -76,9 +76,9 @@ func TestProductTypeInfoWrap_GetPkgNameFromPkgPath(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	expected := "pkgName"
-	mockDepPkgPathInfo := NewMockDepPkgPathInfo(ctrl)
-	mockDepPkgPathInfo.EXPECT().GetPkgNameFromPkgPath("input").Times(1).Return(expected)
-	sut := &typeInfoWrap{depPkgPathInfo: mockDepPkgPathInfo}
+	mockPkgNameArbitrator := NewMockPkgNameArbitrator(ctrl)
+	mockPkgNameArbitrator.EXPECT().GetPkgNameFromPkgPath("input").Times(1).Return(expected)
+	sut := &typeInfoWrap{pkgNameArbitrator: mockPkgNameArbitrator}
 	imports := sut.GetPkgNameFromPkgPath("input")
 	assert.Equal(t, expected, imports)
 }
@@ -86,15 +86,15 @@ func TestProductTypeInfoWrap_GetPkgNameFromPkgPath(t *testing.T) {
 func TestProductTypeInfoWrap_GenRegisterCode_DifferentPackage(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockDepPkgPathInfo := NewMockDepPkgPathInfo(ctrl)
+	mockPkgNameArbitrator := NewMockPkgNameArbitrator(ctrl)
 	const pkgPath = "github.com/lonegunmanb/test_code/check_package_name_duplicate_a/model"
-	mockDepPkgPathInfo.EXPECT().GetPkgNameFromPkgPath(pkgPath).Times(1).Return("p0")
+	mockPkgNameArbitrator.EXPECT().GetPkgNameFromPkgPath(pkgPath).Times(1).Return("p0")
 	mockTypeInfo := NewMockTypeInfo(ctrl)
 	mockTypeInfo.EXPECT().GetPkgPath().Times(2).Return(pkgPath)
 	mockTypeInfo.EXPECT().GetName().Times(1).Return("Request")
-	sut := &register{
-		typeInfo:        NewTypeInfoWrapWithDepPkgPath(mockTypeInfo, mockDepPkgPathInfo),
-		registeringPath: "github.com/lonegunmanb/test_code",
+	sut := &registerCodeWriter{
+		typeInfo:       NewTypeInfoWrapWithDepPkgPath(mockTypeInfo, mockPkgNameArbitrator),
+		workingPkgPath: "github.com/lonegunmanb/test_code",
 	}
 	actual := sut.RegisterCode()
 	const expected = "p0.Register_Request(container)"
@@ -104,14 +104,14 @@ func TestProductTypeInfoWrap_GenRegisterCode_DifferentPackage(t *testing.T) {
 func TestProductTypeInfoWrap_GenRegisterCode_SamePackage(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mockDepPkgPathInfo := NewMockDepPkgPathInfo(ctrl)
+	mockPkgNameArbitrator := NewMockPkgNameArbitrator(ctrl)
 	const pkgPath = "github.com/lonegunmanb/test_code/check_package_name_duplicate_a/model"
 	mockTypeInfo := NewMockTypeInfo(ctrl)
 	mockTypeInfo.EXPECT().GetPkgPath().Times(1).Return(pkgPath)
 	mockTypeInfo.EXPECT().GetName().Times(1).Return("Request")
-	sut := &register{
-		typeInfo:        NewTypeInfoWrapWithDepPkgPath(mockTypeInfo, mockDepPkgPathInfo),
-		registeringPath: pkgPath,
+	sut := &registerCodeWriter{
+		typeInfo:       NewTypeInfoWrapWithDepPkgPath(mockTypeInfo, mockPkgNameArbitrator),
+		workingPkgPath: pkgPath,
 	}
 	actual := sut.RegisterCode()
 	const expected = "Register_Request(container)"

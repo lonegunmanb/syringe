@@ -16,11 +16,11 @@ type RegisterCodegen interface {
 }
 
 type registerCodegen struct {
-	writer         io.Writer
-	pkgName        string
-	pkgPath        string
-	depPkgPathInfo DepPkgPathInfo
-	typeInfos      []Register
+	writer              io.Writer
+	pkgName             string
+	pkgPath             string
+	pkgNameArbitrator   PkgNameArbitrator
+	registerCodeWriters []RegisterCodeWriter
 }
 
 func (c *registerCodegen) GetPkgName() string {
@@ -32,30 +32,30 @@ func (c *registerCodegen) GetPkgPath() string {
 }
 
 func (c *registerCodegen) GetPkgNameFromPkgPath(pkgPath string) string {
-	return c.depPkgPathInfo.GetPkgNameFromPkgPath(pkgPath)
+	return c.pkgNameArbitrator.GetPkgNameFromPkgPath(pkgPath)
 }
 
-func (c *registerCodegen) GetRegisters() []Register {
-	return c.typeInfos
+func (c *registerCodegen) GetRegisterCodeWriters() []RegisterCodeWriter {
+	return c.registerCodeWriters
 }
 
 //noinspection GoUnusedExportedFunction
-func NewRegisterCodegen(writer io.Writer, typeInfos []ast.TypeInfo, pkgName string, pkgPath string) RegisterCodegen {
-	var typeInfosWraps []Register
-	pkgPathInfo := newDepPkgPathInfo(typeInfos, pkgPath, RegisterCodegenMode)
+func NewRegisterCodegen(writer io.Writer, typeInfos []ast.TypeInfo, pkgName string, workingPkgPath string) RegisterCodegen {
+	var typeInfosWraps []RegisterCodeWriter
+	pkgNameArbitrator := newPkgNameArbitrator(typeInfos, workingPkgPath, RegisterCodegenMode)
 	linq.From(typeInfos).Select(func(typeInfo interface{}) interface{} {
-		typeInfoWrap := NewTypeInfoWrapWithDepPkgPath(typeInfo.(ast.TypeInfo), pkgPathInfo)
-		return &register{
-			typeInfo:        typeInfoWrap,
-			registeringPath: pkgPath,
+		typeInfoWrap := NewTypeInfoWrapWithDepPkgPath(typeInfo.(ast.TypeInfo), pkgNameArbitrator)
+		return &registerCodeWriter{
+			typeInfo:       typeInfoWrap,
+			workingPkgPath: workingPkgPath,
 		}
 	}).ToSlice(&typeInfosWraps)
 	return &registerCodegen{
-		writer:         writer,
-		depPkgPathInfo: pkgPathInfo,
-		pkgName:        pkgName,
-		pkgPath:        pkgPath,
-		typeInfos:      typeInfosWraps,
+		writer:              writer,
+		pkgNameArbitrator:   pkgNameArbitrator,
+		pkgName:             pkgName,
+		pkgPath:             workingPkgPath,
+		registerCodeWriters: typeInfosWraps,
 	}
 }
 
@@ -64,17 +64,17 @@ func (c *registerCodegen) genPkgDecl() error {
 }
 
 func (c *registerCodegen) genImportDecls() error {
-	return genImportDecl(c.writer, c.depPkgPathInfo)
+	return genImportDecl(c.writer, c.pkgNameArbitrator)
 }
 
 const createIocTemplate = `
 func CreateIoc() ioc.Container {
     %s := ioc.NewContainer()
-    Register(%s)
+    RegisterCodeWriter(%s)
     return %s
 }
-func Register(%s ioc.Container) {
-{{with .GetRegisters}}{{range .}}    {{.RegisterCode}}
+func RegisterCodeWriter(%s ioc.Container) {
+{{with .GetRegisterCodeWriters}}{{range .}}    {{.RegisterCode}}
 {{end}}{{end}}}`
 
 func (c *registerCodegen) genRegister() error {

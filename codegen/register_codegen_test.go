@@ -111,10 +111,10 @@ import (
 )
 func CreateIoc() ioc.Container {
     container := ioc.NewContainer()
-    Register(container)
+    RegisterCodeWriter(container)
     return container
 }
-func Register(container ioc.Container) {
+func RegisterCodeWriter(container ioc.Container) {
     p0.Register_Request(container)
     p1.Register_Request(container)
     car.Register_Car(container)

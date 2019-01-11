@@ -10,28 +10,27 @@ import (
 
 type DepMode = string
 
-var ProductCodegenMode DepMode = "ProductCodegen"
-var RegisterCodegenMode DepMode = "RegisterCodegen"
+var ProductCodegenMode = "ProductCodegen"
+var RegisterCodegenMode = "RegisterCodegen"
 
-type DepPkgPathInfo interface {
-	GetDepPkgPaths() []string
+type PkgNameArbitrator interface {
 	GenImportDecls() []string
 	GetPkgNameFromPkgPath(pkgPath string) string
 }
 
-type packageNamer struct {
+type packageNameCounter struct {
 	count       int
 	nameExisted *set.Set
 }
 
-func newNamer() *packageNamer {
-	return &packageNamer{
+func newNameCounter() *packageNameCounter {
+	return &packageNameCounter{
 		count:       0,
 		nameExisted: set.New(),
 	}
 }
 
-func (n *packageNamer) nextName() string {
+func (n *packageNameCounter) generateName() string {
 	for {
 		nextName := fmt.Sprintf("p%d", n.count)
 		n.count++
@@ -42,33 +41,33 @@ func (n *packageNamer) nextName() string {
 	}
 }
 
-func (n *packageNamer) uniqueName(name string) string {
+func (n *packageNameCounter) uniqueName(name string) string {
 	if n.nameExisted.Has(name) {
-		return n.nextName()
+		return n.generateName()
 	}
 	n.nameExisted.Insert(name)
 	return name
 }
 
-type depPkgPathInfo struct {
+type pkgNameArbitrator struct {
 	typeInfos            []ast.TypeInfo
 	depPkgPaths          []string
 	depPkgPathPkgNameMap map[string]string
-	pkgPath              string
+	currentPkgPath       string
 	mode                 DepMode
 }
 
-func newDepPkgPathInfo(typeInfos []ast.TypeInfo, pkgPath string, mode DepMode) DepPkgPathInfo {
-	return &depPkgPathInfo{typeInfos: typeInfos, pkgPath: pkgPath, mode: mode}
+func newPkgNameArbitrator(typeInfos []ast.TypeInfo, currentPkgPath string, mode DepMode) PkgNameArbitrator {
+	return &pkgNameArbitrator{typeInfos: typeInfos, currentPkgPath: currentPkgPath, mode: mode}
 }
 
-func (c *depPkgPathInfo) GenImportDecls() []string {
-	paths := c.GetDepPkgPaths()
+func (c *pkgNameArbitrator) GenImportDecls() []string {
+	paths := c.getDepPkgPaths()
 	results := make([]string, 0, len(c.depPkgPathPkgNameMap))
 	//we iterate paths so generated import decls' order is as same as fields' order
 	for _, pkgPath := range paths {
 		if pkgPath == "" {
-			continue
+			panic("no package path found, maybe forgot to set walker's physical path?")
 		}
 		pkgName := c.depPkgPathPkgNameMap[pkgPath]
 		if pkgName != retrievePkgNameFromPkgPath(pkgPath) {
@@ -80,7 +79,7 @@ func (c *depPkgPathInfo) GenImportDecls() []string {
 	return results
 }
 
-func (c *depPkgPathInfo) GetPkgNameFromPkgPath(pkgPath string) string {
+func (c *pkgNameArbitrator) GetPkgNameFromPkgPath(pkgPath string) string {
 	name, ok := c.depPkgPathPkgNameMap[pkgPath]
 	if !ok {
 		name = retrievePkgNameFromPkgPath(pkgPath)
@@ -88,7 +87,7 @@ func (c *depPkgPathInfo) GetPkgNameFromPkgPath(pkgPath string) string {
 	return name
 }
 
-func (c *depPkgPathInfo) GetDepPkgPaths() []string {
+func (c *pkgNameArbitrator) getDepPkgPaths() []string {
 	if c.depPkgPaths != nil {
 		return c.depPkgPaths
 	}
@@ -97,11 +96,7 @@ func (c *depPkgPathInfo) GetDepPkgPaths() []string {
 	return c.depPkgPaths
 }
 
-func (c *depPkgPathInfo) GetTypeInfos() []ast.TypeInfo {
-	return c.typeInfos
-}
-
-func (c *depPkgPathInfo) initDepPkgPaths() []string {
+func (c *pkgNameArbitrator) initDepPkgPaths() []string {
 	paths := make([]string, len(c.typeInfos))
 	query := linq.From(c.typeInfos).Select(func(typeInfo interface{}) interface{} {
 		return typeInfo.(ast.TypeInfo).GetPkgPath()
@@ -113,14 +108,14 @@ func (c *depPkgPathInfo) initDepPkgPaths() []string {
 			}))
 	}
 	query.Distinct().Where(func(path interface{}) bool {
-		return path.(string) != c.pkgPath
+		return path.(string) != c.currentPkgPath
 	}).ToSlice(&paths)
 	return paths
 }
 
-func (c *depPkgPathInfo) initDepPkgPathPkgNameMap() map[string]string {
+func (c *pkgNameArbitrator) initDepPkgPathPkgNameMap() map[string]string {
 	pkgNamePkgPathMap := make(map[string][]string)
-	packageNamer := newNamer()
+	packageNameCounter := newNameCounter()
 	for _, path := range c.depPkgPaths {
 		pkgName := retrievePkgNameFromPkgPath(path)
 		paths := pkgNamePkgPathMap[pkgName]
@@ -129,10 +124,10 @@ func (c *depPkgPathInfo) initDepPkgPathPkgNameMap() map[string]string {
 	pkgPathPkgNameMap := make(map[string]string)
 	for pkgName, paths := range pkgNamePkgPathMap {
 		if len(paths) == 1 && pkgName != "ioc" {
-			pkgPathPkgNameMap[paths[0]] = packageNamer.uniqueName(pkgName)
+			pkgPathPkgNameMap[paths[0]] = packageNameCounter.uniqueName(pkgName)
 		} else {
 			for _, path := range paths {
-				pkgPathPkgNameMap[path] = packageNamer.nextName()
+				pkgPathPkgNameMap[path] = packageNameCounter.generateName()
 			}
 		}
 	}
