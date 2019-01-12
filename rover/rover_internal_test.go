@@ -1,7 +1,5 @@
 package rover
 
-//go:generate mockgen -package=rover -destination=./mock_type_walker.go github.com/lonegunmanb/varys/ast TypeWalker
-
 import (
 	"github.com/golang/mock/gomock"
 	"github.com/lonegunmanb/syringe/codegen"

@@ -1,6 +1,5 @@
 package codegen
 
-//go:generate mockgen -package=codegen -destination=./mock_register.go github.com/lonegunmanb/syringe/codegen RegisterCodeWriter
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"

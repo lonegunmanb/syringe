@@ -30,7 +30,7 @@ func (f *productFieldInfoWrap) AssembleCode() string {
 			key = tagKey
 		}
 	}
-	pkgPath := f.GetReferenceFrom().GetPkgPath()
+	pkgPath := f.GetReferenceFromType().GetPkgPath()
 	declType := getDeclType(pkgPath, fieldType, func(p *types.Package) string {
 		return f.typeInfo.GetPkgNameFromPkgPath(p.Path())
 	})

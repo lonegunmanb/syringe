@@ -1,11 +1,5 @@
 package codegen
 
-//go:generate mockgen -package=codegen -destination=./mock_type_info.go github.com/lonegunmanb/varys/ast TypeInfo
-//go:generate mockgen -package=codegen -destination=./mock_field_info.go github.com/lonegunmanb/varys/ast FieldInfo
-//go:generate mockgen -package=codegen -destination=./mock_embedded_type.go github.com/lonegunmanb/varys/ast EmbeddedType
-//go:generate mockgen -package=codegen -destination=./mock_assembler.go github.com/lonegunmanb/syringe/codegen Assembler
-//go:generate mockgen -package=codegen -destination=./mock_type_codegen.go github.com/lonegunmanb/syringe/codegen TypeInfoWrap
-//go:generate mockgen -package=codegen -destination=./mock_gopathenv.go github.com/lonegunmanb/varys/ast GoPathEnv
 import (
 	"bytes"
 	"fmt"

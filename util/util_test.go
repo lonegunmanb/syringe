@@ -1,6 +1,6 @@
 package util_test
 
-//go:generate mockgen -package=util -destination=./mock_file_operator.go github.com/lonegunmanb/syringe/util FileOperator
+//go:generate mockgen -source=./file_operator.go -package=util -destination=./mock_file_operator.go
 import (
 	"errors"
 	"github.com/lonegunmanb/syringe/util"

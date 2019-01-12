@@ -28,7 +28,7 @@ func TestAssembleCodeForBasicType(t *testing.T) {
 	field := getField(t, "", "int")
 	sut := &productFieldInfoWrap{
 		FieldInfo: field,
-		typeInfo:  NewTypeInfoWrap(field.GetReferenceFrom()),
+		typeInfo:  NewTypeInfoWrap(field.GetReferenceFromType()),
 	}
 	code := sut.AssembleCode()
 	assert.Equal(t, "product.Field = container.Resolve(\"int\").(int)", code)
@@ -38,7 +38,7 @@ func TestAssembleCodeForCustomIdentName(t *testing.T) {
 	field := getField(t, "", "int")
 	sut := &productFieldInfoWrap{
 		FieldInfo: field,
-		typeInfo:  NewTypeInfoWrap(field.GetReferenceFrom()),
+		typeInfo:  NewTypeInfoWrap(field.GetReferenceFromType()),
 	}
 	originContainerIdent := ContainerIdentName
 	originProductIdent := ProductIdentName
@@ -210,7 +210,7 @@ func testTypeDecls(t *testing.T, args []funk.Tuple) {
 func testTypeDecl(t *testing.T, importString string, typeString string) {
 	field := getField(t, importString, typeString)
 	fieldType := field.GetType()
-	pkgPath := field.GetReferenceFrom().GetPkgPath()
+	pkgPath := field.GetReferenceFromType().GetPkgPath()
 	assert.Equal(t, typeString, getDeclType(pkgPath, fieldType, func(p *types.Package) string {
 		return p.Name()
 	}))

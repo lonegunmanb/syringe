@@ -9,9 +9,6 @@ import (
 	"testing"
 )
 
-//go:generate mockgen -package=rover -destination=./mock_gopathenv.go github.com/lonegunmanb/varys/ast GoPathEnv
-//go:generate mockgen -package=rover -destination=./mock_file_retriever.go github.com/lonegunmanb/varys/ast FileRetriever
-//go:generate mockgen -package=rover -destination=./mock_file_info.go github.com/lonegunmanb/varys/ast FileInfo
 func TestCleanGeneratedCodeFiles(t *testing.T) {
 	startingPath := "path"
 	fileName := "gen_src.go"

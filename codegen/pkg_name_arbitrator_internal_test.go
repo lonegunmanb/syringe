@@ -8,7 +8,6 @@ import (
 	"testing"
 )
 
-//go:generate mockgen -package=codegen -destination=./mock_pkg_name_arbitrator.go github.com/lonegunmanb/syringe/codegen PkgNameArbitrator
 func TestGetPkgNameFromPkgPath(t *testing.T) {
 	cases := []*funk.Tuple{
 		{"testing", "testing"},
