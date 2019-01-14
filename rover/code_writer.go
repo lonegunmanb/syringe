@@ -13,20 +13,16 @@ import (
 )
 
 func GenerateCode(startingPath string, ignorePattern string) error {
-	if !filepath.IsAbs(startingPath) {
-		absPath, err := filepath.Abs(startingPath)
-		if err != nil {
-			return err
-		}
-		startingPath = absPath
-	}
-	osEnv := getOsEnv()
-	pkgPath, err := osEnv.GetPkgPath(startingPath)
-	pkgName := getPkgName(pkgPath)
-
+	startingPath, err := toAbsPath(startingPath)
 	if err != nil {
 		return err
 	}
+	osEnv := getOsEnv()
+	pkgPath, err := osEnv.GetPkgPath(startingPath)
+	if err != nil {
+		return err
+	}
+	pkgName := getPkgName(pkgPath)
 	rover := newCodeRover(startingPath)
 	rover.ignorePattern = ignorePattern
 	typeInfos, err := rover.getStructTypes()
@@ -35,58 +31,13 @@ func GenerateCode(startingPath string, ignorePattern string) error {
 	}
 	fileOperator := getFileOperator()
 	for _, typeInfo := range typeInfos {
-		fileName := fmt.Sprintf("%s.go", strings.ToLower(typeInfo.GetName()))
-		createFileName := fmt.Sprintf("gen_%s", fileName)
-		filePath := osEnv.ConcatFileNameWithPath(typeInfo.GetPhysicalPath(), createFileName)
-		count := 1
-		for {
-			needRename, err := nonGeneratedFileExisted(filePath)
-			if err != nil {
-				return err
-			}
-			if !needRename {
-				break
-			}
-			createFileName = fmt.Sprintf("gen_%s_%d.go", strings.ToLower(typeInfo.GetName()), count)
-			filePath = osEnv.ConcatFileNameWithPath(typeInfo.GetPhysicalPath(), createFileName)
-			count++
-		}
-		writer, err := fileOperator.Open(filePath)
-
+		err := generateProductAssembleFile(typeInfo, osEnv, fileOperator)
 		if err != nil {
 			return err
 		}
-		err = writeHead(writer)
-		if err != nil {
-			return err
-		}
-		productCodegen := codegen.NewProductCodegen(typeInfo, writer)
-		err = productCodegen.GenerateCode()
-		if err != nil {
-			return err
-		}
-		if c, ok := writer.(io.Closer); ok {
-			_ = c.Close()
-		}
 	}
-	registerFileName := fmt.Sprintf("%s/gen_register_ioc.go", startingPath)
-	writer, err := fileOperator.Open(registerFileName)
-	if err != nil {
-		return err
-	}
-	err = writeHead(writer)
-	if err != nil {
-		return err
-	}
-	registerCodegen := codegen.NewRegisterCodegen(writer, typeInfos, pkgName, pkgPath)
-	err = registerCodegen.GenerateCode()
-	if err != nil {
-		return err
-	}
-	if c, ok := writer.(io.Closer); ok {
-		_ = c.Close()
-	}
-	return nil
+	err = generateRegisterFile(startingPath, typeInfos, pkgPath, pkgName, fileOperator)
+	return err
 }
 
 func CleanGeneratedCodeFiles(startingPath string) error {
@@ -126,6 +77,85 @@ func getOsEnv() ast.GoPathEnv {
 }
 
 var fileRetrieverKey = (*ast.FileRetriever)(nil)
+
+func generateProductAssembleFile(typeInfo ast.TypeInfo, osEnv ast.GoPathEnv, fileOperator util.FileOperator) error {
+	fileName := fmt.Sprintf("%s.go", strings.ToLower(typeInfo.GetName()))
+	createFileName := fmt.Sprintf("gen_%s", fileName)
+	filePath := osEnv.ConcatFileNameWithPath(typeInfo.GetPhysicalPath(), createFileName)
+	filePath, err := getUniqueFileName(filePath, createFileName, typeInfo, osEnv)
+	if err != nil {
+		return err
+	}
+	writer, err := fileOperator.Open(filePath)
+	if err != nil {
+		return err
+	}
+	err = writeHead(writer)
+	if err != nil {
+		return err
+	}
+	productCodegen := codegen.NewProductCodegen(typeInfo, writer)
+	err = productCodegen.GenerateCode()
+	if err != nil {
+		return err
+	}
+	closeIfNeed(writer)
+	return nil
+}
+
+func generateRegisterFile(startingPath string, typeInfos []ast.TypeInfo, pkgPath string, pkgName string,
+	fileOperator util.FileOperator) error {
+	registerFileName := fmt.Sprintf("%s/gen_register_ioc.go", startingPath)
+	writer, err := fileOperator.Open(registerFileName)
+	if err != nil {
+		return err
+	}
+	err = writeHead(writer)
+	if err != nil {
+		return err
+	}
+	registerCodegen := codegen.NewRegisterCodegen(writer, typeInfos, pkgName, pkgPath)
+	err = registerCodegen.GenerateCode()
+	if err != nil {
+		return err
+	}
+	closeIfNeed(writer)
+	return nil
+}
+
+func closeIfNeed(writer io.Writer) {
+	if c, ok := writer.(io.Closer); ok {
+		_ = c.Close()
+	}
+}
+
+func toAbsPath(startingPath string) (string, error) {
+	if !filepath.IsAbs(startingPath) {
+		absPath, err := filepath.Abs(startingPath)
+		if err != nil {
+			return "", err
+		}
+		return absPath, nil
+	}
+	return startingPath, nil
+}
+
+func getUniqueFileName(path string, fileName string, typeInfo ast.TypeInfo, osEnv ast.GoPathEnv) (string, error) {
+	count := 1
+	for {
+		needRename, err := nonGeneratedFileExisted(path)
+		if err != nil {
+			return "", err
+		}
+		if !needRename {
+			break
+		}
+		fileName = fmt.Sprintf("gen_%s_%d.go", strings.ToLower(typeInfo.GetName()), count)
+		path = osEnv.ConcatFileNameWithPath(typeInfo.GetPhysicalPath(), fileName)
+		count++
+	}
+	return path, nil
+}
 
 func getFileRetriever() ast.FileRetriever {
 	return roverContainer.GetOrRegister(fileRetrieverKey, func(ioc ioc.Container) interface{} {

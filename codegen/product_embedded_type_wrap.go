@@ -21,11 +21,8 @@ func (f *productEmbeddedTypeWrap) AssembleCode() string {
 
 	var name string
 	embeddedType := f.GetType()
-	switch t := embeddedType.(type) {
-	case *types.Pointer:
-		{
-			embeddedType = t.Elem()
-		}
+	if isPointer(embeddedType) {
+		embeddedType = embeddedType.(*types.Pointer).Elem()
 	}
 	if f.GetKind() == ast.EmbeddedByPointer {
 		name = f.GetType().(*types.Pointer).Elem().(*types.Named).Obj().Name()
@@ -37,5 +34,19 @@ func (f *productEmbeddedTypeWrap) AssembleCode() string {
 		star = "*"
 		typeDecl = fmt.Sprintf("*%s", typeDecl)
 	}
-	return fmt.Sprintf(embeddedTypeInitTemplate, ProductIdentName, name, star, ContainerIdentName, embeddedType.String(), typeDecl)
+	return fmt.Sprintf(embeddedTypeInitTemplate,
+		ProductIdentName, name, star, ContainerIdentName, embeddedType.String(), typeDecl)
+}
+
+func isPointer(t types.Type) bool {
+	switch t.(type) {
+	case *types.Pointer:
+		{
+			return true
+		}
+	default:
+		{
+			return false
+		}
+	}
 }

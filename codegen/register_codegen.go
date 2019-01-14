@@ -39,8 +39,8 @@ func (c *registerCodegen) GetRegisterCodeWriters() []RegisterCodeWriter {
 	return c.registerCodeWriters
 }
 
-//noinspection GoUnusedExportedFunction
-func NewRegisterCodegen(writer io.Writer, typeInfos []ast.TypeInfo, pkgName string, workingPkgPath string) RegisterCodegen {
+func NewRegisterCodegen(writer io.Writer, typeInfos []ast.TypeInfo,
+	pkgName string, workingPkgPath string) RegisterCodegen {
 	var typeInfosWraps []RegisterCodeWriter
 	pkgNameArbitrator := newPkgNameArbitrator(typeInfos, workingPkgPath, RegisterCodegenMode)
 	linq.From(typeInfos).Select(func(typeInfo interface{}) interface{} {
@@ -78,7 +78,10 @@ func RegisterCodeWriter(%s ioc.Container) {
 {{end}}{{end}}}`
 
 func (c *registerCodegen) genRegister() error {
-	return gen("registerType", fmt.Sprintf(createIocTemplate, ContainerIdentName, ContainerIdentName, ContainerIdentName, ContainerIdentName), c.writer, c)
+	return gen("registerType",
+		fmt.Sprintf(createIocTemplate,
+			ContainerIdentName, ContainerIdentName, ContainerIdentName, ContainerIdentName),
+		c.writer, c)
 }
 
 func (c *registerCodegen) GenerateCode() error {

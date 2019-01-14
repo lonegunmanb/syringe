@@ -42,15 +42,10 @@ func (f *productFieldInfoWrap) AssembleCode() string {
 		}
 	case *types.Named:
 		{
-			switch t.Underlying().(type) {
-			case *types.Struct:
-				{
-					declType = fmt.Sprintf("*%s", declType)
-				}
-			case *types.Interface:
-				{
-					star = ""
-				}
+			if isInterface(t) {
+				star = ""
+			} else {
+				declType = fmt.Sprintf("*%s", declType)
 			}
 		}
 	case *types.Pointer:
@@ -58,9 +53,20 @@ func (f *productFieldInfoWrap) AssembleCode() string {
 			star = ""
 			key = t.Elem().String()
 		}
+	default:
+		panic(fmt.Sprintf("unknown type %s", t.String()))
 	}
 
 	return fmt.Sprintf(fieldAssignTemplate, ProductIdentName, f.GetName(), star, ContainerIdentName, key, declType)
+}
+
+func isInterface(t *types.Named) bool {
+	switch t.Underlying().(type) {
+	case *types.Interface:
+		return true
+	default:
+		return false
+	}
 }
 
 var injectTagRegex = regexp.MustCompile("inject:\".*\"")

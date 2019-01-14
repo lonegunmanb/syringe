@@ -22,7 +22,8 @@ type typeInfoWrap struct {
 }
 
 func NewTypeInfoWrap(typeInfo ast.TypeInfo) TypeInfoWrap {
-	return NewTypeInfoWrapWithDepPkgPath(typeInfo, newPkgNameArbitrator([]ast.TypeInfo{typeInfo}, typeInfo.GetPkgPath(), ProductCodegenMode))
+	return NewTypeInfoWrapWithDepPkgPath(typeInfo,
+		newPkgNameArbitrator([]ast.TypeInfo{typeInfo}, typeInfo.GetPkgPath(), ProductCodegenMode))
 }
 
 func NewTypeInfoWrapWithDepPkgPath(typeInfo ast.TypeInfo, pkgNameArbitrator PkgNameArbitrator) TypeInfoWrap {

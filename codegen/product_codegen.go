@@ -62,7 +62,9 @@ func Create_{{.GetName}}(%s ioc.Container) *{{.GetName}} {
 }`
 
 func (c *productCodegen) genCreateFuncDecl() error {
-	return c.gen("createFunc", fmt.Sprintf(createFuncDecl, ContainerIdentName, ProductIdentName, ProductIdentName, ContainerIdentName, ProductIdentName))
+	return c.gen("createFunc",
+		fmt.Sprintf(createFuncDecl,
+			ContainerIdentName, ProductIdentName, ProductIdentName, ContainerIdentName, ProductIdentName))
 }
 
 const assembleFuncDecl = `
@@ -72,7 +74,8 @@ func Assemble_{{.GetName}}(%s *{{.GetName}}, %s ioc.Container) {
 {{end}}{{end}}}`
 
 func (c *productCodegen) genAssembleFuncDecl() error {
-	return c.gen("assembleFunc", fmt.Sprintf(assembleFuncDecl, ProductIdentName, ContainerIdentName))
+	return c.gen("assembleFunc",
+		fmt.Sprintf(assembleFuncDecl, ProductIdentName, ContainerIdentName))
 }
 
 const registerFuncDecl = `
@@ -83,7 +86,9 @@ func Register_{{.GetName}}(%s ioc.Container) {
 }`
 
 func (c *productCodegen) genRegisterFuncDecl() (err error) {
-	return c.gen("registerFunc", fmt.Sprintf(registerFuncDecl, ContainerIdentName, ContainerIdentName, ContainerIdentName, ContainerIdentName))
+	return c.gen("registerFunc",
+		fmt.Sprintf(registerFuncDecl,
+			ContainerIdentName, ContainerIdentName, ContainerIdentName, ContainerIdentName))
 }
 
 func (c *productCodegen) gen(templateName string, text string) (err error) {
