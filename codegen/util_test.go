@@ -1,5 +1,6 @@
 package codegen_test
 
+//go:generate go generate github.com/lonegunmanb/varys/...
 //go:generate mockgen -package=codegen -destination=./mock_type_info.go github.com/lonegunmanb/varys/ast TypeInfo
 //go:generate mockgen -package=codegen -destination=./mock_field_info.go github.com/lonegunmanb/varys/ast FieldInfo
 //go:generate mockgen -package=codegen -destination=./mock_embedded_type.go github.com/lonegunmanb/varys/ast EmbeddedType
