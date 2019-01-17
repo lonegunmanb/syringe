@@ -6,7 +6,6 @@ import (
 	"github.com/lonegunmanb/syringe/util"
 	"github.com/lonegunmanb/varys/ast"
 	"io"
-	"text/template"
 )
 
 type RegisterCodegen interface {
@@ -92,14 +91,4 @@ func (c *registerCodegen) GenerateCode() error {
 	}).Call(func() error {
 		return c.genRegister()
 	}).Err
-}
-
-func (c *registerCodegen) gen(templateName string, text string, data interface{}) (err error) {
-	t := template.New(templateName)
-	t, err = t.Parse(text)
-	if err != nil {
-		return
-	}
-	err = t.Execute(c.writer, data)
-	return
 }
