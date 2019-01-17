@@ -1,6 +1,14 @@
 package util
 
-import "github.com/ahmetb/go-linq"
+import (
+	"github.com/ahmetb/go-linq"
+	"github.com/smartystreets/goconvey/convey"
+)
+
+var Given = convey.Convey
+var When = convey.Convey
+var Then = convey.Convey
+var And = convey.So
 
 type Action struct {
 	Err error

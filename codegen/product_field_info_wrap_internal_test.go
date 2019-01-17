@@ -34,6 +34,16 @@ func TestAssembleCodeForBasicType(t *testing.T) {
 	assert.Equal(t, "product.Field = container.Resolve(\"int\").(int)", code)
 }
 
+func TestAssembleCodeForFieldWithInjectTag(t *testing.T) {
+	field := getField(t, "", "int `inject:\"tag\"`")
+	sut := &productFieldInfoWrap{
+		FieldInfo: field,
+		typeInfo:  NewTypeInfoWrap(field.GetReferenceFromType()),
+	}
+	code := sut.AssembleCode()
+	assert.Equal(t, "product.Field = container.Resolve(\"tag\").(int)", code)
+}
+
 func TestAssembleCodeForCustomIdentName(t *testing.T) {
 	field := getField(t, "", "int")
 	sut := &productFieldInfoWrap{
@@ -182,7 +192,8 @@ func TestGenerateAssembleCode(t *testing.T) {
 	assert.Nil(t, err)
 	flyCar := walker.GetTypes()[0]
 	decorationField := &productFieldInfoWrap{flyCar.GetFields()[0], mockTypeCodegen}
-	assert.Equal(t, `product.D = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)`,
+	assert.Equal(t,
+		`product.D = container.Resolve("github.com/lonegunmanb/syringe/test_code/fly_car.Decoration").(Decoration)`,
 		decorationField.AssembleCode())
 	carField := &productFieldInfoWrap{flyCar.GetFields()[1], mockTypeCodegen}
 	assert.Equal(t, `product.C = *container.Resolve("github.com/lonegunmanb/syringe/test_code/car.Car").(*car.Car)`,
