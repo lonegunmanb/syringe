@@ -5,7 +5,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/lonegunmanb/varys/ast"
 	"github.com/stretchr/testify/assert"
-	"go-funk"
+	"github.com/thoas/go-funk"
 	"go/types"
 	"testing"
 )
