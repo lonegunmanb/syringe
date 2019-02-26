@@ -8,7 +8,7 @@ import (
 )
 
 //go:generate go get github.com/golang/mock/gomock
-//go:generate go install github.com/golang/mock/gomock
+//go:generate go install github.com/golang/mock/mockgen
 //go:generate go generate ./...
 //go:generate go get -t -v ./...
 
