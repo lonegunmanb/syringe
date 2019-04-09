@@ -1,12 +1,17 @@
 package rover
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/lonegunmanb/syringe/ioc"
 	. "github.com/lonegunmanb/syringe/util"
 	"github.com/lonegunmanb/varys/ast"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/suite"
+	"go/types"
+	"io"
+	"reflect"
 	"testing"
 )
 
@@ -99,6 +104,92 @@ func (suite *cleanGenFilesTestSuite) TestCleanGeneratedCodeFilesWillNotDeleteNon
 			Then("only go file with comment head will be deleted, not other src file", func() {
 				So(err, ShouldBeNil)
 				And(suite, shouldNotDeleted, filePath)
+			})
+		})
+	})
+}
+
+type stubTypeInfo struct {
+	pkgPath      string
+	pkgName      string
+	physicalPath string
+}
+
+func (*stubTypeInfo) GetName() string {
+	return "StubType"
+}
+
+func (s *stubTypeInfo) GetPkgPath() string {
+	return s.pkgPath
+}
+
+func (s *stubTypeInfo) GetPkgName() string {
+	return s.pkgName
+}
+
+func (s *stubTypeInfo) GetPhysicalPath() string {
+	return s.physicalPath
+}
+
+func (*stubTypeInfo) GetFields() []ast.FieldInfo {
+	return []ast.FieldInfo{}
+}
+
+func (*stubTypeInfo) GetKind() reflect.Kind {
+	panic("implement me")
+}
+
+func (*stubTypeInfo) GetType() types.Type {
+	panic("implement me")
+}
+
+func (*stubTypeInfo) GetEmbeddedTypes() []ast.EmbeddedType {
+	return []ast.EmbeddedType{}
+}
+
+func (*stubTypeInfo) GetFullName() string {
+	return "StubType"
+}
+
+func (*stubTypeInfo) GetDepPkgPaths(fieldTagFilter string) []string {
+	return []string{}
+}
+
+type stubFileOperator struct {
+	writer *bytes.Buffer
+}
+
+func (s *stubFileOperator) Open(path string) (io.Writer, error) {
+	return s.writer, nil
+}
+
+func (*stubFileOperator) Del(path string) error {
+	panic("implement me")
+}
+
+func (*stubFileOperator) FirstLine(path string) (string, error) {
+	panic("implement me")
+}
+
+func TestGenerateRegisterFileWithPkgNameInCodeDifferentWithPkgNameFromPath(t *testing.T) {
+	Convey("given one existing type in a path with different pkg name with name resolved from path", t, func() {
+		pkgPath := "github.com/lonegunmanb/syringe"
+		startingPath := fmt.Sprintf("/go/src/%s", pkgPath)
+		expectedName := "notsyringe"
+		typeInfo := &stubTypeInfo{
+			pkgPath:      pkgPath,
+			pkgName:      expectedName,
+			physicalPath: startingPath,
+		}
+		stubFo := &stubFileOperator{
+			writer: new(bytes.Buffer),
+		}
+		Convey("when generate register file code", func() {
+			err := generateRegisterFile(startingPath, []ast.TypeInfo{typeInfo}, pkgPath, stubFo)
+			Convey("then generated code should has same pkg name with existing type", func() {
+				code := stubFo.writer.String()
+				So(err, ShouldBeNil)
+				So(code, ShouldContainSubstring, fmt.Sprintf("package %s", expectedName))
 			})
 		})
 	})

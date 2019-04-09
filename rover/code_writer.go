@@ -22,7 +22,6 @@ func GenerateCode(startingPath string, ignorePattern string) error {
 	if err != nil {
 		return err
 	}
-	pkgName := getPkgName(pkgPath)
 	rover := newCodeRover(startingPath)
 	rover.ignorePattern = ignorePattern
 	typeInfos, err := rover.getStructTypes()
@@ -36,7 +35,7 @@ func GenerateCode(startingPath string, ignorePattern string) error {
 			return err
 		}
 	}
-	err = generateRegisterFile(startingPath, typeInfos, pkgPath, pkgName, fileOperator)
+	err = generateRegisterFile(startingPath, typeInfos, pkgPath, fileOperator)
 	return err
 }
 
@@ -99,17 +98,23 @@ func generateProductAssembleFile(typeInfo ast.TypeInfo, osEnv ast.GoPathEnv, fil
 	if err != nil {
 		return err
 	}
-	closeIfNeed(writer)
+	safeClose(writer)
 	return nil
 }
 
-func generateRegisterFile(startingPath string, typeInfos []ast.TypeInfo, pkgPath string, pkgName string,
-	fileOperator util.FileOperator) error {
+func generateRegisterFile(startingPath string, typeInfos []ast.TypeInfo, pkgPath string, fo util.FileOperator) error {
+	pkgName := getPkgName(pkgPath)
+	for _, typeInfo := range typeInfos {
+		if typeInfo.GetPhysicalPath() == startingPath && typeInfo.GetPkgName() != pkgName {
+			pkgName = typeInfo.GetPkgName()
+		}
+	}
 	registerFileName := fmt.Sprintf("%s/gen_register_ioc.go", startingPath)
-	writer, err := fileOperator.Open(registerFileName)
+	writer, err := fo.Open(registerFileName)
 	if err != nil {
 		return err
 	}
+	defer safeClose(writer)
 	err = writeHead(writer)
 	if err != nil {
 		return err
@@ -119,11 +124,10 @@ func generateRegisterFile(startingPath string, typeInfos []ast.TypeInfo, pkgPath
 	if err != nil {
 		return err
 	}
-	closeIfNeed(writer)
 	return nil
 }
 
-func closeIfNeed(writer io.Writer) {
+func safeClose(writer io.Writer) {
 	if c, ok := writer.(io.Closer); ok {
 		_ = c.Close()
 	}
