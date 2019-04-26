@@ -185,11 +185,30 @@ func TestGenerateRegisterFileWithPkgNameInCodeDifferentWithPkgNameFromPath(t *te
 			writer: new(bytes.Buffer),
 		}
 		Convey("when generate register file code", func() {
-			err := generateRegisterFile(startingPath, []ast.TypeInfo{typeInfo}, pkgPath, stubFo)
+			err := generateRegisterFile(startingPath, []ast.TypeInfo{typeInfo}, pkgPath, stubFo, nil)
 			Convey("then generated code should has same pkg name with existing type", func() {
 				code := stubFo.writer.String()
 				So(err, ShouldBeNil)
 				So(code, ShouldContainSubstring, fmt.Sprintf("package %s", expectedName))
+			})
+		})
+	})
+}
+
+func TestGenerateRegisterFileWithPreferedPkgName(t *testing.T) {
+	Convey("given one prefered package name that different than name resolved from path", t, func() {
+		pkgPath := "github.com/lonegunmanb/syringe"
+		startingPath := fmt.Sprintf("/go/src/%s", pkgPath)
+		preferredPkgName := "notsyringe"
+		stubFo := &stubFileOperator{
+			writer: new(bytes.Buffer),
+		}
+		Convey("when generate register file code", func() {
+			err := generateRegisterFile(startingPath, []ast.TypeInfo{}, pkgPath, stubFo, &preferredPkgName)
+			Convey("then generated code should has same pkg name with existing type", func() {
+				code := stubFo.writer.String()
+				So(err, ShouldBeNil)
+				So(code, ShouldContainSubstring, fmt.Sprintf("package %s", preferredPkgName))
 			})
 		})
 	})

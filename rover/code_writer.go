@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func GenerateCode(startingPath string, ignorePattern string) error {
+func GenerateCode(startingPath string, ignorePattern string, preferredPkgName *string) error {
 	startingPath, err := toAbsPath(startingPath)
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func GenerateCode(startingPath string, ignorePattern string) error {
 			return err
 		}
 	}
-	err = generateRegisterFile(startingPath, typeInfos, pkgPath, fileOperator)
+	err = generateRegisterFile(startingPath, typeInfos, pkgPath, fileOperator, preferredPkgName)
 	return err
 }
 
@@ -102,8 +102,15 @@ func generateProductAssembleFile(typeInfo ast.TypeInfo, osEnv ast.GoPathEnv, fil
 	return nil
 }
 
-func generateRegisterFile(startingPath string, typeInfos []ast.TypeInfo, pkgPath string, fo util.FileOperator) error {
+func generateRegisterFile(startingPath string,
+	typeInfos []ast.TypeInfo,
+	pkgPath string,
+	fo util.FileOperator,
+	preferPkgName *string) error {
 	pkgName := getPkgName(pkgPath)
+	if preferPkgName != nil {
+		pkgName = *preferPkgName
+	}
 	for _, typeInfo := range typeInfos {
 		if typeInfo.GetPhysicalPath() == startingPath && typeInfo.GetPkgName() != pkgName {
 			pkgName = typeInfo.GetPkgName()
